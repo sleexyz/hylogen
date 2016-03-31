@@ -90,12 +90,12 @@ instance Floating Vec1 where
 -- | Vec2:
 
 data Vec2 where
-  Vec2 :: (ToVec1 a, ToVec1 b) => a -> b -> Vec2
+  Vec2 :: (ToVec1 a, ToVec1 b) => (a, b) -> Vec2
   V2u :: String -> Vec2
 
 instance Show Vec2 where
   show expr = case expr of
-    Vec2 x y -> "vec2(" <> show x <> ", " <> show y <> ")"
+    Vec2 (x, y) -> "vec2(" <> show x <> ", " <> show y <> ")"
     V2u x -> x
 
 instance HasX Vec2
@@ -105,12 +105,12 @@ instance HasY Vec2
 -- | Vec3:
 
 data Vec3 where
-  Vec3 :: (ToVec1 a, ToVec1 b, ToVec1 c) => a -> b -> c -> Vec3
+  Vec3 :: (ToVec1 a, ToVec1 b, ToVec1 c) => (a, b, c) -> Vec3
   V3u :: String -> Vec3
 
 instance Show Vec3 where
   show expr = case expr of
-    Vec3 x y z -> "vec3(" <> show x <> ", " <> show y <> ", " <> show z <> ")"
+    Vec3 (x, y, z) -> "vec3(" <> show x <> ", " <> show y <> ", " <> show z <> ")"
     V3u x -> x
 
 instance HasX Vec3
@@ -121,12 +121,12 @@ instance HasZ Vec3
 -- | Vec4:
 
 data Vec4 where
-  Vec4 :: (ToVec1 a, ToVec1 b, ToVec1 c, ToVec1 d) => a -> b -> c -> d -> Vec4
+  Vec4 :: (ToVec1 a, ToVec1 b, ToVec1 c, ToVec1 d) => (a, b, c, d) -> Vec4
   V4u :: String -> Vec4
 
 instance Show Vec4 where
   show expr = case expr of
-    Vec4 x y z w -> "vec4(" <> show x <> ", " <> show y <> ", " <> show z <> ", " <> show w <> ")"
+    Vec4 (x, y, z, w) -> "vec4(" <> show x <> ", " <> show y <> ", " <> show z <> ", " <> show w <> ")"
     V4u x -> x
 
 instance HasX Vec4
