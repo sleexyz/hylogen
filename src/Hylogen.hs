@@ -33,9 +33,9 @@ toGLSL x = unlines $ [ boiler
                      ]
   where
     boiler = unlines $ [ "precision mediump float;"
-                       , "\nuniform float uTime;"
-                       , "uniform vec3 uCursor;"
-                       , "varying vec3 vPosition;"
+                       , "uniform float time;"
+                       , "uniform vec3 mouse;"
+                       , "varying vec3 uv;"
                        ]
 
 run :: Vec4 -> IO()

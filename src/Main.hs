@@ -17,4 +17,4 @@ testExpr2 = sin_ 0.1
 
 main :: IO ()
 main = do
-  run $ V4 0.9 (sin_ 1) 0.2 1
+  run $ V4 0.8 1 0.2 1

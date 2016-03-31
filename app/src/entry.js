@@ -1,6 +1,3 @@
-console.log("hello world");
-
-
 let animationFrameRequest = null;
 let animating = true;
 
@@ -85,8 +82,8 @@ const loadProgram = (gl, vsSource, fsSource) => {
   gl.vertexAttribPointer(gl.aPosition, 3, gl.FLOAT, false, 0, 0);
 
   // remember the address within the fragment shader of each of my uniforms variables
-  gl.uTime = gl.getUniformLocation(program, "uTime");
-  gl.uCursor = gl.getUniformLocation(program, "uCursor");
+  gl.time = gl.getUniformLocation(program, "time");
+  gl.mouse = gl.getUniformLocation(program, "mouse");
 
   draw(gl);
 
@@ -100,8 +97,8 @@ const loadProgram = (gl, vsSource, fsSource) => {
 }
 
 const draw = (gl) => {
-  gl.uniform1f(gl.uTime, (new Date().getTime() / 1000 - time0));
-  gl.uniform3f(gl.uCursor, gl.cursor.x, gl.cursor.y, gl.cursor.z);
+  gl.uniform1f(gl.time, (new Date().getTime() / 1000 - time0));
+  gl.uniform3f(gl.mouse, gl.cursor.x, gl.cursor.y, gl.cursor.z);
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 };
 
@@ -113,10 +110,10 @@ const animate = (gl) => {
 
 let vsSource = `
 attribute vec3 aPosition;
-varying vec3 vPosition;
+varying vec3 uv;
 void main() {
   gl_Position = vec4(aPosition, 1.0);
-  vPosition = aPosition;
+  uv = aPosition;
 }
 `;
 
