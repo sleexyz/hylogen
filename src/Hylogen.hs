@@ -1,18 +1,18 @@
-{-# LANGUAGE DeriveFunctor#-}
-{-# LANGUAGE GADTs #-}
-{-# LANGUAGE Rank2Types #-}
-{-# LANGUAGE StandaloneDeriving #-}
-{-# LANGUAGE ExplicitForAll #-}
-{-# LANGUAGE PolyKinds #-}
-{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE DataKinds                 #-}
+{-# LANGUAGE DeriveFunctor             #-}
+{-# LANGUAGE ExplicitForAll            #-}
+{-# LANGUAGE ExtendedDefaultRules      #-}
+{-# LANGUAGE FlexibleInstances         #-}
+{-# LANGUAGE GADTs                     #-}
+{-# LANGUAGE InstanceSigs              #-}
+{-# LANGUAGE MultiParamTypeClasses     #-}
+{-# LANGUAGE NoMonoLocalBinds          #-}
 {-# LANGUAGE NoMonomorphismRestriction #-}
-{-# LANGUAGE NoMonoLocalBinds #-}
-{-# LANGUAGE ExtendedDefaultRules #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE InstanceSigs #-}
-{-# LANGUAGE DataKinds #-}
-{-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE PolyKinds                 #-}
+{-# LANGUAGE Rank2Types                #-}
+{-# LANGUAGE ScopedTypeVariables       #-}
+{-# LANGUAGE StandaloneDeriving        #-}
+{-# LANGUAGE TypeFamilies              #-}
 
 module Hylogen
        ( module Hylogen
@@ -21,18 +21,24 @@ module Hylogen
        )
        where
 
-import Data.Monoid
-import Data.Function
+import           Data.Monoid
+import           Hylogen.Types
+import           Hylogen.Uniforms
 
-import Hylogen.Types
-import Hylogen.Uniforms
+toGLSL :: Vec4 -> String
+toGLSL x = unlines $ [ boiler
+                     , "void main() {"
+                     , "    gl_FragColor = " <> show x <> ";"
+                     , "}"
+                     ]
+  where
+    boiler = unlines $ [ "precision mediump float;"
+                       , "\nuniform float uTime;"
+                       , "uniform vec3 uCursor;"
+                       , "varying vec3 vPosition;"
+                       ]
 
-
-
-
-
-testExpr :: Vec1
-testExpr = V2 0.1 (sin_ 0.1) & X
-
-testExpr2 :: Vec1
-testExpr2 = sin_ 0.1
+run :: Vec4 -> IO()
+run = writeFile "./app/src/shader.js" . toJS . toGLSL
+  where
+    toJS = ("module.exports = `\n"<>) . (<>"`;")
