@@ -17,13 +17,13 @@
 module Hylogen
        ( module Hylogen
        , module Hylogen.Types
-       , module Hylogen.Uniforms
+       , module Hylogen.Globals
        )
        where
 
 import           Data.Monoid
 import           Hylogen.Types
-import           Hylogen.Uniforms
+import           Hylogen.Globals
 
 toGLSL :: Vec4 -> String
 toGLSL x = unlines $ [ boiler
@@ -35,6 +35,7 @@ toGLSL x = unlines $ [ boiler
     boiler = unlines $ [ "precision mediump float;"
                        , "uniform float time;"
                        , "uniform vec3 mouse;"
+                       , "const float PI = 3.141592653589793238462643383; "
                        , "varying vec3 uv;"
                        ]
 
