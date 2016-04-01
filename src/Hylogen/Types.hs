@@ -24,12 +24,14 @@ class HasX a => HasY a
 class HasY a => HasZ a
 class HasZ a => HasW a
 
+
 data Vec1 where
-  Vec1 :: (ToVec1 a) => a -> Vec1
+  Vec1 :: Float -> Vec1
   V1u :: String -> Vec1
-  V1uop :: (ToVec1 a) => String -> a -> Vec1
-  V1bop :: (ToVec1 a, ToVec1 b) => String -> a -> b -> Vec1
-  V1boppre :: (ToVec1 a, ToVec1 b) => String -> a -> b -> Vec1
+  V1uop :: String -> Vec1 -> Vec1
+  V1uoppre :: String -> Vec1 -> Vec1
+  V1bop :: String -> Vec1 -> Vec1 -> Vec1
+  V1boppre :: String -> Vec1 -> Vec1 -> Vec1
   X :: (HasX a) => a -> Vec1
   Y :: (HasY a) => a -> Vec1
   Z :: (HasZ a) => a -> Vec1
@@ -40,6 +42,7 @@ instance Show Vec1 where
     Vec1 x -> show x
     V1u x -> x
     V1uop u x -> u <> "(" <> show x <> ")"
+    V1uoppre u x -> "(" <> u <> show x <> ")"
     V1bop b x y -> "(" <> show x <> " " <> b <> " " <> show y <> ")"
     V1boppre b x y -> b <> "(" <> show x <> ", " <> show y <> ")"
     X x ->  show x <> ".x"
@@ -48,14 +51,10 @@ instance Show Vec1 where
     W x ->  show x <> ".w"
 
 
-class Show a => ToVec1 a where toV1 :: a -> Vec1
-instance {-# INCOHERENT #-} (a ~ Float) => ToVec1 a where toV1 = Vec1
-instance ToVec1 Vec1     where toV1 = id
-
 instance Num Vec1 where
   (+) = V1bop "+"
   (*) = V1bop "*"
-  negate = V1bop "*" (-1)
+  negate = V1uoppre "-"
   abs = V1uop "abs"
   signum = V1uop "sign"
   fromInteger = Vec1  . fromInteger
@@ -71,26 +70,25 @@ instance Floating Vec1 where
   exp = V1uop "exp"
   log = V1uop "log"
   sqrt = V1uop "sqrt"
-  (**)= V1boppre "pow"
+  (**) = V1boppre "pow"
   sin = V1uop "sin"
   cos = V1uop "cos"
   tan = V1uop "tan"
   asin = V1uop "asin"
   acos = V1uop "acos"
   atan = V1uop "atan"
-  -- sinh
-  -- cosh
-  -- tanh
-  -- asinh
-  -- acosh
-  -- atanh
-
+  sinh x = (exp x - exp (negate x))/2
+  cosh x = (exp x + exp (negate x))/2
+  tanh x = sinh x / cosh x
+  asinh x = log $ x + sqrt(x**2 + 1)
+  acosh x = log $ x + sqrt(x**2 - 1)
+  atanh x = 0.5 * log ((1 + x)/(1 - x))
 
 
 -- | Vec2:
 
 data Vec2 where
-  Vec2 :: (ToVec1 a, ToVec1 b) => (a, b) -> Vec2
+  Vec2 :: (Vec1, Vec1) -> Vec2
   V2u :: String -> Vec2
 
 instance Show Vec2 where
@@ -105,7 +103,7 @@ instance HasY Vec2
 -- | Vec3:
 
 data Vec3 where
-  Vec3 :: (ToVec1 a, ToVec1 b, ToVec1 c) => (a, b, c) -> Vec3
+  Vec3 :: (Vec1, Vec1, Vec1) -> Vec3
   V3u :: String -> Vec3
 
 instance Show Vec3 where
@@ -121,7 +119,7 @@ instance HasZ Vec3
 -- | Vec4:
 
 data Vec4 where
-  Vec4 :: (ToVec1 a, ToVec1 b, ToVec1 c, ToVec1 d) => (a, b, c, d) -> Vec4
+  Vec4 :: (Vec1, Vec1, Vec1, Vec1) -> Vec4
   V4u :: String -> Vec4
 
 instance Show Vec4 where
@@ -133,6 +131,3 @@ instance HasX Vec4
 instance HasY Vec4
 instance HasZ Vec4
 instance HasW Vec4
-
-
--- TODO: Swizzle!

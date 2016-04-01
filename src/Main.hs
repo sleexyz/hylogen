@@ -18,6 +18,9 @@ rot phi a = Vec2 ( sin phi * (a&X)
 sigmoid :: Vec1 -> Vec1
 sigmoid x = recip (1 + exp (negate x))
 
+radius :: Vec2 -> Vec1
+radius v2= sqrt((X v2) ** 2 + (Y v2) ** 2)
+
 
 
 trippy :: Vec4
@@ -31,9 +34,10 @@ trippy = Vec4 (val, val, val, 1)
 
 main :: IO ()
 -- main = run $ trippy
-main = run $ Vec4 (0, 0, 0, 1)
+main = run $ Vec4 (r, g, b, 1)
   where
-    val = sin(time * (uv & Y)) + cos (time * (uv & X))
-    r = val * (uv & X)
-    g = val
-    b = val
+    ty = time * 0.1
+    val = tanh(radius uv * sin(time * 1))
+    r = val
+    g = val * 0.2
+    b = val * 0.5

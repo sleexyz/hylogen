@@ -12,7 +12,7 @@ time = V1u "time"
 -- rand_ = V1uop "rand"
 
 
-fract :: (ToVec1 a) => a -> Vec1
+fract :: Vec1 -> Vec1
 fract = V1uop "fract"
 
 
