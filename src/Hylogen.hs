@@ -40,6 +40,4 @@ toGLSL x = unlines $ [ boiler
                        ]
 
 run :: Vec4 -> IO()
-run = writeFile "./app/src/shader.js" . toJS . toGLSL
-  where
-    toJS = ("module.exports = `\n"<>) . (<>"`;")
+run = putStrLn . toGLSL

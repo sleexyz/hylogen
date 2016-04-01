@@ -117,9 +117,37 @@ void main() {
 }
 `;
 
-let fsSource = require("./shader.js");
+let blankCanvas = `
+precision mediump float;
+uniform float time;
+uniform vec3 mouse;
+const float PI = 3.141592653589793238462643383;
+varying vec3 uv;
 
-loadProgram (gl, vsSource, fsSource);
+void main() {
+    gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);
+}
+`;
+
+loadProgram (gl, vsSource, blankCanvas);
+
+var wsConn = new WebSocket("ws://localhost:8080/");
+var messages = document.getElementById('repl');
+var code_content = document.getElementById('code_content');
+wsConn.onopen = function(e) {
+   console.log('websocket opened');
+};
+wsConn.onmessage = function (m) {
+    console.log(m.data);
+    loadProgram(gl, vsSource, m.data);
+};
+wsConn.onclose = function(e) {
+   console.log('websocket closed');
+};
 
 
-module.hot.accept((err) => {console.error(err);});
+
+
+
+
+// module.hot.accept((err) => {console.error(err);});
