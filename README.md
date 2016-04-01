@@ -1,3 +1,3 @@
 # HYLOGEN
 
-Hylogen is a tiny *embedded domain-specific language* for live-coding visuals.
+Hylogen is a tiny language [embedded in Haskell](https://wiki.haskell.org/Embedded_domain_specific_language) for live-coding visuals.
