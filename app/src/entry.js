@@ -1,14 +1,14 @@
 let animationFrameRequest = null;
 let animating = true;
 
+let time0 = require("./blah");
+
 let canvas = document.getElementById("canvas");
 
 canvas.width = Math.max(window.innerHeight, window.innerWidth);
 canvas.height = Math.max(window.innerHeight, window.innerWidth);
 
 let gl = canvas.getContext("webgl");
-
-let time0 = new Date() / 1000;
 
 
 const setMouse = (event, z) => {
@@ -116,6 +116,7 @@ void main() {
   uv = aPosition;
 }
 `;
+
 
 let fsSource = require("./shader.js");
 
