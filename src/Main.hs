@@ -18,26 +18,43 @@ rot phi a = Vec2 ( sin phi * (a&X)
 sigmoid :: Vec1 -> Vec1
 sigmoid x = recip (1 + exp (negate x))
 
+-- angle :: Vec2 -> Vec1
+-- angle v2 = atan ()
+
 radius :: Vec2 -> Vec1
-radius v2= sqrt((X v2) ** 2 + (Y v2) ** 2)
+radius v2 = sqrt((X v2) ** 2 + (Y v2) ** 2)
+
+linexp :: (Vec1, Vec1, Vec1, Vec1) -> Vec1 -> Vec1
+linexp (a, b, c, d) x = c * ((d / c) ** ((x - a) / (b - a)))
+
+linlin :: (Vec1, Vec1, Vec1, Vec1) -> Vec1 -> Vec1
+linlin (a, b, c, d) x = c + (d - c) * ((x - a) / (b - a))
 
 
 
-trippy :: Vec4
-trippy = Vec4 (val, val, val, 1)
+concentric :: Vec4
+concentric = Vec4 (r, g, b, 1)
   where
-    phi = atan (X uv / Y uv)
-    val = cos (uv & X & trans)
-      * sin (uv & Y & trans)
-    trans x = x * tan (time / 10) ** 10 * speed
-    speed = 1000
-
-main :: IO ()
--- main = run $ trippy
-main = run $ Vec4 (r, g, b, 1)
-  where
-    ty = time * 0.1
-    val = tanh(radius uv * sin(time * 1))
+    val = fract(radius uv * 10 + time)
     r = val
     g = val * 0.2
     b = val * 0.5
+
+world :: Vec4
+world = Vec4 (r, g, b, 1)
+  where
+    gap = 10
+    m = sin(time * 0.1) & linexp (-1, 1, 10e1, 10e10)
+    ratemul = 0.5
+    val   = cos(radius uv * m + time + sin(time + gap) * ratemul)
+    val'  = cos(radius uv * m + time + sin(time + gap ** 2) * ratemul)
+    val'' = cos(radius uv * m + time + sin(time + gap ** 3) * ratemul)
+    r = val ** 2
+    g = val' ** 2
+    b = val'' ** 2
+
+main :: IO ()
+main = run $ concentric
+  where
+    -- a = X mouse
+

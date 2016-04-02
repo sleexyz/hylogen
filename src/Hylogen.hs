@@ -16,14 +16,14 @@
 
 module Hylogen
        ( module Hylogen
-       , module Hylogen.Types
-       , module Hylogen.Globals
+       , module Types
+       , module Globals
        )
        where
 
 import           Data.Monoid
-import           Hylogen.Types
-import           Hylogen.Globals
+import           Types
+import           Globals
 
 toGLSL :: Vec4 -> String
 toGLSL x = unlines $ [ boiler
