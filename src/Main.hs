@@ -22,7 +22,7 @@ sigmoid x = recip (1 + exp (negate x))
 -- angle v2 = atan ()
 
 radius :: Vec2 -> Vec1
-radius v2 = sqrt((X v2) ** 2 + (Y v2) ** 2)
+radius v2 = sqrt(X v2 ** 2 + Y v2 ** 2)
 
 linexp :: (Vec1, Vec1, Vec1, Vec1) -> Vec1 -> Vec1
 linexp (a, b, c, d) x = c * ((d / c) ** ((x - a) / (b - a)))
