@@ -54,7 +54,5 @@ world = Vec4 (r, g, b, 1)
     b = val'' ** 2
 
 main :: IO ()
-main = run $ concentric
-  where
-    -- a = X mouse
+main = run $ world
 
