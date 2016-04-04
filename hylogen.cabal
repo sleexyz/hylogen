@@ -1,6 +1,7 @@
 name:                hylogen
-version:             0.1.0.0
-synopsis:            glsl edsl
+version:             0.1.0.1
+synopsis:            a tiny EDSL for live-coding fragment shaders
+description:         a tiny EDSL for live-coding fragment shaders
 homepage:            https://github.com/sleexyz/hylogen
 author:              Sean Lee
 license:             MIT
@@ -9,6 +10,7 @@ category:            Graphics
 build-type:          Simple
 extra-source-files:  README.md
 cabal-version:       >=1.10
+stability:           experimental
 
 
 library
@@ -17,7 +19,6 @@ library
                      , Hylogen.Globals
   build-depends:       base >=4.8 && <4.9
   hs-source-dirs:      src
-  -- ghc-options:         -dynamic
   default-language:    Haskell2010
   
 executable hylogen
@@ -30,5 +31,4 @@ executable hylogen
                      , random
                      , process
   hs-source-dirs:      app
-  -- ghc-options:         -dynamic
   default-language:    Haskell2010
