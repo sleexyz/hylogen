@@ -1,3 +1,4 @@
 dist/
 TAGS
 .stack-work/
+shader.glsl
