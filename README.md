@@ -2,7 +2,7 @@
 
 Hylogen is a tiny language [embedded in Haskell](https://wiki.haskell.org/Embedded_domain_specific_language) for live-coding visuals.
 
-## Setup
+## setup
 ```
 cabal update
 cabal install ghcid hylogen
@@ -36,3 +36,7 @@ hylogen shader.glsl
 
 
 Hooray! Now, whatever changes you make to `Main.hs` will be reflected live in your realtime visuals!
+
+## inspiration
+- [The_Force](https://github.com/shawnlawson/The_Force).
+
