@@ -21,6 +21,7 @@ fract = V1uop "fract"
 -- | Vec2:
 
 uv = V2u "uv"
+mouse = V2u "mouse"
 
 
 -- coord_ = V4u "gl_FragCoord"
