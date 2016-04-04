@@ -4,6 +4,7 @@ Hylogen is a tiny language [embedded in Haskell](https://wiki.haskell.org/Embedd
 
 ## Setup
 ```
+cabal update
 cabal install ghcid hylogen
 ```
 ## use
