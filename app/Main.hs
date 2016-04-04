@@ -77,7 +77,7 @@ getNewSource pathToWatch = do
 serveIndex :: IO ()
 serveIndex = withSocketsDo $ do
    -- TODO: Serve other files when asked for other files!
-   fileName <- getDataFileName "web/index.html"
+   fileName <- getDataFileName "app/index.html"
    sock <- listenOn $ PortNumber 5678
    forever $ do
       (conn, huh) <- accept sock

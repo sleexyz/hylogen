@@ -9,7 +9,7 @@ maintainer:          freshdried@gmail.com
 category:            Graphics
 build-type:          Simple
 extra-source-files:  README.md
-data-files:          web/index.html
+data-files:          app/index.html
 cabal-version:       >=1.10
 stability:           experimental
 
