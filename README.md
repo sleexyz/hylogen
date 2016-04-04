@@ -33,7 +33,7 @@ In another terminal:
 ```
 hylogen shader.glsl
 ```
-#### 3. profit!!
+#### 3. play!
 Open up [hylogen.com](http://hylogen.com) or [localhost:5678](http://localhost:5678) in your browser.
 
 Changes in `Main.hs` will now be propagated in realtime to your shader!
