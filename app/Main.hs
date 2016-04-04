@@ -80,7 +80,6 @@ serveIndex = withSocketsDo $ do
    sock <- listenOn $ PortNumber 5678
    forever $ do
       (conn, _) <- accept sock
-      print conn
       forkIO $ do
          sendAll conn $ wrapHtml $ BS8.pack htmlString
          sClose conn
