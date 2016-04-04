@@ -2,12 +2,12 @@
 
 Hylogen is a tiny language [embedded in Haskell](https://wiki.haskell.org/Embedded_domain_specific_language) for live-coding visuals.
 
-## setup
+## Setup
 ```
 cabal update
 cabal install ghcid hylogen
 ```
-## use
+## Usage
 
 ```haskell
 -- ./Main.hs
@@ -21,21 +21,22 @@ main = writeFile "./shader.glsl" . toGLSL $ Vec4 (a, a, a, 1)
     a = cos(X uv * sin(time/ 10) * 10 + X mouse)
       + sin(Y uv * sin(time / 10) * 10 + Y mouse)
 ```
-Open up [localhost:5678](http://localhost:5678) in your browser.
 
+#### 1. run ghcid
 In a terminal:
 ```
 ghcid Main.hs -T main
 ```
 
+#### 2. run hylogen
 In another terminal:
 ```
 hylogen shader.glsl
 ```
+#### 3. profit!!
+Open up [hylogen.com](http://hylogen.com) or [localhost:5678](http://localhost:5678) in your browser.
 
-
-
-Hooray! Now, whatever changes you make to `Main.hs` will be reflected live in your realtime visuals!
+Changes in `Main.hs` will now be propagated in realtime to your shader!
 
 ## inspiration
 - [The_Force](https://github.com/shawnlawson/The_Force).
