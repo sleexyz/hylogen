@@ -3,6 +3,7 @@ version:             0.1.0.0
 synopsis:            glsl edsl
 homepage:            https://github.com/sleexyz/hylogen
 author:              Sean Lee
+license:             MIT
 maintainer:          freshdried@gmail.com
 category:            Graphics
 build-type:          Simple
