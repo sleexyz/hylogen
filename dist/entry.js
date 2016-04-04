@@ -147,7 +147,7 @@ function fadeOut(elem) {
   elem.className = "removing";
   window.setTimeout(function() {
     elem.remove();
-  }, 7000);
+  }, 1000);
 }
 
 function connectToHylogen() {
@@ -156,7 +156,8 @@ function connectToHylogen() {
   wsConn.onopen = function() {
     const landing = document.getElementById("landing");
     if (landing) {
-      window.setTimeout(() => fadeOut(landing), 3000);
+      fadeOut(document.getElementById("bg"));
+      window.setTimeout(() => {fadeOut(landing);}, 500);
     }
     console.log('websocket opened');
 

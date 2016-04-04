@@ -33,8 +33,16 @@
          font-family: arial;
          line-height: 10em;
      }
+     #bg {
+         background: black;
+         width: 100vw;
+         height: 100vh;
+         position: fixed;
+         right: 0;
+         top: 0;
+     }
 
-     .title {
+     #title {
          text-transform: uppercase;
          font-style: italic;
          font-weight: bold;
@@ -47,9 +55,9 @@
          100% {opacity: 0;} 
      } 
      .removing {
-         -webkit-animation: fadeOut 7000ms;
-         -moz-animation: fadeOut 7000ms;
-         animation: fadeOut 7000ms;
+         -webkit-animation: fadeOut 1000ms;
+         -moz-animation: fadeOut 1000ms;
+         animation: fadeOut 1000ms;
      }
      a {
          text-decoration: inherit;
@@ -61,8 +69,9 @@
     </style>
   </head>
   <body>
+    <div id="bg"> </div>
     <div id="landing">
-      <div class="title">
+      <div id="title">
         <a href="https://github.com/sleexyz/hylogen">
           Hylogen
         </a>
