@@ -1,4 +1,5 @@
 dist/
 TAGS
 .stack-work/
+src/Test.hs
 shader.glsl
