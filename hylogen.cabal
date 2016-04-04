@@ -2,7 +2,6 @@ name:                hylogen
 version:             0.1.0.0
 synopsis:            glsl edsl
 homepage:            https://github.com/sleexyz/hylogen
-license-file:        LICENSE
 author:              Sean Lee
 maintainer:          freshdried@gmail.com
 category:            Graphics
@@ -12,11 +11,23 @@ cabal-version:       >=1.10
 
 
 library
-  exposed-modules:     Main, Hylogen
+  exposed-modules:     Hylogen
+                     , Hylogen.Types
+                     , Hylogen.Globals
   build-depends:       base >=4.8 && <4.9
-    , websockets
-    , hinotify
-    , text
   hs-source-dirs:      src
+  -- ghc-options:         -dynamic
   default-language:    Haskell2010
   
+executable hylogen
+  main-is:             Main.hs
+  build-depends:       base
+                     , websockets
+                     , hinotify
+                     , text
+                     , filepath
+                     , random
+                     , process
+  hs-source-dirs:      app
+  -- ghc-options:         -dynamic
+  default-language:    Haskell2010

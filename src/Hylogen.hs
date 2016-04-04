@@ -1,5 +1,4 @@
 {-# LANGUAGE DataKinds                 #-}
-{-# LANGUAGE DeriveFunctor             #-}
 {-# LANGUAGE ExplicitForAll            #-}
 {-# LANGUAGE ExtendedDefaultRules      #-}
 {-# LANGUAGE FlexibleInstances         #-}
@@ -11,19 +10,18 @@
 {-# LANGUAGE PolyKinds                 #-}
 {-# LANGUAGE Rank2Types                #-}
 {-# LANGUAGE ScopedTypeVariables       #-}
-{-# LANGUAGE StandaloneDeriving        #-}
 {-# LANGUAGE TypeFamilies              #-}
 
 module Hylogen
        ( module Hylogen
-       , module Types
-       , module Globals
+       , module Hylogen.Types
+       , module Hylogen.Globals
        )
        where
 
 import           Data.Monoid
-import           Types
-import           Globals
+import           Hylogen.Types
+import           Hylogen.Globals
 
 toGLSL :: Vec4 -> String
 toGLSL x = unlines $ [ boiler
@@ -38,6 +36,3 @@ toGLSL x = unlines $ [ boiler
                        , "const float PI = 3.141592653589793238462643383; "
                        , "varying vec3 uv;"
                        ]
-
-run :: Vec4 -> IO()
-run = putStrLn . toGLSL

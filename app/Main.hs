@@ -38,11 +38,12 @@ handleConnection pathToWatch pending = do
 getNewSource :: FilePath -> IO String
 getNewSource pathToWatch = do
    -- TODO: more robust paths!:
-   let (dirToWatch, fileToWatch) = splitFileName pathToWatch
-   c <- readProcess "runghc" [
-        "-i"++dirToWatch
-      , pathToWatch
-      ] ""
+   c <- readFile pathToWatch
+   -- let (dirToWatch, fileToWatch) = splitFileName pathToWatch
+   -- c <- readProcess "runghc" [
+   --      "-i"++dirToWatch
+   --    , pathToWatch
+   --    ] ""
    putStrLn c
    return c
 {-
