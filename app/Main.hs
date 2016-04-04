@@ -2,8 +2,8 @@
 {-# LANGUAGE ViewPatterns #-}
 {-# LANGUAGE LambdaCase #-}
 
-import HtmlSource (htmlSource)
 
+import Paths_hylogen (getDataFileName)
 import Control.Monad
 import Control.Concurrent
 import qualified Data.ByteString.Char8 as BS8
@@ -76,11 +76,15 @@ getNewSource pathToWatch = do
 
 serveIndex :: IO ()
 serveIndex = withSocketsDo $ do
+   -- TODO: Serve other files when asked for other files!
+   fileName <- getDataFileName "web/index.html"
    sock <- listenOn $ PortNumber 5678
    forever $ do
-      (conn, _) <- accept sock
+      (conn, huh) <- accept sock
+      print conn
       forkIO $ do
-         sendAll conn $ wrapHtml htmlSource
+         htmlString <- readFile fileName
+         sendAll conn $ wrapHtml $ BS8.pack htmlString
          sClose conn
 
 wrapHtml :: ByteString -> ByteString
