@@ -1,8 +1,8 @@
 {-# LANGUAGE NoMonomorphismRestriction #-}
 
-module Globals where
+module Hylogen.Globals where
 
-import Types
+import Hylogen.Types
 
 
 -- | Vec1:

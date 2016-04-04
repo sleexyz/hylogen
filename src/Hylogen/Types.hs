@@ -14,7 +14,7 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 
-module Types where
+module Hylogen.Types where
 
 import Data.Monoid
 
