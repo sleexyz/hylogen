@@ -24,11 +24,13 @@ library
 executable hylogen
   main-is:             Main.hs
   build-depends:       base
-                     , websockets
-                     , hinotify
-                     , text
+                     , bytestring
                      , filepath
-                     , random
+                     , hinotify
+                     , network
                      , process
+                     , random
+                     , text
+                     , websockets
   hs-source-dirs:      app
   default-language:    Haskell2010

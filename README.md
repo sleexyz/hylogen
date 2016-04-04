@@ -21,7 +21,7 @@ main = writeFile "./shader.glsl" . toGLSL $ Vec4 (a, a, a, 1)
     a = cos(X uv * sin(time/ 10) * 10 + X mouse)
       + sin(Y uv * sin(time / 10) * 10 + Y mouse)
 ```
-Open up [hylogen.com](http://hylogen.com) in your browser.
+Open up [localhost:5678](http://localhost:5678) in your browser.
 
 In a terminal:
 ```

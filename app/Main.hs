@@ -2,18 +2,29 @@
 {-# LANGUAGE ViewPatterns #-}
 {-# LANGUAGE LambdaCase #-}
 
-import Data.Monoid
+import HtmlSource (htmlSource)
+
+import Control.Monad
+import Control.Concurrent
+import qualified Data.ByteString.Char8 as BS8
+import Data.ByteString (ByteString)
+import Network (PortID(..), withSocketsDo, listenOn)
+import Network.Socket (accept, sClose)
+import Network.Socket.ByteString (sendAll)
+
+-- import Data.Monoid
 import qualified Data.Text as T
 import Network.WebSockets
 import System.Environment (getArgs)
 import System.FilePath
 import System.INotify
-import System.Process
-import System.Random
+-- import System.Process
+-- import System.Random
 
 main :: IO ()
 main = getArgs >>= \case
-   [pathToWatch] ->
+   [pathToWatch] -> do
+      _ <- forkIO $ serveIndex
       runServer "127.0.0.1" 8080 $ handleConnection pathToWatch
    _ -> error "Name a file to watch!"
 
@@ -25,7 +36,7 @@ handleConnection pathToWatch pending = do
    connection <- acceptRequest pending
    (sendTextData connection . T.pack) =<< getNewSource pathToWatch
    -- withINotify $ \inotify ->
-   addWatch inotify [Modify] dirToWatch $ \case
+   _ <- addWatch inotify [Modify] dirToWatch $ \case
       Modified False (Just f) | f == fileToWatch ->
          (sendTextData connection . T.pack) =<< getNewSource pathToWatch
       _ -> return ()
@@ -48,7 +59,7 @@ getNewSource pathToWatch = do
    return c
 {-
    color <- randomRIO (0::Float, 1)
-   
+
    return $ unlines [
         "precision mediump float;"
       , "uniform float time;"
@@ -61,3 +72,22 @@ getNewSource pathToWatch = do
       , "}"
       ]
 -}
+
+
+serveIndex :: IO ()
+serveIndex = withSocketsDo $ do
+   sock <- listenOn $ PortNumber 5678
+   forever $ do
+      (conn, _) <- accept sock
+      forkIO $ do
+         sendAll conn $ wrapHtml htmlSource
+         sClose conn
+
+wrapHtml :: ByteString -> ByteString
+wrapHtml bs = mconcat [
+     "HTTP/1.0 200 OK\r\nContent-Length: "
+   , BS8.pack . show $ BS8.length bs
+   , "\r\n\r\n", bs, "\r\n"
+   ]
+
+
