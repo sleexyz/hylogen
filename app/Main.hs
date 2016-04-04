@@ -81,9 +81,10 @@ serveIndex = withSocketsDo $ do
    forever $ do
       (conn, _) <- accept sock
       print conn
-      forkIO $ do
+      _ <- forkIO $ do
          sendAll conn $ wrapHtml $ BS8.pack htmlString
          sClose conn
+      return ()
 
 wrapHtml :: ByteString -> ByteString
 wrapHtml bs = mconcat [

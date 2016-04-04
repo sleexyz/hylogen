@@ -7,6 +7,7 @@ import Hylogen.Types
 
 -- | Vec1:
 
+pi, time :: Vec1
 pi = V1u "pi"
 time = V1u "time"
 -- rand_ = V1uop "rand"
@@ -20,6 +21,7 @@ fract = V1uop "fract"
 
 -- | Vec2:
 
+uv, mouse :: Vec2
 uv = V2u "uv"
 mouse = V2u "mouse"
 
