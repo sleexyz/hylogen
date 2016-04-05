@@ -33,6 +33,7 @@ toGLSL x = unlines $ [ boiler
     boiler = unlines $ [ "precision mediump float;"
                        , "uniform float time;"
                        , "uniform vec3 mouse;"
+                       , "uniform vec4 audio;"
                        , "const float PI = 3.141592653589793238462643383; "
                        , "varying vec3 uv;"
                        ]
