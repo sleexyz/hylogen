@@ -18,7 +18,7 @@ import Network.WebSockets
 import System.Environment (getArgs)
 import System.FilePath
 import System.INotify
--- import System.Process
+import System.Process
 -- import System.Random
 
 main :: IO ()
@@ -49,12 +49,12 @@ handleConnection pathToWatch pending = do
 getNewSource :: FilePath -> IO String
 getNewSource pathToWatch = do
    -- TODO: more robust paths!:
-   c <- readFile pathToWatch
-   -- let (dirToWatch, fileToWatch) = splitFileName pathToWatch
-   -- c <- readProcess "runghc" [
-   --      "-i"++dirToWatch
-   --    , pathToWatch
-   --    ] ""
+   -- c <- readFile pathToWatch
+   let (dirToWatch, fileToWatch) = splitFileName pathToWatch
+   c <- readProcess "runghc" [
+        "-i"++dirToWatch
+      , pathToWatch
+      ] ""
    putStrLn c
    return c
 {-

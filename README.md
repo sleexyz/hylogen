@@ -16,25 +16,21 @@ module Main where
 import Hylogen
 
 
-main = writeFile "./shader.glsl" . toGLSL $ Vec4 (a, a, a, 1)
+main = putStrLn . toGLSL $ Vec4 (a, a, a, 1)
   where
     a = cos(X uv * sin(time/ 10) * 10 + X mouse)
       + sin(Y uv * sin(time / 10) * 10 + Y mouse)
 ```
 
-#### 1. run ghcid
-In a terminal:
+#### run hylogen
+
 ```
-ghcid Main.hs -T main
+hylogen Main.hs
 ```
 
-#### 2. run hylogen
-In another terminal:
-```
-hylogen shader.glsl
-```
-#### 3. profit!!
-Open up [hylogen.com](http://hylogen.com) or [localhost:5678](http://localhost:5678) in your browser.
+
+#### play!
+Go to [localhost:5678](http://localhost:5678) in your browser.
 
 Changes in `Main.hs` will now be propagated in realtime to your shader!
 
