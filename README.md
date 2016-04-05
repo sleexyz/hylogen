@@ -28,7 +28,6 @@ main = putStrLn . toGLSL $ Vec4 (a, a, a, 1)
 hylogen Main.hs
 ```
 
-
 #### play!
 Go to [localhost:5678](http://localhost:5678) in your browser.
 

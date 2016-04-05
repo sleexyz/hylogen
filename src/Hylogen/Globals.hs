@@ -7,8 +7,7 @@ import Hylogen.Types
 
 -- | Vec1:
 
-pi, time :: Vec1
-pi = V1u "pi"
+time :: Vec1
 time = V1u "time"
 -- rand_ = V1uop "rand"
 
