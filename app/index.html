@@ -83,7 +83,7 @@
 
     <canvas id="canvas"></canvas>
     <script>
-const vsSource = `
+     const vsSource = `
 attribute vec3 aPosition;
 varying vec3 uv;
 void main() {
@@ -92,7 +92,7 @@ void main() {
 }
 `;
 
-const initialFsSource = `
+     const initialFsSource = `
 precision mediump float;
 uniform float time;
 uniform vec3 mouse;
@@ -105,222 +105,224 @@ void main() {
 `;
 
 
-function loadProgram (gl, state, vsSource, fsSource) {
+     function loadProgram (gl, state, vsSource, fsSource) {
 
-    // compileShader :: (gl, source, shaderType) -> Shader
-    // throws Error on compilation error
+       // compileShader :: (gl, source, shaderType) -> Shader
+       // throws Error on compilation error
 
-    function compileShader (gl, source, shaderType) {
-        //assert(shaderType === gl.FRAGMENT_SHADER || shaderType === g.VERTEXT_SHADER);
+       function compileShader (gl, source, shaderType) {
+         //assert(shaderType === gl.FRAGMENT_SHADER || shaderType === g.VERTEXT_SHADER);
 
-        let shader = gl.createShader(shaderType);
+         let shader = gl.createShader(shaderType);
 
-        gl.shaderSource(shader, source);
-        gl.compileShader(shader);
+         gl.shaderSource(shader, source);
+         gl.compileShader(shader);
 
 
-        let success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
-        if (!success) {
-            throw "could not compile shader:" + gl.getShaderInfoLog(shader);
-        }
+         let success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
+         if (!success) {
+           throw "could not compile shader:" + gl.getShaderInfoLog(shader);
+         }
 
-        return shader;
-    };
+         return shader;
+       };
 
 
 
-    let vs = compileShader(gl, vsSource, gl.VERTEX_SHADER);
-    let fs = compileShader(gl, fsSource, gl.FRAGMENT_SHADER);
+       let vs = compileShader(gl, vsSource, gl.VERTEX_SHADER);
+       let fs = compileShader(gl, fsSource, gl.FRAGMENT_SHADER);
 
 
-    let program = gl.createProgram();
+       let program = gl.createProgram();
 
-    gl.attachShader(program, vs);
-    gl.attachShader(program, fs);
+       gl.attachShader(program, vs);
+       gl.attachShader(program, fs);
 
-    gl.linkProgram(program);
+       gl.linkProgram(program);
 
-    let success = gl.getProgramParameter(program, gl.LINK_STATUS);
-    if (!success) {
-        throw ("program failed to link:" + gl.getProgramInfoLog(program));
-    }
+       let success = gl.getProgramParameter(program, gl.LINK_STATUS);
+       if (!success) {
+         throw ("program failed to link:" + gl.getProgramInfoLog(program));
+       }
 
-    gl.useProgram(program);
+       gl.useProgram(program);
 
 
-    // Create a square as a strip of two triangles.
-    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([ -1,1,0, 1,1,0, -1,-1,0, 1,-1,0 ]), gl.STATIC_DRAW);
+       // Create a square as a strip of two triangles.
+       gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([ -1,1,0, 1,1,0, -1,-1,0, 1,-1,0 ]), gl.STATIC_DRAW);
 
-    // Assign attribute aPosition to each of the square's vertices.
-    gl.aPosition = gl.getAttribLocation(program, "aPosition");
-    gl.enableVertexAttribArray(gl.aPosition);
-    gl.vertexAttribPointer(gl.aPosition, 3, gl.FLOAT, false, 0, 0);
+       // Assign attribute aPosition to each of the square's vertices.
+       gl.aPosition = gl.getAttribLocation(program, "aPosition");
+       gl.enableVertexAttribArray(gl.aPosition);
+       gl.vertexAttribPointer(gl.aPosition, 3, gl.FLOAT, false, 0, 0);
 
-    // remember the address within the fragment shader of each of my uniforms variables
-    gl.time = gl.getUniformLocation(program, "time");
-    gl.mouse = gl.getUniformLocation(program, "mouse");
-    gl.audio = gl.getUniformLocation(program, "audio");
+       // remember the address within the fragment shader of each of my uniforms variables
+       gl.time = gl.getUniformLocation(program, "time");
+       gl.mouse = gl.getUniformLocation(program, "mouse");
+       gl.audio = gl.getUniformLocation(program, "audio");
 
-    draw(gl, state);
+       draw(gl, state);
 
-    if (state.animationFrameRequest === null) {
-        state.animationFrameRequest = requestAnimationFrame(() => animate(gl, state));
-    }
-}
+       if (state.animationFrameRequest === null) {
+         state.animationFrameRequest = requestAnimationFrame(() => animate(gl, state));
+       }
+     }
 
-function draw (gl, state) {
+     function draw (gl, state) {
 
-    gl.uniform1f(gl.time, (new Date().getTime() / 1000 - state.time0));
-    gl.uniform3f(gl.mouse, state.mouse.x, state.mouse.y, state.mouse.z);
-    gl.uniform4f(gl.audio, state.audio.low, state.audio.mid, state.audio.upper, state.audio.high);
+       gl.uniform1f(gl.time, (new Date().getTime() / 1000 - state.time0));
+       gl.uniform3f(gl.mouse, state.mouse.x, state.mouse.y, state.mouse.z);
+       gl.uniform4f(gl.audio, state.audio.low, state.audio.mid, state.audio.upper, state.audio.high);
 
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-};
+       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+     };
 
-function animate (gl, state) {
-    draw(gl, state);
-    state.animationFrameRequest = requestAnimationFrame(() => animate(gl, state));
-};
+     function animate (gl, state) {
+       draw(gl, state);
+       state.animationFrameRequest = requestAnimationFrame(() => animate(gl, state));
+     };
 
 
 
-function setupState (state, canvas){
-    state.animationFrameRequest = null;
+     function setupState (state, canvas){
+       state.animationFrameRequest = null;
 
-    state.time0 = new Date() / 1000;
+       state.time0 = new Date() / 1000;
 
 
-    function setMouse (event, z) {
-        let r = event.target.getBoundingClientRect();
-        state.mouse.x = (event.clientX - r.left) / (r.right - r.left) * 2 -1;
-        state.mouse.y = (event.clientY - r.bottom) / (r.top - r.bottom) * 2 - 1;
+       function setMouse (event, z) {
+         let r = event.target.getBoundingClientRect();
+         state.mouse.x = (event.clientX - r.left) / (r.right - r.left) * 2 -1;
+         state.mouse.y = (event.clientY - r.bottom) / (r.top - r.bottom) * 2 - 1;
 
-        if (z !== undefined) {
-            state.mouse.z = z;
-        }
-    };
-    canvas.onmousedown = (event) => setMouse(event, 1);
-    canvas.onmousemove = (event) => setMouse(event);
-    canvas.onmouseup = (event) => setMouse(event, 0);
-    state.mouse = {x: 0, y: 0, z: 0};
+         if (z !== undefined) {
+           state.mouse.z = z;
+         }
+       };
+       canvas.onmousedown = (event) => setMouse(event, 1);
+       canvas.onmousemove = (event) => setMouse(event);
+       canvas.onmouseup = (event) => setMouse(event, 0);
+       state.mouse = {x: 0, y: 0, z: 0};
 
 
-    state.audio = {low: 0.0, mid: 0.0, upper: 0.0, high: 0.0};
-    state.audioAgain = null;
-    navigator.mediaDevices.getUserMedia( {audio: true})
-      .then((stream) => {
-        let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        let source = audioCtx.createMediaStreamSource(stream);
-        let analyser = audioCtx.createAnalyser();
-        source.connect(analyser);
+       state.audio = {low: 0.0, mid: 0.0, upper: 0.0, high: 0.0};
+       state.audioAgain = null;
 
-        analyser.fftSize = 512;
-        let bufferLength = analyser.frequencyBinCount;
-        let dataArray = new Uint8Array(bufferLength);
+       function onAccept (stream) {
+         let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+         let source = audioCtx.createMediaStreamSource(stream);
+         let analyser = audioCtx.createAnalyser();
+         source.connect(analyser);
 
+         analyser.fftSize = 512;
+         let bufferLength = analyser.frequencyBinCount;
+         let dataArray = new Uint8Array(bufferLength);
 
-        function toAudio() {
-          state.audioAgain = requestAnimationFrame(toAudio);
-          analyser.getByteFrequencyData(dataArray);
 
-            // Taken from The_Force
-            let k = 0, f = 0.0;
-            let a = 5, b = 11, c = 24, d = bufferLength, i = 0;
+         function toAudio() {
+           state.audioAgain = requestAnimationFrame(toAudio);
+           analyser.getByteFrequencyData(dataArray);
 
-            for(; i < a; i++) {
-                f += dataArray[i];
-            }
+           // Taken from The_Force
+           let k = 0, f = 0.0;
+           let a = 5, b = 11, c = 24, d = bufferLength, i = 0;
 
-            f *= .2; // 1/(a-0)
-            f *= .003921569; // 1/255
-            state.audio.low = f;
+           for(; i < a; i++) {
+             f += dataArray[i];
+           }
 
-            f = 0.0;
-            for(; i < b; i++) {
-                f += dataArray[i];
-            }
+           f *= .2; // 1/(a-0)
+           f *= .003921569; // 1/255
+           state.audio.low = f;
 
-            f *= .166666667; // 1/(b-a)
-            f *= .003921569; // 1/255
-            state.audio.mid = f;
+           f = 0.0;
+           for(; i < b; i++) {
+             f += dataArray[i];
+           }
 
-            f = 0.0;
-            for(; i < c; i++) {
-                f += dataArray[i];
-            }
+           f *= .166666667; // 1/(b-a)
+           f *= .003921569; // 1/255
+           state.audio.mid = f;
 
-            f *= .076923077; // 1/(c-b)
-            f *= .003921569; // 1/255
-            state.audio.upper = f;
+           f = 0.0;
+           for(; i < c; i++) {
+             f += dataArray[i];
+           }
 
-            f = 0.0;
-            for(; i < d; i++) {
-                f += dataArray[i];
-            }
-            f *= .00204918; // 1/(d-c)
-            f *= .003921569; // 1/255
-            state.audio.high = f;
-        };
+           f *= .076923077; // 1/(c-b)
+           f *= .003921569; // 1/255
+           state.audio.upper = f;
 
-        toAudio();
+           f = 0.0;
+           for(; i < d; i++) {
+             f += dataArray[i];
+           }
+           f *= .00204918; // 1/(d-c)
+           f *= .003921569; // 1/255
+           state.audio.high = f;
+         };
 
-      })
-      .catch((err) => {console.log(err);});
+         toAudio();
+       }
+       function onFail(e) {
+         console.error(e);
+       }
+       navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia;
+       navigator.getUserMedia({audio: true}, onAccept, onFail);
+     }
 
-}
 
 
 
+     // stateful variables
 
-// stateful variables
+     const canvas = document.getElementById("canvas");
+     canvas.width = Math.max(window.innerHeight, window.innerWidth);
+     canvas.height = Math.max(window.innerHeight, window.innerWidth);
 
-const canvas = document.getElementById("canvas");
-canvas.width = Math.max(window.innerHeight, window.innerWidth);
-canvas.height = Math.max(window.innerHeight, window.innerWidth);
+     const gl = canvas.getContext("webgl");
 
-const gl = canvas.getContext("webgl");
+     const state = {};
 
-const state = {};
+     setupState(state, canvas);
 
-setupState(state, canvas);
 
+     loadProgram (gl, state,  vsSource, initialFsSource);
 
-loadProgram (gl, state,  vsSource, initialFsSource);
 
+     function fadeOut(elem) {
+       elem.className = "removing";
+       window.setTimeout(function() {
+         elem.remove();
+       }, 1000);
+     }
 
-function fadeOut(elem) {
-    elem.className = "removing";
-    window.setTimeout(function() {
-        elem.remove();
-    }, 1000);
-}
+     function connectToHylogen() {
+       const wsConn = new WebSocket("ws://localhost:8080/");
 
-function connectToHylogen() {
-    const wsConn = new WebSocket("ws://localhost:8080/");
+       wsConn.onopen = function() {
+         const landing = document.getElementById("landing");
+         if (landing) {
+           fadeOut(document.getElementById("bg"));
+           window.setTimeout(() => {fadeOut(landing);}, 500);
+         }
+         console.log('websocket opened');
 
-    wsConn.onopen = function() {
-        const landing = document.getElementById("landing");
-        if (landing) {
-            fadeOut(document.getElementById("bg"));
-            window.setTimeout(() => {fadeOut(landing);}, 500);
-        }
-        console.log('websocket opened');
+       };
 
-    };
+       wsConn.onclose = function() {
+         console.log('websocket closed');
+         window.setTimeout(connectToHylogen, 100);
+       };
 
-    wsConn.onclose = function() {
-        console.log('websocket closed');
-        window.setTimeout(connectToHylogen, 100);
-    };
+       wsConn.onmessage = function (m) {
+         console.log(m.data);
+         loadProgram(gl, state,  vsSource, m.data);
+       };
+     }
 
-    wsConn.onmessage = function (m) {
-        console.log(m.data);
-        loadProgram(gl, state,  vsSource, m.data);
-    };
-}
-
-connectToHylogen();
+     connectToHylogen();
     </script>
   </body>
 </html>
