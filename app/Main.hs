@@ -23,10 +23,13 @@ import System.Process
 
 main :: IO ()
 main = getArgs >>= \case
-   [pathToWatch] -> do
-      _ <- forkIO $ serveIndex
-      runServer "127.0.0.1" 8080 $ handleConnection pathToWatch
-   _ -> error "Name a file to watch!"
+  [pathToWatch] -> main' pathToWatch
+  _ -> error "Name a file to watch!"
+
+main' :: FilePath ->  IO ()
+main' pathToWatch = do
+  _ <- forkIO $ serveIndex
+  runServer "127.0.0.1" 8080 $ handleConnection pathToWatch
 
 handleConnection :: FilePath -> PendingConnection -> IO ()
 handleConnection pathToWatch pending = do
