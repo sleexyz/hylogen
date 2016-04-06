@@ -64,11 +64,13 @@
      }
      a {
          text-decoration: inherit;
+         color: white;
      }
 
      a:visited {
          color: inherit;
      }
+
     </style>
   </head>
   <body>
@@ -268,7 +270,7 @@ void main() {
        function onFail(e) {
          console.error(e);
        }
-       navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia;
+       navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
        navigator.getUserMedia({audio: true}, onAccept, onFail);
      }
 
