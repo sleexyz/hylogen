@@ -10,8 +10,6 @@
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE UndecidableInstances #-}
 
 module Hylogen.Types where
 
@@ -50,9 +48,6 @@ data Vec1 where
   W :: (HasW a) => a -> Vec1
 
 
-instance VectorSpace Vec1 where
-  type Scalar Vec1 = Float
-  a *^ b = Vec1 a * b
 
 instance Show Vec1 where
   show expr = case expr of
@@ -117,6 +112,10 @@ instance AdditiveGroup Vec1 where
   negateV = negate
   (^-^) = (-)
 
+instance VectorSpace Vec1 where
+  type Scalar Vec1 = Vec1
+  a *^ b = a * b
+
 -- | Vec2:
 
 data Vec2 where
@@ -126,6 +125,7 @@ data Vec2 where
   V2uoppre :: String -> Vec2 -> Vec2
   V2bop :: String -> Vec2 -> Vec2 -> Vec2
   V2boppre :: String -> Vec2 -> Vec2 -> Vec2
+  V2bops :: String -> Vec1 -> Vec2 -> Vec2
 
 instance HyloPrim Vec2 where
   type HyloConstructor Vec2 = (Vec1, Vec1)
@@ -146,7 +146,7 @@ instance Show Vec2 where
     V2uoppre u x -> "(" <> u <> show x <> ")"
     V2bop b x y -> "(" <> show x <> " " <> b <> " " <> show y <> ")"
     V2boppre b x y -> b <> "(" <> show x <> ", " <> show y <> ")"
-
+    V2bops b x y -> "(" <> show x <> " " <> b <> " " <> show y <> ")"
 instance Num Vec2 where
   (+) = vbop "+"
   (*) = vbop "*"
@@ -188,7 +188,7 @@ instance AdditiveGroup Vec2 where
 
 instance VectorSpace Vec2 where
   type Scalar Vec2 = Vec1
-  a *^ b = fromVec1 a * b
+  a *^ b = V2bops "*" a b
 
 instance HasX Vec2
 instance HasY Vec2
@@ -203,6 +203,7 @@ data Vec3 where
   V3uoppre :: String -> Vec3 -> Vec3
   V3bop :: String -> Vec3 -> Vec3 -> Vec3
   V3boppre :: String -> Vec3 -> Vec3 -> Vec3
+  V3bops :: String -> Vec1 -> Vec3 -> Vec3
 
 instance HyloPrim Vec3 where
   type HyloConstructor Vec3 = (Vec1, Vec1, Vec1)
@@ -222,6 +223,7 @@ instance Show Vec3 where
     V3uoppre u x -> "(" <> u <> show x <> ")"
     V3bop b x y -> "(" <> show x <> " " <> b <> " " <> show y <> ")"
     V3boppre b x y -> b <> "(" <> show x <> ", " <> show y <> ")"
+    V3bops b x y -> "(" <> show x <> " " <> b <> " " <> show y <> ")"
 
 instance Num Vec3 where
   (+) = vbop "+"
@@ -264,7 +266,7 @@ instance AdditiveGroup Vec3 where
 
 instance VectorSpace Vec3 where
   type Scalar Vec3 = Vec1
-  a *^ b = fromVec1 a * b
+  a *^ b = V3bops "*" a b
 
 instance HasX Vec3
 instance HasY Vec3
@@ -281,6 +283,8 @@ data Vec4 where
   V4uoppre :: String -> Vec4 -> Vec4
   V4bop :: String -> Vec4 -> Vec4 -> Vec4
   V4boppre :: String -> Vec4 -> Vec4 -> Vec4
+  V4bops :: String -> Vec1 -> Vec4 -> Vec4
+
 
 instance HyloPrim Vec4 where
   type HyloConstructor Vec4 = (Vec1, Vec1, Vec1, Vec1)
@@ -300,6 +304,7 @@ instance Show Vec4 where
     V4uoppre u x -> "(" <> u <> show x <> ")"
     V4bop b x y -> "(" <> show x <> " " <> b <> " " <> show y <> ")"
     V4boppre b x y -> b <> "(" <> show x <> ", " <> show y <> ")"
+    V4bops b x y -> "(" <> show x <> " " <> b <> " " <> show y <> ")"
 
 instance Num Vec4 where
   (+) = vbop "+"
@@ -342,7 +347,7 @@ instance AdditiveGroup Vec4 where
 
 instance VectorSpace Vec4 where
   type Scalar Vec4 = Vec1
-  a *^ b = fromVec1 a * b
+  a *^ b = V4bops "*" a b
 
 instance HasX Vec4
 instance HasY Vec4
