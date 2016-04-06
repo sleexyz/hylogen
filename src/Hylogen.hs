@@ -35,5 +35,5 @@ toGLSL x = unlines $ [ boiler
                        , "uniform vec3 mouse;"
                        , "uniform vec4 audio;"
                        , "const float PI = 3.141592653589793238462643383; "
-                       , "varying vec3 uv;"
+                       , "varying vec2 uv;"
                        ]

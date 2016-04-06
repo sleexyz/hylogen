@@ -88,7 +88,7 @@ attribute vec3 aPosition;
 varying vec2 uv;
 void main() {
   gl_Position = vec4(aPosition, 1.0);
-  uv = aPosition;
+  uv = aPosition.xy;
 }
 `;
 
