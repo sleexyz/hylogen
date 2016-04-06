@@ -12,11 +12,58 @@
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 
 module Hylogen.Types where
 
 import Data.Monoid
+import Data.VectorSpace
+
+class HyloPrim v where
+  type HyloConstructor v :: *
+  vec :: HyloConstructor v -> v
+  vu :: String -> v
+  vuop :: String -> v -> v
+  vuoppre :: String -> v -> v
+  vbop :: String -> v -> v -> v
+  vboppre :: String -> v -> v -> v
+  fromVec1 :: Vec1 -> v
+
+instance HyloPrim v => Num v where
+  (+) = vbop "+"
+  (*) = vbop "*"
+  negate = vuoppre "-"
+  abs = vuop "abs"
+  signum = vuop "sign"
+  fromInteger = fromVec1 . fromInteger
+
+instance HyloPrim v => Fractional v where
+  (/) = vbop "/"
+  recip = vbop "/" 1
+  fromRational = fromVec1 . fromRational
+
+
+instance HyloPrim v => Floating v where
+  pi = vu "pi"
+  exp = vuop "exp"
+  log = vuop "log"
+  sqrt = vuop "sqrt"
+  (**) = vboppre "pow"
+  sin = vuop "sin"
+  cos = vuop "cos"
+  tan = vuop "tan"
+  asin = vuop "asin"
+  acos = vuop "acos"
+  atan = vuop "atan"
+  sinh x = (exp x - exp (negate x))/2
+  cosh x = (exp x + exp (negate x))/2
+  tanh x = sinh x / cosh x
+  asinh x = log $ x + sqrt(x**2 + 1)
+  acosh x = log $ x + sqrt(x**2 - 1)
+  atanh x = 0.5 * log ((1 + x)/(1 - x))
+
+
 
 
 class Show a => HasX a
@@ -25,14 +72,9 @@ class HasY a => HasZ a
 class HasZ a => HasW a
 
 
--- Scalable!
--- class VectorSpace a where
---   copy :: Vec1 -> a
---   (~*) :: Vec1 -> a
-
 
 data Vec1 where
-  Vec1 :: Float -> Vec1
+  Vec1 :: Vec1 -> Vec1
   V1u :: String -> Vec1
   V1uop :: String -> Vec1 -> Vec1
   V1uoppre :: String -> Vec1 -> Vec1
@@ -42,6 +84,11 @@ data Vec1 where
   Y :: (HasY a) => a -> Vec1
   Z :: (HasZ a) => a -> Vec1
   W :: (HasW a) => a -> Vec1
+
+-- instance AdditiveGroup Vec1 where
+--   type Scalar (Vec1) = (Vec1)
+--   (*^) = 
+
 
 
 instance Show Vec1 where
@@ -58,38 +105,15 @@ instance Show Vec1 where
     W x ->  show x <> ".w"
 
 
-instance Num Vec1 where
-  (+) = V1bop "+"
-  (*) = V1bop "*"
-  negate = V1uoppre "-"
-  abs = V1uop "abs"
-  signum = V1uop "sign"
-  fromInteger = Vec1  . fromInteger
-
-
-instance Fractional Vec1 where
-  (/) = V1bop "/"
-  recip = V1bop "/" 1
-  fromRational = Vec1 . fromRational
-
-instance Floating Vec1 where
-  pi = V1u "pi"
-  exp = V1uop "exp"
-  log = V1uop "log"
-  sqrt = V1uop "sqrt"
-  (**) = V1boppre "pow"
-  sin = V1uop "sin"
-  cos = V1uop "cos"
-  tan = V1uop "tan"
-  asin = V1uop "asin"
-  acos = V1uop "acos"
-  atan = V1uop "atan"
-  sinh x = (exp x - exp (negate x))/2
-  cosh x = (exp x + exp (negate x))/2
-  tanh x = sinh x / cosh x
-  asinh x = log $ x + sqrt(x**2 + 1)
-  acosh x = log $ x + sqrt(x**2 - 1)
-  atanh x = 0.5 * log ((1 + x)/(1 - x))
+instance HyloPrim Vec1 where
+  type HyloConstructor Vec1 = Vec1
+  vec = Vec1
+  vu = V1u
+  vuop = V1uop
+  vuoppre = V1uoppre
+  vbop = V1bop
+  vboppre = V1boppre
+  fromVec1 = Vec1
 
 
 -- | Vec2:
@@ -113,40 +137,6 @@ instance Show Vec2 where
 
 instance HasX Vec2
 instance HasY Vec2
-
-instance Num Vec2 where
-  (+) = V2bop "+"
-  (*) = V2bop "*"
-  negate = V2uoppre "-"
-  abs = V2uop "abs"
-  signum = V2uop "sign"
-  fromInteger = (\x -> Vec2 (x, x)) . fromInteger
-
-
-instance Fractional Vec2 where
-  (/) = V2bop "/"
-  recip = V2bop "/" 1
-  fromRational = (\x -> Vec2 (x, x)) . fromRational
-
-instance Floating Vec2 where
-  pi = V2u "pi"
-  exp = V2uop "exp"
-  log = V2uop "log"
-  sqrt = V2uop "sqrt"
-  (**) = V2boppre "pow"
-  sin = V2uop "sin"
-  cos = V2uop "cos"
-  tan = V2uop "tan"
-  asin = V2uop "asin"
-  acos = V2uop "acos"
-  atan = V2uop "atan"
-  sinh x = (exp x - exp (negate x))/2
-  cosh x = (exp x + exp (negate x))/2
-  tanh x = sinh x / cosh x
-  asinh x = log $ x + sqrt(x**2 + 1)
-  acosh x = log $ x + sqrt(x**2 - 1)
-  atanh x = 0.5 * log ((1 + x)/(1 - x))
-
 
 -- | Vec3:
 
@@ -180,29 +170,6 @@ instance Num Vec3 where
   fromInteger = (\x -> Vec3 (x, x, x)) . fromInteger
 
 
-instance Fractional Vec3 where
-  (/) = V3bop "/"
-  recip = V3bop "/" 1
-  fromRational = (\x -> Vec3 (x, x, x)) . fromRational
-
-instance Floating Vec3 where
-  pi = V3u "pi"
-  exp = V3uop "exp"
-  log = V3uop "log"
-  sqrt = V3uop "sqrt"
-  (**) = V3boppre "pow"
-  sin = V3uop "sin"
-  cos = V3uop "cos"
-  tan = V3uop "tan"
-  asin = V3uop "asin"
-  acos = V3uop "acos"
-  atan = V3uop "atan"
-  sinh x = (exp x - exp (negate x))/2
-  cosh x = (exp x + exp (negate x))/2
-  tanh x = sinh x / cosh x
-  asinh x = log $ x + sqrt(x**2 + 1)
-  acosh x = log $ x + sqrt(x**2 - 1)
-  atanh x = 0.5 * log ((1 + x)/(1 - x))
 
 
 -- | Vec4:
@@ -229,36 +196,3 @@ instance HasX Vec4
 instance HasY Vec4
 instance HasZ Vec4
 instance HasW Vec4
-
-instance Num Vec4 where
-  (+) = V4bop "+"
-  (*) = V4bop "*"
-  negate = V4uoppre "-"
-  abs = V4uop "abs"
-  signum = V4uop "sign"
-  fromInteger = (\x -> Vec4 (x, x, x, x)) . fromInteger
-
-
-instance Fractional Vec4 where
-  (/) = V4bop "/"
-  recip = V4bop "/" 1
-  fromRational = (\x -> Vec4 (x, x, x, x)) . fromRational
-
-instance Floating Vec4 where
-  pi = V4u "pi"
-  exp = V4uop "exp"
-  log = V4uop "log"
-  sqrt = V4uop "sqrt"
-  (**) = V4boppre "pow"
-  sin = V4uop "sin"
-  cos = V4uop "cos"
-  tan = V4uop "tan"
-  asin = V4uop "asin"
-  acos = V4uop "acos"
-  atan = V4uop "atan"
-  sinh x = (exp x - exp (negate x))/2
-  cosh x = (exp x + exp (negate x))/2
-  tanh x = sinh x / cosh x
-  asinh x = log $ x + sqrt(x**2 + 1)
-  acosh x = log $ x + sqrt(x**2 - 1)
-  atanh x = 0.5 * log ((1 + x)/(1 - x))
