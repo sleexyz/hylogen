@@ -30,12 +30,6 @@ class HyloPrim v where
 
 
 
-
--- -- Why doesn't this work?
--- instance (HyloPrim v, s ~ Scalar v) => VectorSpace v where
---   type Scalar (v) = Vec1
---   a *^ b = fromVec1 a * b -- TODO: optimize!
-
 class Show a => HasX a
 class HasX a => HasY a
 class HasY a => HasZ a
@@ -84,7 +78,7 @@ instance HyloPrim Vec1 where
   vboppre = V1boppre
   fromVec1 = id
 
-instance {-# OVERLAPPING #-} Num Vec1 where
+instance Num Vec1 where
   (+) = vbop "+"
   (*) = vbop "*"
   negate = vuoppre "-"
@@ -196,7 +190,6 @@ instance VectorSpace Vec2 where
   type Scalar Vec2 = Vec1
   a *^ b = fromVec1 a * b
 
-
 instance HasX Vec2
 instance HasY Vec2
 
@@ -276,7 +269,6 @@ instance VectorSpace Vec3 where
 instance HasX Vec3
 instance HasY Vec3
 instance HasZ Vec3
-
 
 
 
