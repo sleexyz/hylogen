@@ -17,19 +17,19 @@ module Main where
 import Hylogen
 
 
-main = putStrLn . toGLSL $ Vec4 (a, a, a, 1)
+main = putStrLn $ toGLSL $ Vec4 (a, a, a, 1)
   where
     a = cos(X uv * sin(time/ 10) * 10 + X mouse)
       + sin(Y uv * sin(time / 10) * 10 + Y mouse)
 ```
 
-#### run hylogen
+#### 1. run hylogen
 
 ```
 hylogen Main.hs
 ```
 
-#### play!
+#### 2. play!
 Go to [localhost:5678](http://localhost:5678) in your browser.
 
 Changes in `Main.hs` will now be propagated in realtime to your shader!
