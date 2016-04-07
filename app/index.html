@@ -158,10 +158,39 @@ void main() {
        gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([ -1,1,0, 1,1,0, -1,-1,0, 1,-1,0 ]), gl.STATIC_DRAW);
 
+
        // Assign attribute aPosition to each of the square's vertices.
        gl.aPosition = gl.getAttribLocation(program, "aPosition");
        gl.enableVertexAttribArray(gl.aPosition);
        gl.vertexAttribPointer(gl.aPosition, 3, gl.FLOAT, false, 0, 0);
+
+       // backbuffer stuff
+       function createTarget() {
+         let target = {
+           texture: gl.createTexture(),
+           framebuffer: gl.createFramebuffer()
+         };
+         // set up framebuffer
+         gl.bindTexture( gl.TEXTURE_2D, target.texture);
+         gl.texImage2D( gl.TEXTURE_2D, 0,  gl.RGBA, WIDTH, HEIGHT, 0,  gl.RGBA,  gl.UNSIGNED_BYTE, null);
+
+         gl.texParameteri( gl.TEXTURE_2D,  gl.TEXTURE_WRAP_S,  gl.CLAMP_TO_EDGE);
+         gl.texParameteri( gl.TEXTURE_2D,  gl.TEXTURE_WRAP_T,  gl.CLAMP_TO_EDGE);
+
+         gl.texParameteri( gl.TEXTURE_2D,  gl.TEXTURE_MAG_FILTER,  gl.NEAREST);
+         gl.texParameteri( gl.TEXTURE_2D,  gl.TEXTURE_MIN_FILTER,  gl.NEAREST);
+
+         gl.bindFramebuffer( gl.FRAMEBUFFER, target.framebuffer);
+         gl.framebufferTexture2D( gl.FRAMEBUFFER,  gl.COLOR_ATTACHMENT0,  gl.TEXTURE_2D, target.texture, 0);
+
+         // clean up
+         gl.bindTexture( gl.TEXTURE_2D, null);
+         gl.bindFramebuffer( gl.FRAMEBUFFER, null);
+
+         return target;
+       }
+       state.fb[0] = createTarget();
+       state.fb[1] = createTarget();
 
        // remember the address within the fragment shader of each of my uniforms variables
        gl.time = gl.getUniformLocation(program, "time");
@@ -177,7 +206,6 @@ void main() {
      }
 
      function draw (gl, state) {
-
        gl.uniform1f(gl.time, (new Date().getTime() / 1000 - state.time0));
        gl.uniform3f(gl.mouse, state.mouse.x, state.mouse.y, state.mouse.z);
        gl.uniform4f(gl.audio, state.audio.low, state.audio.mid, state.audio.upper, state.audio.high);
@@ -185,6 +213,17 @@ void main() {
        gl.uniform1i(gl.backbuffer, 0); // Do I need to check for null?
 
        gl.activeTexture(gl.TEXTURE0);
+       gl.bindTexture(gl.TEXTURE_2D, state.fb[state.bit].texture);
+       state.bit = (state.bit + 1) % 2;
+       gl.bindFramebuffer( gl.FRAMEBUFFER, state.fb[state.bit].framebuffer);
+       gl.clear(gl.COLOR_BUFFER_BIT);
+
+       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+       gl.activeTexture(gl.TEXTURE0);
+       gl.bindTexture(gl.TEXTURE_2D, state.fb[state.bit].texture);
+       gl.bindFramebuffer( gl.FRAMEBUFFER, null);
+       gl.clear(gl.COLOR_BUFFER_BIT);
 
        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
      };
@@ -198,6 +237,9 @@ void main() {
 
      function setupState (state, canvas){
        state.animationFrameRequest = null;
+
+       state.bit = 0
+       state.fb = [null, null];
 
        state.time0 = new Date() / 1000;
 
@@ -289,8 +331,10 @@ void main() {
      // stateful variables
 
      const canvas = document.getElementById("canvas");
-     canvas.width = Math.max(window.innerHeight, window.innerWidth);
-     canvas.height = Math.max(window.innerHeight, window.innerWidth);
+     let WIDTH = Math.max(window.innerHeight, window.innerWidth);
+     let HEIGHT =  Math.max(window.innerHeight, window.innerWidth);
+     canvas.width = WIDTH;
+     canvas.height = HEIGHT;
 
      const gl = canvas.getContext("webgl");
 
