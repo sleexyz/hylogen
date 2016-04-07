@@ -284,7 +284,7 @@ data Vec4 where
   V4bop :: String -> Vec4 -> Vec4 -> Vec4
   V4boppre :: String -> Vec4 -> Vec4 -> Vec4
   V4bops :: String -> Vec1 -> Vec4 -> Vec4
-  V4FromTexture :: Texture -> Vec2 -> Vec4
+  Texture2D :: Texture -> Vec2 -> Vec4
 
 
 instance HyloPrim Vec4 where
@@ -306,7 +306,7 @@ instance Show Vec4 where
     V4bop b x y -> "(" <> show x <> " " <> b <> " " <> show y <> ")"
     V4boppre b x y -> b <> "(" <> show x <> ", " <> show y <> ")"
     V4bops b x y -> "(" <> show x <> " " <> b <> " " <> show y <> ")"
-    V4FromTexture t v -> "texture2D(" <> show t <> ", " <> show v <> ")"
+    Texture2D t v -> "texture2D(" <> show t <> ", " <> show v <> ")"
 
 instance Num Vec4 where
   (+) = vbop "+"
@@ -358,7 +358,7 @@ instance HasW Vec4
 
 
 data Texture where
-  TextureUniform :: String -> Texture
+  Tu :: String -> Texture
 
 instance Show Texture where
-  show (TextureUniform xs) = xs
+  show (Tu xs) = xs

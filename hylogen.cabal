@@ -1,7 +1,7 @@
 name:                hylogen
-version:             0.1.0.5
-synopsis:            a tiny EDSL for live-coding fragment shaders
-description:         a tiny EDSL for live-coding fragment shaders
+version:             0.1.0.6
+synopsis:            an EDSL for live-coding fragment shaders
+description:         an EDSL for live-coding fragment shaders
 homepage:            https://github.com/sleexyz/hylogen
 author:              Sean Lee
 license:             MIT

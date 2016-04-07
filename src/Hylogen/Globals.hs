@@ -5,19 +5,19 @@ module Hylogen.Globals where
 import Hylogen.Types
 
 
-time = fromVec1 $ V1u "time"
-fract = fromVec1 . V1uop "fract"
+time = V1u "time"
+fract = vuop "fract"
+-- inversesqrt
 
 
 
 
-uv = V2u "uv"
+uv = V2u "uv()"
+uvN = V2u "uvN"
 mouse = V2u "mouse"
 
 
 -- coord_ = V4u "gl_FragCoord"
 audio = V4u "audio"
 
-getPixel = V4FromTexture
-
-backbuffer = TextureUniform "backbuffer"
+backBuffer = Tu "backbuffer"

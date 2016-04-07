@@ -87,10 +87,10 @@
     <script>
      const vsSource = `
 attribute vec3 aPosition;
-varying vec2 uv;
+varying vec2 uvN;
 void main() {
   gl_Position = vec4(aPosition, 1.0);
-  uv = aPosition.xy;
+  uvN = aPosition.xy;
 }
 `;
      const fsHeader=`
@@ -100,7 +100,11 @@ uniform float time;
 uniform vec3 mouse;
 uniform vec4 audio;
 uniform sampler2D backbuffer;
-varying vec2 uv;
+varying vec2 uvN;
+
+vec2 uv() {
+  return 0.5 * uvN  + 0.5;
+}
 
 `
 
@@ -127,6 +131,7 @@ void main() {
 
          let success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
          if (!success) {
+           console.log(source);
            throw "could not compile shader:" + gl.getShaderInfoLog(shader);
          }
 

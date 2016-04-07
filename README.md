@@ -1,6 +1,6 @@
 # [*H Y L O G E N*](https://hylogen.com)
 
-Hylogen is a little language [embedded in Haskell](https://wiki.haskell.org/Embedded_domain_specific_language) for live-coding visuals.
+Hylogen is a language [embedded in Haskell](https://wiki.haskell.org/Embedded_domain_specific_language) for live-coding visuals in WebGL.
 
 ## Setup
 ```
@@ -13,14 +13,14 @@ cabal install hylogen
 ```haskell
 -- ./Main.hs
 module Main where
-
 import Hylogen
 
+main = putStrLn $ toGLSL $ color
 
-main = putStrLn $ toGLSL $ Vec4 (a, a, a, 1)
+color = vec (a, a, a, 1)
   where
-    a = cos(X uv * sin(time/ 10) * 10 + X mouse)
-      + sin(Y uv * sin(time / 10) * 10 + Y mouse)
+    a = cos(X uvN * sin(time/ 10) * 10 + X mouse)
+      + sin(Y uvN * sin(time / 10) * 10 + Y mouse)
 ```
 
 #### 1. run hylogen
@@ -35,5 +35,4 @@ Go to [localhost:5678](http://localhost:5678) in your browser.
 Changes in `Main.hs` will now be propagated in realtime to your shader!
 
 ## inspiration
-- [The_Force](https://github.com/shawnlawson/The_Force).
-
+- [The_Force](https://github.com/shawnlawson/The_Force)
