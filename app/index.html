@@ -93,14 +93,18 @@ void main() {
   uv = aPosition.xy;
 }
 `;
-
-     const initialFsSource = `
+     const fsHeader=`
 precision mediump float;
+const float PI = 3.141592653589793238462643383;
 uniform float time;
 uniform vec3 mouse;
-const float PI = 3.141592653589793238462643383;
+uniform vec4 audio;
+uniform sampler2D backbuffer;
 varying vec2 uv;
 
+`
+
+     const initialFsSource = `
 void main() {
     gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
 }
@@ -163,6 +167,7 @@ void main() {
        gl.time = gl.getUniformLocation(program, "time");
        gl.mouse = gl.getUniformLocation(program, "mouse");
        gl.audio = gl.getUniformLocation(program, "audio");
+       gl.backbuffer = gl.getUniformLocation(program, "backbuffer");
 
        draw(gl, state);
 
@@ -176,6 +181,10 @@ void main() {
        gl.uniform1f(gl.time, (new Date().getTime() / 1000 - state.time0));
        gl.uniform3f(gl.mouse, state.mouse.x, state.mouse.y, state.mouse.z);
        gl.uniform4f(gl.audio, state.audio.low, state.audio.mid, state.audio.upper, state.audio.high);
+
+       gl.uniform1i(gl.backbuffer, 0); // Do I need to check for null?
+
+       gl.activeTexture(gl.TEXTURE0);
 
        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
      };
@@ -290,7 +299,7 @@ void main() {
      setupState(state, canvas);
 
 
-     loadProgram (gl, state,  vsSource, initialFsSource);
+     loadProgram (gl, state,  vsSource, fsHeader + initialFsSource);
 
 
      function fadeOut(elem) {
@@ -320,7 +329,7 @@ void main() {
 
        wsConn.onmessage = function (m) {
          console.log(m.data);
-         loadProgram(gl, state,  vsSource, m.data);
+         loadProgram(gl, state,  vsSource, fsHeader + m.data);
        };
      }
 

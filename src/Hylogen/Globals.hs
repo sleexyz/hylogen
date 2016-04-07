@@ -17,3 +17,7 @@ mouse = V2u "mouse"
 
 -- coord_ = V4u "gl_FragCoord"
 audio = V4u "audio"
+
+getPixel = V4FromTexture
+
+backbuffer = TextureUniform "backbuffer"
