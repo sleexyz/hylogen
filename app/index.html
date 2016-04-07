@@ -99,7 +99,7 @@ const float PI = 3.141592653589793238462643383;
 uniform float time;
 uniform vec3 mouse;
 uniform vec4 audio;
-uniform sampler2D backbuffer;
+uniform sampler2D backBuffer;
 varying vec2 uvN;
 
 vec2 uv() {
@@ -169,7 +169,7 @@ void main() {
        gl.enableVertexAttribArray(gl.aPosition);
        gl.vertexAttribPointer(gl.aPosition, 3, gl.FLOAT, false, 0, 0);
 
-       // backbuffer stuff
+       // backBuffer stuff
        function createTarget() {
          let target = {
            texture: gl.createTexture(),
@@ -201,7 +201,7 @@ void main() {
        gl.time = gl.getUniformLocation(program, "time");
        gl.mouse = gl.getUniformLocation(program, "mouse");
        gl.audio = gl.getUniformLocation(program, "audio");
-       gl.backbuffer = gl.getUniformLocation(program, "backbuffer");
+       gl.backBuffer = gl.getUniformLocation(program, "backBuffer");
 
        draw(gl, state);
 
@@ -215,7 +215,7 @@ void main() {
        gl.uniform3f(gl.mouse, state.mouse.x, state.mouse.y, state.mouse.z);
        gl.uniform4f(gl.audio, state.audio.low, state.audio.mid, state.audio.upper, state.audio.high);
 
-       gl.uniform1i(gl.backbuffer, 0); // Do I need to check for null?
+       gl.uniform1i(gl.backBuffer, 0); // Do I need to check for null?
 
        gl.activeTexture(gl.TEXTURE0);
        gl.bindTexture(gl.TEXTURE_2D, state.fb[state.bit].texture);
