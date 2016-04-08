@@ -95,9 +95,9 @@ void main() {
 `;
      const fsHeader=`
 precision mediump float;
-const float PI = 3.141592653589793238462643383;
+const float pi = 3.141592653589793238462643383;
 uniform float time;
-uniform vec3 mouse;
+uniform vec2 mouse;
 uniform vec4 audio;
 uniform sampler2D backBuffer;
 varying vec2 uvN;
@@ -212,7 +212,7 @@ void main() {
 
      function draw (gl, state) {
        gl.uniform1f(gl.time, (new Date().getTime() / 1000 - state.time0));
-       gl.uniform3f(gl.mouse, state.mouse.x, state.mouse.y, state.mouse.z);
+       gl.uniform2f(gl.mouse, state.mouse.x, state.mouse.y);
        gl.uniform4f(gl.audio, state.audio.low, state.audio.mid, state.audio.upper, state.audio.high);
 
        gl.uniform1i(gl.backBuffer, 0); // Do I need to check for null?
@@ -249,19 +249,16 @@ void main() {
        state.time0 = new Date() / 1000;
 
 
-       function setMouse (event, z) {
+       function setMouse (event) {
          let r = event.target.getBoundingClientRect();
          state.mouse.x = (event.clientX - r.left) / (r.right - r.left) * 2 -1;
          state.mouse.y = (event.clientY - r.bottom) / (r.top - r.bottom) * 2 - 1;
-
-         if (z !== undefined) {
-           state.mouse.z = z;
-         }
        };
-       canvas.onmousedown = (event) => setMouse(event, 1);
+       /* canvas.onmousedown = (event) => setMouse(event, 1); */
+       /* canvas.onmouseup = (event) => setMouse(event, 0); */
+
        canvas.onmousemove = (event) => setMouse(event);
-       canvas.onmouseup = (event) => setMouse(event, 0);
-       state.mouse = {x: 0, y: 0, z: 0};
+       state.mouse = {x: 0, y: 0};
 
 
        state.audio = {low: 0.0, mid: 0.0, upper: 0.0, high: 0.0};

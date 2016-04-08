@@ -362,3 +362,7 @@ data Texture where
 
 instance Show Texture where
   show (Tu xs) = xs
+
+
+-- data Expr a where
+--   Node a :: ID -> a
