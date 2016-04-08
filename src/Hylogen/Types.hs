@@ -363,6 +363,11 @@ data Texture where
 instance Show Texture where
   show (Tu xs) = xs
 
+-- data Bul where
+--   Bu :: String -> Bul
+--   Buop :: String -> Bul -> Bul
+--   Bbop :: String -> Bul -> Bul -> Bul
+
 
 -- data Expr a where
 --   Node a :: ID -> a

@@ -6,8 +6,16 @@ import Hylogen.Types
 
 
 time = V1u "time"
+
+inverseSqrt = vuop "inversesqrt"
+
 fract = vuop "fract"
--- inversesqrt
+floor_ = vuop "floor"
+ceil_ = vuop "ceil"
+min_ = vbop "min"
+max_ = vbop "max"
+
+clamp x y z = (z `min_` y) `max_` x
 
 
 
