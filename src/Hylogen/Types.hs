@@ -16,7 +16,7 @@ module Hylogen.Types where
 import Data.Monoid
 import Data.VectorSpace
 
-class HyloPrim v where
+class (Show v) => HyloPrim v where
   type HyloConstructor v :: *
   vec :: HyloConstructor v -> v
   vu :: String -> v
@@ -24,8 +24,8 @@ class HyloPrim v where
   vuoppre :: String -> v -> v
   vbop :: String -> v -> v -> v
   vboppre :: String -> v -> v -> v
+  select :: Booly -> v -> v -> v
   fromVec1 :: Vec1 -> v
-
 
 
 class Show a => HasX a
@@ -42,6 +42,7 @@ data Vec1 where
   V1uoppre :: String -> Vec1 -> Vec1
   V1bop :: String -> Vec1 -> Vec1 -> Vec1
   V1boppre :: String -> Vec1 -> Vec1 -> Vec1
+  V1select :: Booly -> Vec1 -> Vec1 -> Vec1
   X :: (HasX a) => a -> Vec1
   Y :: (HasY a) => a -> Vec1
   Z :: (HasZ a) => a -> Vec1
@@ -57,6 +58,7 @@ instance Show Vec1 where
     V1uoppre u x -> "(" <> u <> show x <> ")"
     V1bop b x y -> "(" <> show x <> " " <> b <> " " <> show y <> ")"
     V1boppre b x y -> b <> "(" <> show x <> ", " <> show y <> ")"
+    V1select b x y -> "( " <> show b <> " ? " <> show x <> " : " <> show y <> ")"
     X x ->  show x <> ".x"
     Y x ->  show x <> ".y"
     Z x ->  show x <> ".z"
@@ -71,6 +73,7 @@ instance HyloPrim Vec1 where
   vuoppre = V1uoppre
   vbop = V1bop
   vboppre = V1boppre
+  select = V1select
   fromVec1 = id
 
 instance Num Vec1 where
@@ -126,6 +129,7 @@ data Vec2 where
   V2bop :: String -> Vec2 -> Vec2 -> Vec2
   V2boppre :: String -> Vec2 -> Vec2 -> Vec2
   V2bops :: String -> Vec1 -> Vec2 -> Vec2
+  V2select :: Booly -> Vec2 -> Vec2 -> Vec2
 
 instance HyloPrim Vec2 where
   type HyloConstructor Vec2 = (Vec1, Vec1)
@@ -135,6 +139,7 @@ instance HyloPrim Vec2 where
   vuoppre = V2uoppre
   vbop = V2bop
   vboppre = V2boppre
+  select = V2select
   fromVec1 x = Vec2 (x, x)
 
 
@@ -147,6 +152,8 @@ instance Show Vec2 where
     V2bop b x y -> "(" <> show x <> " " <> b <> " " <> show y <> ")"
     V2boppre b x y -> b <> "(" <> show x <> ", " <> show y <> ")"
     V2bops b x y -> "(" <> show x <> " " <> b <> " " <> show y <> ")"
+    V2select b x y -> "( " <> show b <> " ? " <> show x <> " : " <> show y <> ")"
+
 instance Num Vec2 where
   (+) = vbop "+"
   (*) = vbop "*"
@@ -204,6 +211,7 @@ data Vec3 where
   V3bop :: String -> Vec3 -> Vec3 -> Vec3
   V3boppre :: String -> Vec3 -> Vec3 -> Vec3
   V3bops :: String -> Vec1 -> Vec3 -> Vec3
+  V3select :: Booly -> Vec3 -> Vec3 -> Vec3
 
 instance HyloPrim Vec3 where
   type HyloConstructor Vec3 = (Vec1, Vec1, Vec1)
@@ -213,6 +221,7 @@ instance HyloPrim Vec3 where
   vuoppre = V3uoppre
   vbop = V3bop
   vboppre = V3boppre
+  select = V3select
   fromVec1 x = Vec3 (x, x, x)
 
 instance Show Vec3 where
@@ -224,6 +233,7 @@ instance Show Vec3 where
     V3bop b x y -> "(" <> show x <> " " <> b <> " " <> show y <> ")"
     V3boppre b x y -> b <> "(" <> show x <> ", " <> show y <> ")"
     V3bops b x y -> "(" <> show x <> " " <> b <> " " <> show y <> ")"
+    V3select b x y -> "( " <> show b <> " ? " <> show x <> " : " <> show y <> ")"
 
 instance Num Vec3 where
   (+) = vbop "+"
@@ -284,6 +294,7 @@ data Vec4 where
   V4bop :: String -> Vec4 -> Vec4 -> Vec4
   V4boppre :: String -> Vec4 -> Vec4 -> Vec4
   V4bops :: String -> Vec1 -> Vec4 -> Vec4
+  V4select :: Booly -> Vec4 -> Vec4 -> Vec4
   Texture2D :: Texture -> Vec2 -> Vec4
 
 
@@ -295,6 +306,7 @@ instance HyloPrim Vec4 where
   vuoppre = V4uoppre
   vbop = V4bop
   vboppre = V4boppre
+  select = V4select
   fromVec1 x = Vec4 (x, x, x, x)
 
 instance Show Vec4 where
@@ -306,6 +318,7 @@ instance Show Vec4 where
     V4bop b x y -> "(" <> show x <> " " <> b <> " " <> show y <> ")"
     V4boppre b x y -> b <> "(" <> show x <> ", " <> show y <> ")"
     V4bops b x y -> "(" <> show x <> " " <> b <> " " <> show y <> ")"
+    V4select b x y -> "( " <> show b <> " ? " <> show x <> " : " <> show y <> ")"
     Texture2D t v -> "texture2D(" <> show t <> ", " <> show v <> ")"
 
 instance Num Vec4 where
@@ -363,10 +376,32 @@ data Texture where
 instance Show Texture where
   show (Tu xs) = xs
 
--- data Bul where
---   Bu :: String -> Bul
---   Buop :: String -> Bul -> Bul
---   Bbop :: String -> Bul -> Bul -> Bul
+-- | We implement Bool as a Num
+
+data Booly where
+  Bu:: String -> Booly
+  Buop :: String -> Booly -> Booly
+  Buoppre :: String -> Booly -> Booly
+  Bbop :: String -> Booly -> Booly -> Booly
+  Bcomp :: (HyloPrim a) => String -> a -> a -> Booly
+
+instance Show Booly where
+  show expr = case expr of
+    Bu x -> x
+    Buop u x -> u <> "(" <> show x <> ")"
+    Buoppre u x -> "(" <> u <> show x <> ")"
+    Bbop u x y -> "(" <> show x <> " " <> u <> " " <>  show y <> ")"
+    Bcomp u x y -> "(" <> show x <> " " <> u <> " " <>  show y <> ")"
+
+instance Num Booly where
+  (+) = Bbop "||"
+  (*) = Bbop "&&"
+  negate = Buoppre "!"
+  abs = id
+  signum = id
+  fromInteger x
+    | x > 0 = Bu "true"
+    | otherwise = Bu "false"
 
 
 -- data Expr a where
