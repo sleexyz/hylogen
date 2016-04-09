@@ -16,8 +16,14 @@ module Hylogen.Types where
 import Data.Monoid
 import Data.VectorSpace
 
+-- | Darn I need injective type families.. waiting for GHC8
+type family HyloConstructor v where
+  HyloConstructor Vec1 = Float
+  HyloConstructor Vec2 = (Vec1, Vec1)
+  HyloConstructor Vec3 = (Vec1, Vec1, Vec1)
+  HyloConstructor Vec4 = (Vec1, Vec1, Vec1, Vec1)
+
 class (Show v) => HyloPrim v where
-  type HyloConstructor v :: *
   vec :: HyloConstructor v -> v
   vu :: String -> v
   vuop :: String -> v -> v
@@ -66,7 +72,6 @@ instance Show Vec1 where
 
 
 instance HyloPrim Vec1 where
-  type HyloConstructor Vec1 = Float
   vec = Vec1
   vu = V1u
   vuop = V1uop
@@ -132,7 +137,6 @@ data Vec2 where
   V2select :: Booly -> Vec2 -> Vec2 -> Vec2
 
 instance HyloPrim Vec2 where
-  type HyloConstructor Vec2 = (Vec1, Vec1)
   vec = Vec2
   vu = V2u
   vuop = V2uop
@@ -214,7 +218,6 @@ data Vec3 where
   V3select :: Booly -> Vec3 -> Vec3 -> Vec3
 
 instance HyloPrim Vec3 where
-  type HyloConstructor Vec3 = (Vec1, Vec1, Vec1)
   vec = Vec3
   vu = V3u
   vuop = V3uop
@@ -299,7 +302,6 @@ data Vec4 where
 
 
 instance HyloPrim Vec4 where
-  type HyloConstructor Vec4 = (Vec1, Vec1, Vec1, Vec1)
   vec = Vec4
   vu = V4u
   vuop = V4uop
