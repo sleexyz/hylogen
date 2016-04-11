@@ -58,7 +58,7 @@ getNewSource pathToWatch = do
         "-i"++dirToWatch
       , pathToWatch
       ] ""
-   putStrLn c
+   putStrLn "updated"
    return c
 
 serveIndex :: IO ()

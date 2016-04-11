@@ -5,40 +5,60 @@ module Hylogen.Globals where
 import Hylogen.Types
 
 
-time = V1u "time"
-
+inverseSqrt :: (HyloPrim a) => a -> a
 inverseSqrt = vuop "inversesqrt"
 
+fract :: (HyloPrim a) => a -> a
 fract = vuop "fract"
+
+floor_ :: (HyloPrim a) => a -> a
 floor_ = vuop "floor"
+
+ceil_ :: (HyloPrim a) => a -> a
 ceil_ = vuop "ceil"
-min_ = vbop "min"
-max_ = vbop "max"
+
+min_ :: (HyloPrim a) => a -> a -> a
+min_ = vboppre "min"
+
+max_:: (HyloPrim a) => a -> a -> a
+max_ = vboppre "max"
 
 clamp :: (HyloPrim a) => a -> a -> a -> a
 clamp x y z = (z `min_` y) `max_` x
 
 
-linexp :: (Vec1, Vec1, Vec1, Vec1) -> Vec1 -> Vec1
+linexp :: (Floating a) => (a, a, a, a) -> a -> a
 linexp (a, b, c, d) x = c * ((d / c) ** ((x - a) / (b - a)))
 
-linlin :: (Vec1, Vec1, Vec1, Vec1) -> Vec1 -> Vec1
+linlin :: (Floating a) => (a, a, a, a) -> a -> a
 linlin (a, b, c, d) x = c + (d - c) * ((x - a) / (b - a))
 
 
+time :: Vec1
+time = V1u "time"
+
+uv :: Vec2
 uv = V2u "uv()"
+
+uvN :: Vec2
 uvN = V2u "uvN"
+
+mouse :: Vec2
 mouse = V2u "mouse"
 
 
--- coord_ = V4u "gl_FragCoord"
+audio :: Vec4
 audio = V4u "audio"
 
+backBuffer :: Texture
 backBuffer = Tu "backBuffer"
 
 -- | Booly's
 
+true :: Booly
 true = Bu "true"
+
+false :: Booly
 false = Bu "false"
 
 eq :: (HyloPrim v) => v -> v -> Booly
