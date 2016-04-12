@@ -2,6 +2,11 @@
 <html>
   <head>
     <title>HYLOGEN</title>
+    <meta charset="UTF-8">
+    <meta name="description" content="A language embedded in Haskell for live coding fragment shaders.">
+    <meta name="keywords" content="Haskell,GLSL,Live Code,Music Visualization">
+    <meta name="author" content="Sean Lee">
+
     <style>
      html, body {
          width: 100%;
@@ -81,7 +86,7 @@
          text-align: right;
          opacity: 0;
          color: white;
-         font-size: 2vw;
+         font-size: 12px;
          text-shadow: 0 0 0.2em white;
      }
     </style>
@@ -402,7 +407,7 @@ void main() {
          fadeOut(landing);
       window.setTimeout(() => {
         stuff.style.opacity = 0.9;
-      });
+      }, 5000);
       }, 5000);
         const audio = document.getElementById("audio");
         audio.controls = true;
