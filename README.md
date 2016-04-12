@@ -36,3 +36,8 @@ Changes in `Main.hs` will now be propagated in realtime to your shader!
 
 ## inspiration
 - [The_Force](https://github.com/shawnlawson/The_Force)
+
+## resources
+[hackage](https://hackage.haskell.org/package/hylogen)
+
+[examples](https://github.com/sleexyz/hylogen-yay)
