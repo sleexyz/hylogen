@@ -3,6 +3,7 @@
 module Hylogen.Globals where
 
 import Hylogen.Types
+import Data.VectorSpace
 
 
 inverseSqrt :: (HyloPrim a) => a -> a
@@ -52,6 +53,9 @@ audio = V4u "audio"
 
 backBuffer :: Texture
 backBuffer = Tu "backBuffer"
+
+mix :: Vec1 -> Vec4 -> Vec4 -> Vec4
+mix p a b = p *^ a + (1 - p) *^ b
 
 -- | Booly's
 
