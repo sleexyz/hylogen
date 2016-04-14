@@ -29,14 +29,15 @@ main = getArgs >>= \case
 main' :: FilePath ->  IO ()
 main' pathToWatch = do
   _ <- forkIO $ serveIndex
-  runServer "127.0.0.1" 8080 $ handleConnection pathToWatch
+  inotify <- initINotify
+  print inotify
+  runServer "127.0.0.1" 8080 $ handleConnection pathToWatch inotify
 
-handleConnection :: FilePath -> PendingConnection -> IO ()
-handleConnection pathToWatch pending = do
+handleConnection :: FilePath -> INotify -> PendingConnection -> IO ()
+handleConnection pathToWatch inotify pending = do
    let (dirToWatch, fileToWatch) = splitFileName pathToWatch
-   inotify <- initINotify
-   print inotify
    connection <- acceptRequest pending
+
    (sendTextData connection . T.pack) =<< getNewSource pathToWatch
    -- withINotify $ \inotify ->
    _ <- addWatch inotify [Modify] dirToWatch $ \case

@@ -44,6 +44,9 @@ uv = V2u "uv()"
 uvN :: Vec2
 uvN = V2u "uvN"
 
+resolution :: Vec2
+resolution = V2u "resolution"
+
 mouse :: Vec2
 mouse = V2u "mouse"
 

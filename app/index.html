@@ -98,6 +98,7 @@ precision mediump float;
 const float pi = 3.141592653589793238462643383;
 uniform float time;
 uniform vec2 mouse;
+uniform vec2 resolution;
 uniform vec4 audio;
 uniform sampler2D backBuffer;
 varying vec2 uvN;
@@ -201,6 +202,7 @@ void main() {
        gl.time = gl.getUniformLocation(program, "time");
        gl.mouse = gl.getUniformLocation(program, "mouse");
        gl.audio = gl.getUniformLocation(program, "audio");
+       gl.resolution = gl.getUniformLocation(program, "resolution");
        gl.backBuffer = gl.getUniformLocation(program, "backBuffer");
 
        draw(gl, state);
@@ -213,6 +215,7 @@ void main() {
      function draw (gl, state) {
        gl.uniform1f(gl.time, (new Date().getTime() / 1000 - state.time0));
        gl.uniform2f(gl.mouse, state.mouse.x, state.mouse.y);
+       gl.uniform2f(gl.resolution, WIDTH, HEIGHT);
        gl.uniform4f(gl.audio, state.audio.low, state.audio.mid, state.audio.upper, state.audio.high);
 
        gl.uniform1i(gl.backBuffer, 0); // Do I need to check for null?

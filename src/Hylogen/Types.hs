@@ -27,6 +27,7 @@ class (Show v) => HyloPrim v where
   vboppre :: String -> v -> v -> v
   select :: Booly -> v -> v -> v
   fromVec1 :: Vec1 -> v
+  toList :: v -> [Vec1]
 
 
 class Show a => HasX a
@@ -75,6 +76,7 @@ instance HyloPrim Vec1 where
   vboppre = V1boppre
   select = V1select
   fromVec1 = id
+  toList x = [x]
 
 instance Num Vec1 where
   (+) = vbop "+"
@@ -140,6 +142,7 @@ instance HyloPrim Vec2 where
   vboppre = V2boppre
   select = V2select
   fromVec1 x = Vec2 (x, x)
+  toList x = [X x, Y x]
 
 
 instance Show Vec2 where
@@ -221,6 +224,7 @@ instance HyloPrim Vec3 where
   vboppre = V3boppre
   select = V3select
   fromVec1 x = Vec3 (x, x, x)
+  toList x = [X x, Y x, Z x]
 
 instance Show Vec3 where
   show expr = case expr of
@@ -305,6 +309,7 @@ instance HyloPrim Vec4 where
   vboppre = V4boppre
   select = V4select
   fromVec1 x = Vec4 (x, x, x, x)
+  toList x = [X x, Y x, Z x, W x]
 
 instance Show Vec4 where
   show expr = case expr of
@@ -381,6 +386,7 @@ data Booly where
   Buoppre :: String -> Booly -> Booly
   Bbop :: String -> Booly -> Booly -> Booly
   Bcomp :: (HyloPrim a) => String -> a -> a -> Booly
+  Bcomp_ :: String -> Vec1 -> Vec1 -> Booly
 
 instance Show Booly where
   show expr = case expr of
@@ -388,7 +394,8 @@ instance Show Booly where
     Buop u x -> u <> "(" <> show x <> ")"
     Buoppre u x -> "(" <> u <> show x <> ")"
     Bbop u x y -> "(" <> show x <> " " <> u <> " " <>  show y <> ")"
-    Bcomp u x y -> "(" <> show x <> " " <> u <> " " <>  show y <> ")"
+    Bcomp u x y -> show . product $ zipWith (Bcomp_ u) (toList x) (toList y)
+    Bcomp_ u x y -> "(" <> show x <> " " <> u <> " " <>  show y <> ")"
 
 instance Num Booly where
   (+) = Bbop "||"
