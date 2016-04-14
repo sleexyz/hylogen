@@ -109,35 +109,29 @@
 
     <canvas id="canvas"></canvas>
     <script>
-     const vsSource = `
-attribute vec3 aPosition;
-varying vec2 uvN;
-void main() {
-  gl_Position = vec4(aPosition, 1.0);
-  uvN = aPosition.xy;
-}
-`;
-     const fsHeader=`
-precision mediump float;
-const float pi = 3.141592653589793238462643383;
-uniform float time;
-uniform vec2 mouse;
-uniform vec4 audio;
-uniform sampler2D backBuffer;
-varying vec2 uvN;
+     var vsSource = [ "attribute vec3 aPosition;"
+                    , "varying vec2 uvN;"
+                    , "void main() {"
+                    , "  gl_Position = vec4(aPosition, 1.0);"
+                    , "  uvN = aPosition.xy;"
+                    , "}"
+     ].join("\n");
 
-vec2 uv() {
-  return 0.5 * uvN  + 0.5;
-}
+     var fsHeader= [ "precision mediump float;"
+                   , "const float pi = 3.141592653589793238462643383;"
+                   , "uniform float time;"
+                   , "uniform vec2 mouse;"
+                   , "uniform vec2 resolution;"
+                   , "uniform vec4 audio;"
+                   , "uniform sampler2D backBuffer;"
+                   , "varying vec2 uvN;"
+                   , "vec2 uv() {"
+                   , "  return 0.5 * uvN  + 0.5;"
+                   , "}"
+     ].join("\n");
 
-`
 
-     const initialFsSource = `
-void main() {
-    gl_FragColor = max(min(((1.0e-2 * vec4(((tan(((sqrt((pow((uvN + (-vec2(0.1, 0.0))).x, 2.0) + pow((uvN + (-vec2(0.1, 0.0))).y, 2.0))) * audio.z) * (1.0 * pow((100000.0 / 1.0), ((audio.x + (-0.0)) / (1.0 + (-0.0))))))) * audio.y) * pow(cos(((audio.x * 10.0) * sin(((time * 1.0e-2) + (uvN.x * 100.0))))), 10.0)), ((tan(((sqrt((pow((uvN + (-vec2(0.1, 0.0))).x, 2.0) + pow((uvN + (-vec2(0.1, 0.0))).y, 2.0))) * audio.z) * (1.0 * pow((100000.0 / 1.0), ((audio.x + (-0.0)) / (1.0 + (-0.0))))))) * audio.y) * pow(cos(((audio.x * 10.0) * sin(((time * 1.0e-2) + (uvN.x * 100.0))))), 1.0)), ((tan(((sqrt((pow((uvN + (-vec2(0.1, 0.0))).x, 2.0) + pow((uvN + (-vec2(0.1, 0.0))).y, 2.0))) * audio.z) * (1.0 * pow((100000.0 / 1.0), ((audio.x + (-0.0)) / (1.0 + (-0.0))))))) * audio.y) * pow(cos(((audio.x * 10.0) * sin(((time * 1.0e-2) + (uvN.x * 100.0))))), 0.1)), 1.0)) + (0.99 * texture2D(backBuffer, ((vec2(0.5, 0.5) * (vec2(((cos((((-1.0e-2) * audio.w) * (0.5 * pow((1.0 / 0.5), ((sin(time) + (-(-1.0))) / (1.0 + (-(-1.0)))))))) * ((1.25 * pow((0.81 / 1.25), ((audio.x + (-0.0)) / (1.0 + (-0.0))))) * vec2(abs(vec2(((cos(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).x) + (sin(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).y)), ((((-1.0) * sin(((-0.2) * audio.w))) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).x) + (cos(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).y))).x), vec2(((cos(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).x) + (sin(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).y)), ((((-1.0) * sin(((-0.2) * audio.w))) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).x) + (cos(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).y))).y)).x) + (sin((((-1.0e-2) * audio.w) * (0.5 * pow((1.0 / 0.5), ((sin(time) + (-(-1.0))) / (1.0 + (-(-1.0)))))))) * ((1.25 * pow((0.81 / 1.25), ((audio.x + (-0.0)) / (1.0 + (-0.0))))) * vec2(abs(vec2(((cos(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).x) + (sin(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).y)), ((((-1.0) * sin(((-0.2) * audio.w))) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).x) + (cos(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).y))).x), vec2(((cos(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).x) + (sin(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).y)), ((((-1.0) * sin(((-0.2) * audio.w))) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).x) + (cos(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).y))).y)).y)), ((((-1.0) * sin((((-1.0e-2) * audio.w) * (0.5 * pow((1.0 / 0.5), ((sin(time) + (-(-1.0))) / (1.0 + (-(-1.0))))))))) * ((1.25 * pow((0.81 / 1.25), ((audio.x + (-0.0)) / (1.0 + (-0.0))))) * vec2(abs(vec2(((cos(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).x) + (sin(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).y)), ((((-1.0) * sin(((-0.2) * audio.w))) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).x) + (cos(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).y))).x), vec2(((cos(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).x) + (sin(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).y)), ((((-1.0) * sin(((-0.2) * audio.w))) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).x) + (cos(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).y))).y)).x) + (cos((((-1.0e-2) * audio.w) * (0.5 * pow((1.0 / 0.5), ((sin(time) + (-(-1.0))) / (1.0 + (-(-1.0)))))))) * ((1.25 * pow((0.81 / 1.25), ((audio.x + (-0.0)) / (1.0 + (-0.0))))) * vec2(abs(vec2(((cos(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).x) + (sin(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).y)), ((((-1.0) * sin(((-0.2) * audio.w))) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).x) + (cos(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).y))).x), vec2(((cos(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).x) + (sin(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).y)), ((((-1.0) * sin(((-0.2) * audio.w))) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).x) + (cos(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).y))).y)).y))) + vec2(0.0, (-0.25)))) + vec2(0.5, 0.5))))), vec4(1.0, 1.0, 1.0, 1.0)), vec4(0.0, 0.0, 0.0, 0.0));
-}
-
-`;
+     var initialFsSource = "void main() { \n gl_FragColor = max(min(((1.0e-2 * vec4(((tan(((sqrt((pow((uvN + (-vec2(0.1, 0.0))).x, 2.0) + pow((uvN + (-vec2(0.1, 0.0))).y, 2.0))) * audio.z) * (1.0 * pow((100000.0 / 1.0), ((audio.x + (-0.0)) / (1.0 + (-0.0))))))) * audio.y) * pow(cos(((audio.x * 10.0) * sin(((time * 1.0e-2) + (uvN.x * 100.0))))), 10.0)), ((tan(((sqrt((pow((uvN + (-vec2(0.1, 0.0))).x, 2.0) + pow((uvN + (-vec2(0.1, 0.0))).y, 2.0))) * audio.z) * (1.0 * pow((100000.0 / 1.0), ((audio.x + (-0.0)) / (1.0 + (-0.0))))))) * audio.y) * pow(cos(((audio.x * 10.0) * sin(((time * 1.0e-2) + (uvN.x * 100.0))))), 1.0)), ((tan(((sqrt((pow((uvN + (-vec2(0.1, 0.0))).x, 2.0) + pow((uvN + (-vec2(0.1, 0.0))).y, 2.0))) * audio.z) * (1.0 * pow((100000.0 / 1.0), ((audio.x + (-0.0)) / (1.0 + (-0.0))))))) * audio.y) * pow(cos(((audio.x * 10.0) * sin(((time * 1.0e-2) + (uvN.x * 100.0))))), 0.1)), 1.0)) + (0.99 * texture2D(backBuffer, ((vec2(0.5, 0.5) * (vec2(((cos((((-1.0e-2) * audio.w) * (0.5 * pow((1.0 / 0.5), ((sin(time) + (-(-1.0))) / (1.0 + (-(-1.0)))))))) * ((1.25 * pow((0.81 / 1.25), ((audio.x + (-0.0)) / (1.0 + (-0.0))))) * vec2(abs(vec2(((cos(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).x) + (sin(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).y)), ((((-1.0) * sin(((-0.2) * audio.w))) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).x) + (cos(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).y))).x), vec2(((cos(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).x) + (sin(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).y)), ((((-1.0) * sin(((-0.2) * audio.w))) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).x) + (cos(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).y))).y)).x) + (sin((((-1.0e-2) * audio.w) * (0.5 * pow((1.0 / 0.5), ((sin(time) + (-(-1.0))) / (1.0 + (-(-1.0)))))))) * ((1.25 * pow((0.81 / 1.25), ((audio.x + (-0.0)) / (1.0 + (-0.0))))) * vec2(abs(vec2(((cos(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).x) + (sin(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).y)), ((((-1.0) * sin(((-0.2) * audio.w))) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).x) + (cos(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).y))).x), vec2(((cos(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).x) + (sin(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).y)), ((((-1.0) * sin(((-0.2) * audio.w))) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).x) + (cos(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).y))).y)).y)), ((((-1.0) * sin((((-1.0e-2) * audio.w) * (0.5 * pow((1.0 / 0.5), ((sin(time) + (-(-1.0))) / (1.0 + (-(-1.0))))))))) * ((1.25 * pow((0.81 / 1.25), ((audio.x + (-0.0)) / (1.0 + (-0.0))))) * vec2(abs(vec2(((cos(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).x) + (sin(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).y)), ((((-1.0) * sin(((-0.2) * audio.w))) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).x) + (cos(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).y))).x), vec2(((cos(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).x) + (sin(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).y)), ((((-1.0) * sin(((-0.2) * audio.w))) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).x) + (cos(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).y))).y)).x) + (cos((((-1.0e-2) * audio.w) * (0.5 * pow((1.0 / 0.5), ((sin(time) + (-(-1.0))) / (1.0 + (-(-1.0)))))))) * ((1.25 * pow((0.81 / 1.25), ((audio.x + (-0.0)) / (1.0 + (-0.0))))) * vec2(abs(vec2(((cos(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).x) + (sin(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).y)), ((((-1.0) * sin(((-0.2) * audio.w))) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).x) + (cos(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).y))).x), vec2(((cos(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).x) + (sin(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).y)), ((((-1.0) * sin(((-0.2) * audio.w))) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).x) + (cos(((-0.2) * audio.w)) * ((uvN + vec2((-(1.0e-7 * pow((1.0e-3 / 1.0e-7), ((audio.y + (-0.0)) / (1.0 + (-0.0)))))), 0.0)) + vec2(0.0, 0.25)).y))).y)).y))) + vec2(0.0, (-0.25)))) + vec2(0.5, 0.5))))), vec4(1.0, 1.0, 1.0, 1.0)), vec4(0.0, 0.0, 0.0, 0.0)); \n } ";
 
 
      function loadProgram (gl, state, vsSource, fsSource) {
@@ -148,13 +142,13 @@ void main() {
        function compileShader (gl, source, shaderType) {
          //assert(shaderType === gl.FRAGMENT_SHADER || shaderType === g.VERTEXT_SHADER);
 
-         let shader = gl.createShader(shaderType);
+         var shader = gl.createShader(shaderType);
 
          gl.shaderSource(shader, source);
          gl.compileShader(shader);
 
 
-         let success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
+         var success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
          if (!success) {
            console.log(source);
            throw "could not compile shader:" + gl.getShaderInfoLog(shader);
@@ -165,18 +159,18 @@ void main() {
 
 
 
-       let vs = compileShader(gl, vsSource, gl.VERTEX_SHADER);
-       let fs = compileShader(gl, fsSource, gl.FRAGMENT_SHADER);
+       var vs = compileShader(gl, vsSource, gl.VERTEX_SHADER);
+       var fs = compileShader(gl, fsSource, gl.FRAGMENT_SHADER);
 
 
-       let program = gl.createProgram();
+       var program = gl.createProgram();
 
        gl.attachShader(program, vs);
        gl.attachShader(program, fs);
 
        gl.linkProgram(program);
 
-       let success = gl.getProgramParameter(program, gl.LINK_STATUS);
+       var success = gl.getProgramParameter(program, gl.LINK_STATUS);
        if (!success) {
          throw ("program failed to link:" + gl.getProgramInfoLog(program));
        }
@@ -196,7 +190,7 @@ void main() {
 
        // backBuffer stuff
        function createTarget() {
-         let target = {
+         var target = {
            texture: gl.createTexture(),
            framebuffer: gl.createFramebuffer()
          };
@@ -231,7 +225,7 @@ void main() {
        draw(gl, state);
 
        if (state.animationFrameRequest === null) {
-         state.animationFrameRequest = requestAnimationFrame(() => animate(gl, state));
+         state.animationFrameRequest = requestAnimationFrame(function() { animate(gl, state); });
        }
      }
 
@@ -260,7 +254,7 @@ void main() {
 
      function animate (gl, state) {
        draw(gl, state);
-       state.animationFrameRequest = requestAnimationFrame(() => animate(gl, state));
+       state.animationFrameRequest = requestAnimationFrame(function() { animate(gl, state); });
      };
 
 
@@ -275,14 +269,14 @@ void main() {
 
 
        function setMouse (event) {
-         let r = event.target.getBoundingClientRect();
+         var r = event.target.getBoundingClientRect();
          state.mouse.x = (event.clientX - r.left) / (r.right - r.left) * 2 -1;
          state.mouse.y = (event.clientY - r.bottom) / (r.top - r.bottom) * 2 - 1;
        };
        /* canvas.onmousedown = (event) => setMouse(event, 1); */
        /* canvas.onmouseup = (event) => setMouse(event, 0); */
 
-       canvas.onmousemove = (event) => setMouse(event);
+       canvas.onmousemove = (setMouse);
        state.mouse = {x: 0, y: 0};
 
 
@@ -292,12 +286,12 @@ void main() {
 
        /* function loadMusic() { */
        /* console.log('loading?'); */
-       /* let req = new XMLHttpRequest(); */
+       /* var req = new XMLHttpRequest(); */
        /* req.open("GET", "/bobabeach.mp3", true); */
        /* req.responseType ="arraybuffer"; */
        /* req.onload = function(e) { */
        /* console.log(e); */
-       /* let audioCtx = new (window.AudioContext || window.webkitAudioContext)(); */
+       /* var audioCtx = new (window.AudioContext || window.webkitAudioContext)(); */
        /* audioCtx.decodeAudioData(req.response, function(buffer) { */
        /* console.log(audioCtx); */
        /* onAccept(audioCtx, buffer); */
@@ -308,18 +302,18 @@ void main() {
 
 
        function onAccept () {
-         let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-         let source = audioCtx.createMediaElementSource(document.getElementById("audio"));
-         /* let source = audioCtx.createMediaStreamSource(stream); */
-         /* let source = audioCtx.createBufferSource(); */
+         var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+         var source = audioCtx.createMediaElementSource(document.getElementById("audio"));
+         /* var source = audioCtx.createMediaStreamSource(stream); */
+         /* var source = audioCtx.createBufferSource(); */
          /* source.buffer = buffer; */
-         let analyser = audioCtx.createAnalyser();
+         var analyser = audioCtx.createAnalyser();
          source.connect(analyser);
          source.connect(audioCtx.destination);
 
          analyser.fftSize = 512;
-         let bufferLength = analyser.frequencyBinCount;
-         let dataArray = new Uint8Array(bufferLength);
+         var bufferLength = analyser.frequencyBinCount;
+         var dataArray = new Uint8Array(bufferLength);
 
 
          function toAudio() {
@@ -327,8 +321,8 @@ void main() {
            analyser.getByteFrequencyData(dataArray);
 
            // Taken from The_Force
-           let k = 0, f = 0.0;
-           let a = 5, b = 11, c = 24, d = bufferLength, i = 0;
+           var k = 0, f = 0.0;
+           var a = 5, b = 11, c = 24, d = bufferLength, i = 0;
 
            for(; i < a; i++) {
              f += dataArray[i];
@@ -375,15 +369,15 @@ void main() {
 
      // stateful variables
 
-     const canvas = document.getElementById("canvas");
-     let WIDTH = Math.max(window.innerHeight, window.innerWidth);
-     let HEIGHT =  Math.max(window.innerHeight, window.innerWidth);
+     var canvas = document.getElementById("canvas");
+     var WIDTH = Math.max(window.innerHeight, window.innerWidth);
+     var HEIGHT =  Math.max(window.innerHeight, window.innerWidth);
      canvas.width = WIDTH;
      canvas.height = HEIGHT;
 
-     const gl = canvas.getContext("webgl");
+     var gl = canvas.getContext("webgl");
 
-     const state = {};
+     var state = {};
 
      setupState(state, canvas);
 
@@ -398,18 +392,18 @@ void main() {
        }, 5000);
      }
 
-     const landing = document.getElementById("landing");
-     const stuff = document.getElementById("stuff");
+     var landing = document.getElementById("landing");
+     var stuff = document.getElementById("stuff");
 
      if (landing) {
-      window.setTimeout(() => {
-      window.setTimeout(() => {
+      window.setTimeout(function() {
+      window.setTimeout(function() {
          fadeOut(landing);
-      window.setTimeout(() => {
+      window.setTimeout(function() {
         stuff.style.opacity = 0.9;
       }, 5000);
       }, 5000);
-        const audio = document.getElementById("audio");
+        var audio = document.getElementById("audio");
         audio.controls = true;
       }, 3000);
      }
