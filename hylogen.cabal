@@ -28,7 +28,7 @@ executable hylogen
   build-depends:       base
                      , bytestring
                      , filepath
-                     , hinotify
+                     , fsnotify
                      , network
                      , process
                      , random

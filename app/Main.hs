@@ -17,8 +17,9 @@ import qualified Data.Text as T
 import Network.WebSockets
 import System.Environment (getArgs)
 import System.FilePath
-import System.INotify
+import System.FSNotify
 import System.Process
+
 -- import System.Random
 
 main :: IO ()
@@ -27,26 +28,21 @@ main = getArgs >>= \case
   _ -> error "Name a file to watch!"
 
 main' :: FilePath ->  IO ()
-main' pathToWatch = do
+main' pathToWatch = withManager $ \mgr -> do
   _ <- forkIO $ serveIndex
-  inotify <- initINotify
-  print inotify
-  runServer "127.0.0.1" 8080 $ handleConnection pathToWatch inotify
+  runServer "127.0.0.1" 8080 $ handleConnection pathToWatch mgr
 
-handleConnection :: FilePath -> INotify -> PendingConnection -> IO ()
-handleConnection pathToWatch inotify pending = do
+handleConnection :: FilePath -> WatchManager -> PendingConnection -> IO ()
+handleConnection pathToWatch mgr pending = do
    let (dirToWatch, fileToWatch) = splitFileName pathToWatch
    connection <- acceptRequest pending
 
    (sendTextData connection . T.pack) =<< getNewSource pathToWatch
-   -- withINotify $ \inotify ->
-   _ <- addWatch inotify [Modify] dirToWatch $ \case
-      Modified False (Just f) | f == fileToWatch ->
-         (sendTextData connection . T.pack) =<< getNewSource pathToWatch
-      _ -> return ()
---  print wd
---  removeWatch wd
---  receiveDataMessage connection
+
+   let onChange e = case e of
+         Modified _ _ -> (sendTextData connection . T.pack) =<< getNewSource pathToWatch
+         _ -> return ()
+   _ <- watchDir mgr dirToWatch (const True) onChange
    _ <- getLine -- temp hack to keep the socket open
    return ()
 
