@@ -5,13 +5,13 @@ module Hylogen.Globals where
 import Hylogen.Types
 import Data.VectorSpace
 
-vec2 :: (ConstructFrom tc Vec2) => tc -> Vec2
+vec2 :: (Show tc, ConstructFrom tc Vec2) => tc -> Vec2
 vec2 = Vec2
 
-vec3 :: (ConstructFrom tc Vec3) => tc -> Vec3
+vec3 :: (Show tc, ConstructFrom tc Vec3) => tc -> Vec3
 vec3 = Vec3
 
-vec4 :: (ConstructFrom tc Vec4) => tc -> Vec4
+vec4 :: (Show tc, ConstructFrom tc Vec4) => tc -> Vec4
 vec4 = Vec4
 
 inverseSqrt :: (HyloPrim a) => a -> a

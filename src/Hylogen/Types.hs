@@ -1,59 +1,41 @@
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE NoMonomorphismRestriction #-}
-{-# LANGUAGE NoMonoLocalBinds #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE ExtendedDefaultRules #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE PolyKinds #-}
-{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 
 module Hylogen.Types where
 
+
 import Data.Monoid
 import Data.VectorSpace
-import GHC.TypeLits
 import GHC.Exts (Constraint)
 
--- | Darn I need injective type families.. waiting for GHC8
-type family HyloConstructor v where
-  HyloConstructor Vec1 = Float
-  HyloConstructor Vec2 = (Vec1, Vec1)
-  HyloConstructor Vec3 = (Vec1, Vec1, Vec1)
-  HyloConstructor Vec4 = (Vec1, Vec1, Vec1, Vec1)
-
--- class TupleThing (z :: k)
--- instance (HyloPrim a, HyloPrim b) => TupleThing (a, b)
--- instance (HyloPrim a, HyloPrim b, HyloPrim c) => TupleThing (a, b, c)
--- instance (HyloPrim a, HyloPrim b, HyloPrim c, HyloPrim d) => TupleThing (a, b, c, d)
-
-
-
-type family Dim v :: Nat where
-  Dim Float = 1
-  Dim Vec1 = 1
-  Dim Vec2 = 2
-  Dim Vec3 = 3
-  Dim Vec4 = 4
 
 type family (ConstructFrom tc hprim) :: Constraint where
   ConstructFrom a Vec1 = a ~ Float
-  ConstructFrom tc Vec2 = (Show tc, DimTup tc ~ 2)
-  ConstructFrom tc Vec3 = (Show tc, DimTup tc ~ 3)
-  ConstructFrom tc Vec4 = (Show tc, DimTup tc ~ 4)
+  ConstructFrom (a, b) Vec2 = (a ~ Vec1, b ~ Vec1)
 
-type family DimTup v :: Nat where
-  DimTup Float = 1
-  DimTup (a, b) = Dim a + Dim b
-  DimTup (a, b, c) = Dim a + Dim b + Dim c
-  DimTup (a, b, c, d) = Dim a + Dim b + Dim c + Dim d
+  ConstructFrom (a, b, c) Vec3 = (a ~ Vec1, b ~ Vec1, c ~ Vec1)
+  ConstructFrom (Vec2, b) Vec3 = (b ~ Vec1)
+  ConstructFrom (a, Vec2) Vec3 = (a ~ Vec1)
+
+  ConstructFrom (a, b, c, d) Vec4 = (a ~ Vec1, b ~ Vec1, c ~ Vec1, d ~ Vec1)
+  ConstructFrom (Vec3, b) Vec4 = (b ~ Vec1)
+  ConstructFrom (Vec2, b) Vec4 = (b ~ Vec2)
+  ConstructFrom (a, Vec3) Vec4 = (a ~ Vec1)
+  ConstructFrom (a, Vec2, c) Vec4 = (a ~ Vec1, c ~ Vec1)
+  ConstructFrom (Vec2, b, c) Vec4 = (b ~ Vec1, c ~ Vec1)
+  ConstructFrom (a, b, Vec2) Vec4 = (a ~ Vec1, b ~ Vec1)
 
 
 class (Show v) => HyloPrim v where
-  vec :: (ConstructFrom tc v) => tc -> v
+  vec :: (Show tc, ConstructFrom tc v) => tc -> v
   vu :: String -> v
   vuop :: String -> v -> v
   vuoppre :: String -> v -> v
@@ -69,6 +51,7 @@ class Show a => HasX a
 class HasX a => HasY a
 class HasY a => HasZ a
 class HasZ a => HasW a
+
 
 data Vec1 where
   Vec1 :: Float -> Vec1
@@ -162,7 +145,7 @@ instance InnerSpace Vec1 where
 -- | Vec2:
 
 data Vec2 where
-  Vec2 :: (ConstructFrom tc Vec2) => tc -> Vec2
+  Vec2 :: (Show tc, ConstructFrom tc Vec2) => tc -> Vec2
   V2u :: String -> Vec2
   V2uop :: String -> Vec2 -> Vec2
   V2uoppre :: String -> Vec2 -> Vec2
@@ -247,7 +230,7 @@ instance HasY Vec2
 -- | Vec3:
 
 data Vec3 where
-  Vec3 :: (ConstructFrom tc Vec3) => tc -> Vec3
+  Vec3 :: (Show tc, ConstructFrom tc Vec3) => tc -> Vec3
   V3u :: String -> Vec3
   V3uop :: String -> Vec3 -> Vec3
   V3uoppre :: String -> Vec3 -> Vec3
@@ -333,7 +316,7 @@ instance HasZ Vec3
 -- | Vec4:
 
 data Vec4 where
-  Vec4 :: (ConstructFrom tc Vec4) => tc -> Vec4
+  Vec4 :: (Show tc, ConstructFrom tc Vec4) => tc -> Vec4
   V4u :: String -> Vec4
   V4uop :: String -> Vec4 -> Vec4
   V4uoppre :: String -> Vec4 -> Vec4
