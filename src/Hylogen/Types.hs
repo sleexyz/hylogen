@@ -5,11 +5,18 @@
 {-# LANGUAGE ExtendedDefaultRules #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE ConstraintKinds #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE PolyKinds #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 module Hylogen.Types where
 
 import Data.Monoid
 import Data.VectorSpace
+import GHC.TypeLits
+import GHC.Exts (Constraint)
 
 -- | Darn I need injective type families.. waiting for GHC8
 type family HyloConstructor v where
@@ -18,8 +25,35 @@ type family HyloConstructor v where
   HyloConstructor Vec3 = (Vec1, Vec1, Vec1)
   HyloConstructor Vec4 = (Vec1, Vec1, Vec1, Vec1)
 
+-- class TupleThing (z :: k)
+-- instance (HyloPrim a, HyloPrim b) => TupleThing (a, b)
+-- instance (HyloPrim a, HyloPrim b, HyloPrim c) => TupleThing (a, b, c)
+-- instance (HyloPrim a, HyloPrim b, HyloPrim c, HyloPrim d) => TupleThing (a, b, c, d)
+
+
+
+type family Dim v :: Nat where
+  Dim Float = 1
+  Dim Vec1 = 1
+  Dim Vec2 = 2
+  Dim Vec3 = 3
+  Dim Vec4 = 4
+
+type family (ConstructFrom tc hprim) :: Constraint where
+  ConstructFrom a Vec1 = a ~ Float
+  ConstructFrom tc Vec2 = (Show tc, DimTup tc ~ 2)
+  ConstructFrom tc Vec3 = (Show tc, DimTup tc ~ 3)
+  ConstructFrom tc Vec4 = (Show tc, DimTup tc ~ 4)
+
+type family DimTup v :: Nat where
+  DimTup Float = 1
+  DimTup (a, b) = Dim a + Dim b
+  DimTup (a, b, c) = Dim a + Dim b + Dim c
+  DimTup (a, b, c, d) = Dim a + Dim b + Dim c + Dim d
+
+
 class (Show v) => HyloPrim v where
-  vec :: HyloConstructor v -> v
+  vec :: (ConstructFrom tc v) => tc -> v
   vu :: String -> v
   vuop :: String -> v -> v
   vuoppre :: String -> v -> v
@@ -30,12 +64,11 @@ class (Show v) => HyloPrim v where
   toList :: v -> [Vec1]
 
 
+
 class Show a => HasX a
 class HasX a => HasY a
 class HasY a => HasZ a
 class HasZ a => HasW a
-
-
 
 data Vec1 where
   Vec1 :: Float -> Vec1
@@ -45,6 +78,7 @@ data Vec1 where
   V1bop :: String -> Vec1 -> Vec1 -> Vec1
   V1boppre :: String -> Vec1 -> Vec1 -> Vec1
   V1select :: Booly -> Vec1 -> Vec1 -> Vec1
+  Dot :: (HyloPrim a) => a -> a -> Vec1
   X :: (HasX a) => a -> Vec1
   Y :: (HasY a) => a -> Vec1
   Z :: (HasZ a) => a -> Vec1
@@ -61,6 +95,7 @@ instance Show Vec1 where
     V1bop b x y -> "(" <> show x <> " " <> b <> " " <> show y <> ")"
     V1boppre b x y -> b <> "(" <> show x <> ", " <> show y <> ")"
     V1select b x y -> "( " <> show b <> " ? " <> show x <> " : " <> show y <> ")"
+    Dot x y -> "dot(" <> show x <> ", " <> show y <> ")"
     X x ->  show x <> ".x"
     Y x ->  show x <> ".y"
     Z x ->  show x <> ".z"
@@ -121,10 +156,13 @@ instance VectorSpace Vec1 where
   type Scalar Vec1 = Vec1
   a *^ b = a * b
 
+instance InnerSpace Vec1 where
+  (<.>) = Dot
+
 -- | Vec2:
 
 data Vec2 where
-  Vec2 :: (Vec1, Vec1) -> Vec2
+  Vec2 :: (ConstructFrom tc Vec2) => tc -> Vec2
   V2u :: String -> Vec2
   V2uop :: String -> Vec2 -> Vec2
   V2uoppre :: String -> Vec2 -> Vec2
@@ -147,7 +185,7 @@ instance HyloPrim Vec2 where
 
 instance Show Vec2 where
   show expr = case expr of
-    Vec2 (x, y) -> "vec2(" <> show x <> ", " <> show y <> ")"
+    Vec2 tc -> "vec2" <> show tc
     V2u x -> x
     V2uop u x -> u <> "(" <> show x <> ")"
     V2uoppre u x -> "(" <> u <> show x <> ")"
@@ -199,6 +237,9 @@ instance VectorSpace Vec2 where
   type Scalar Vec2 = Vec1
   a *^ b = V2bops "*" a b
 
+instance InnerSpace Vec2 where
+  (<.>) = Dot
+
 instance HasX Vec2
 instance HasY Vec2
 
@@ -206,7 +247,7 @@ instance HasY Vec2
 -- | Vec3:
 
 data Vec3 where
-  Vec3 :: (Vec1, Vec1, Vec1) -> Vec3
+  Vec3 :: (ConstructFrom tc Vec3) => tc -> Vec3
   V3u :: String -> Vec3
   V3uop :: String -> Vec3 -> Vec3
   V3uoppre :: String -> Vec3 -> Vec3
@@ -228,7 +269,7 @@ instance HyloPrim Vec3 where
 
 instance Show Vec3 where
   show expr = case expr of
-    Vec3 (x, y, z) -> "vec3(" <> show x <> ", " <> show y <> ", " <> show z <> ")"
+    Vec3 tc -> "vec3" <> show tc
     V3u x -> x
     V3uop u x -> u <> "(" <> show x <> ")"
     V3uoppre u x -> "(" <> u <> show x <> ")"
@@ -280,6 +321,9 @@ instance VectorSpace Vec3 where
   type Scalar Vec3 = Vec1
   a *^ b = V3bops "*" a b
 
+instance InnerSpace Vec3 where
+  (<.>) = Dot
+
 instance HasX Vec3
 instance HasY Vec3
 instance HasZ Vec3
@@ -289,7 +333,7 @@ instance HasZ Vec3
 -- | Vec4:
 
 data Vec4 where
-  Vec4 :: (Vec1, Vec1, Vec1, Vec1) -> Vec4
+  Vec4 :: (ConstructFrom tc Vec4) => tc -> Vec4
   V4u :: String -> Vec4
   V4uop :: String -> Vec4 -> Vec4
   V4uoppre :: String -> Vec4 -> Vec4
@@ -313,7 +357,7 @@ instance HyloPrim Vec4 where
 
 instance Show Vec4 where
   show expr = case expr of
-    Vec4 (x, y, z, w) -> "vec4(" <> show x <> ", " <> show y <> ", " <> show z <> ", " <> show w <> ")"
+    Vec4 tc -> "vec4" <> show tc
     V4u x -> x
     V4uop u x -> u <> "(" <> show x <> ")"
     V4uoppre u x -> "(" <> u <> show x <> ")"
@@ -365,6 +409,9 @@ instance AdditiveGroup Vec4 where
 instance VectorSpace Vec4 where
   type Scalar Vec4 = Vec1
   a *^ b = V4bops "*" a b
+
+instance InnerSpace Vec4 where
+  (<.>) = Dot
 
 instance HasX Vec4
 instance HasY Vec4
