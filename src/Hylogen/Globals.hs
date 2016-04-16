@@ -1,38 +1,39 @@
 {-# LANGUAGE NoMonomorphismRestriction #-}
+{-# LANGUAGE FlexibleContexts #-}
 
 module Hylogen.Globals where
 
 import Hylogen.Types
 import Data.VectorSpace
 
-vec2 :: (Show tc, ConstructFrom tc Vec2) => tc -> Vec2
+vec2 :: (ConstructFrom tc Vec2) => tc -> Vec2
 vec2 = Vec2
 
-vec3 :: (Show tc, ConstructFrom tc Vec3) => tc -> Vec3
+vec3 :: (ConstructFrom tc Vec3) => tc -> Vec3
 vec3 = Vec3
 
-vec4 :: (Show tc, ConstructFrom tc Vec4) => tc -> Vec4
+vec4 :: (ConstructFrom tc Vec4) => tc -> Vec4
 vec4 = Vec4
 
-inverseSqrt :: (HyloPrim a) => a -> a
+inverseSqrt :: (Vec a) => a -> a
 inverseSqrt = vuop "inversesqrt"
 
-fract :: (HyloPrim a) => a -> a
+fract :: (Vec a) => a -> a
 fract = vuop "fract"
 
-floor_ :: (HyloPrim a) => a -> a
+floor_ :: (Vec a) => a -> a
 floor_ = vuop "floor"
 
-ceil_ :: (HyloPrim a) => a -> a
+ceil_ :: (Vec a) => a -> a
 ceil_ = vuop "ceil"
 
-min_ :: (HyloPrim a) => a -> a -> a
+min_ :: (Vec a) => a -> a -> a
 min_ = vboppre "min"
 
-max_:: (HyloPrim a) => a -> a -> a
+max_:: (Vec a) => a -> a -> a
 max_ = vboppre "max"
 
-clamp :: (HyloPrim a) => a -> a -> a -> a
+clamp :: (Vec a) => a -> a -> a -> a
 clamp x y z = (z `min_` y) `max_` x
 
 
@@ -76,20 +77,24 @@ true = Bu "true"
 false :: Booly
 false = Bu "false"
 
-eq :: (HyloPrim v) => v -> v -> Booly
+eq :: (Vec v) => v -> v -> Booly
 eq = Bcomp "=="
 
-neq :: (HyloPrim v) => v -> v -> Booly
+neq :: (Vec v) => v -> v -> Booly
 neq = Bcomp "!="
 
-lt :: (HyloPrim v) => v -> v -> Booly
+lt :: (Vec v) => v -> v -> Booly
 lt = Bcomp "<"
 
-gt :: (HyloPrim v) => v -> v -> Booly
+gt :: (Vec v) => v -> v -> Booly
 gt = Bcomp ">"
 
-leq :: (HyloPrim v) => v -> v -> Booly
+leq :: (Vec v) => v -> v -> Booly
 leq = Bcomp "<="
 
-geq :: (HyloPrim v) => v -> v -> Booly
+geq :: (Vec v) => v -> v -> Booly
 geq = Bcomp ">="
+
+
+texture2D :: Texture -> Vec2 -> Vec4
+texture2D = Texture2D

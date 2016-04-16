@@ -8,6 +8,7 @@
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 module Hylogen.Types where
 
@@ -16,26 +17,40 @@ import Data.Monoid
 import Data.VectorSpace
 import GHC.Exts (Constraint)
 
+class (ConstructFrom' tuple hprim, Show tuple, Vec hprim) => ConstructFrom tuple hprim
+instance ConstructFrom Float Vec1
+instance ConstructFrom (Vec1, Vec1) Vec2
+instance ConstructFrom (Vec1, Vec1, Vec1) Vec3
+instance ConstructFrom (Vec2, Vec1) Vec3
+instance ConstructFrom (Vec1, Vec2) Vec3
+instance ConstructFrom (Vec1, Vec1, Vec1, Vec1) Vec4
+instance ConstructFrom (Vec2, Vec1, Vec1) Vec4
+instance ConstructFrom (Vec1, Vec2, Vec1) Vec4
+instance ConstructFrom (Vec1, Vec1, Vec2) Vec4
+instance ConstructFrom (Vec3, Vec1) Vec4
+instance ConstructFrom (Vec1, Vec3) Vec4
+instance ConstructFrom (Vec2, Vec2) Vec4
 
-type family (ConstructFrom tc hprim) :: Constraint where
-  ConstructFrom a Vec1 = a ~ Float
-  ConstructFrom (a, b) Vec2 = (a ~ Vec1, b ~ Vec1)
+type family (ConstructFrom' tuple hprim) :: Constraint where
+  ConstructFrom' a Vec1 = a ~ Float
+  ConstructFrom' (a, b) Vec2 = (a ~ Vec1, b ~ Vec1)
 
-  ConstructFrom (a, b, c) Vec3 = (a ~ Vec1, b ~ Vec1, c ~ Vec1)
-  ConstructFrom (Vec2, b) Vec3 = (b ~ Vec1)
-  ConstructFrom (a, Vec2) Vec3 = (a ~ Vec1)
+  ConstructFrom' (a, b, c) Vec3 = (a ~ Vec1, b ~ Vec1, c ~ Vec1)
+  ConstructFrom' (Vec2, b) Vec3 = (b ~ Vec1)
+  ConstructFrom' (a, Vec2) Vec3 = (a ~ Vec1)
 
-  ConstructFrom (a, b, c, d) Vec4 = (a ~ Vec1, b ~ Vec1, c ~ Vec1, d ~ Vec1)
-  ConstructFrom (Vec3, b) Vec4 = (b ~ Vec1)
-  ConstructFrom (Vec2, b) Vec4 = (b ~ Vec2)
-  ConstructFrom (a, Vec3) Vec4 = (a ~ Vec1)
-  ConstructFrom (a, Vec2, c) Vec4 = (a ~ Vec1, c ~ Vec1)
-  ConstructFrom (Vec2, b, c) Vec4 = (b ~ Vec1, c ~ Vec1)
-  ConstructFrom (a, b, Vec2) Vec4 = (a ~ Vec1, b ~ Vec1)
+  ConstructFrom' (a, b, c, d) Vec4 = (a ~ Vec1, b ~ Vec1, c ~ Vec1, d ~ Vec1)
+  ConstructFrom' (Vec3, b) Vec4 = (b ~ Vec1)
+  ConstructFrom' (Vec2, b) Vec4 = (b ~ Vec2)
+  ConstructFrom' (a, Vec3) Vec4 = (a ~ Vec1)
+  ConstructFrom' (a, Vec2, c) Vec4 = (a ~ Vec1, c ~ Vec1)
+  ConstructFrom' (Vec2, b, c) Vec4 = (b ~ Vec1, c ~ Vec1)
+  ConstructFrom' (a, b, Vec2) Vec4 = (a ~ Vec1, b ~ Vec1)
 
 
-class (Show v) => HyloPrim v where
-  vec :: (Show tc, ConstructFrom tc v) => tc -> v
+
+class (Show v) => Vec v where
+  vec :: (ConstructFrom tuple v) => tuple -> v
   vu :: String -> v
   vuop :: String -> v -> v
   vuoppre :: String -> v -> v
@@ -61,7 +76,7 @@ data Vec1 where
   V1bop :: String -> Vec1 -> Vec1 -> Vec1
   V1boppre :: String -> Vec1 -> Vec1 -> Vec1
   V1select :: Booly -> Vec1 -> Vec1 -> Vec1
-  Dot :: (HyloPrim a) => a -> a -> Vec1
+  Dot :: (Vec a) => a -> a -> Vec1
   X :: (HasX a) => a -> Vec1
   Y :: (HasY a) => a -> Vec1
   Z :: (HasZ a) => a -> Vec1
@@ -85,7 +100,7 @@ instance Show Vec1 where
     W x ->  show x <> ".w"
 
 
-instance HyloPrim Vec1 where
+instance Vec Vec1 where
   vec = Vec1
   vu = V1u
   vuop = V1uop
@@ -145,7 +160,7 @@ instance InnerSpace Vec1 where
 -- | Vec2:
 
 data Vec2 where
-  Vec2 :: (Show tc, ConstructFrom tc Vec2) => tc -> Vec2
+  Vec2 :: (ConstructFrom tuple Vec2) => tuple -> Vec2
   V2u :: String -> Vec2
   V2uop :: String -> Vec2 -> Vec2
   V2uoppre :: String -> Vec2 -> Vec2
@@ -154,7 +169,7 @@ data Vec2 where
   V2bops :: String -> Vec1 -> Vec2 -> Vec2
   V2select :: Booly -> Vec2 -> Vec2 -> Vec2
 
-instance HyloPrim Vec2 where
+instance Vec Vec2 where
   vec = Vec2
   vu = V2u
   vuop = V2uop
@@ -168,7 +183,7 @@ instance HyloPrim Vec2 where
 
 instance Show Vec2 where
   show expr = case expr of
-    Vec2 tc -> "vec2" <> show tc
+    Vec2 tuple -> "vec2" <> show tuple
     V2u x -> x
     V2uop u x -> u <> "(" <> show x <> ")"
     V2uoppre u x -> "(" <> u <> show x <> ")"
@@ -230,7 +245,7 @@ instance HasY Vec2
 -- | Vec3:
 
 data Vec3 where
-  Vec3 :: (Show tc, ConstructFrom tc Vec3) => tc -> Vec3
+  Vec3 :: (ConstructFrom tuple Vec3) => tuple -> Vec3
   V3u :: String -> Vec3
   V3uop :: String -> Vec3 -> Vec3
   V3uoppre :: String -> Vec3 -> Vec3
@@ -239,7 +254,7 @@ data Vec3 where
   V3bops :: String -> Vec1 -> Vec3 -> Vec3
   V3select :: Booly -> Vec3 -> Vec3 -> Vec3
 
-instance HyloPrim Vec3 where
+instance Vec Vec3 where
   vec = Vec3
   vu = V3u
   vuop = V3uop
@@ -252,7 +267,7 @@ instance HyloPrim Vec3 where
 
 instance Show Vec3 where
   show expr = case expr of
-    Vec3 tc -> "vec3" <> show tc
+    Vec3 tuple -> "vec3" <> show tuple
     V3u x -> x
     V3uop u x -> u <> "(" <> show x <> ")"
     V3uoppre u x -> "(" <> u <> show x <> ")"
@@ -316,7 +331,7 @@ instance HasZ Vec3
 -- | Vec4:
 
 data Vec4 where
-  Vec4 :: (Show tc, ConstructFrom tc Vec4) => tc -> Vec4
+  Vec4 :: (ConstructFrom tuple Vec4) => tuple -> Vec4
   V4u :: String -> Vec4
   V4uop :: String -> Vec4 -> Vec4
   V4uoppre :: String -> Vec4 -> Vec4
@@ -327,7 +342,7 @@ data Vec4 where
   Texture2D :: Texture -> Vec2 -> Vec4
 
 
-instance HyloPrim Vec4 where
+instance Vec Vec4 where
   vec = Vec4
   vu = V4u
   vuop = V4uop
@@ -340,7 +355,7 @@ instance HyloPrim Vec4 where
 
 instance Show Vec4 where
   show expr = case expr of
-    Vec4 tc -> "vec4" <> show tc
+    Vec4 tuple -> "vec4" <> show tuple
     V4u x -> x
     V4uop u x -> u <> "(" <> show x <> ")"
     V4uoppre u x -> "(" <> u <> show x <> ")"
@@ -415,7 +430,7 @@ data Booly where
   Buop :: String -> Booly -> Booly
   Buoppre :: String -> Booly -> Booly
   Bbop :: String -> Booly -> Booly -> Booly
-  Bcomp :: (HyloPrim a) => String -> a -> a -> Booly
+  Bcomp :: (Vec a) => String -> a -> a -> Booly
   Bcomp_ :: String -> Vec1 -> Vec1 -> Booly
 
 instance Show Booly where

@@ -19,12 +19,16 @@ module Hylogen
        )
        where
 
-import           Data.Monoid
-import           Hylogen.Types
+import           Hylogen.Types ( Vec1 (X, Y, Z, W)
+                               , Vec2
+                               , Vec3
+                               , Vec4
+                               , Vec (select, fromVec1, toList)
+                               )
 import           Hylogen.Globals
 
 toGLSL :: Vec4 -> String
 toGLSL x = unlines $ [ "void main() {"
-                     , "    gl_FragColor = " <> show x <> ";"
+                     , "    gl_FragColor = " ++ show x ++ ";"
                      , "}"
                      ]
