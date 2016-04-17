@@ -1,6 +1,6 @@
 dist/
 TAGS
 .stack-work/
-src/Test.hs
+src/Audio.hs
 src/NonAudio.hs
 shader.glsl
