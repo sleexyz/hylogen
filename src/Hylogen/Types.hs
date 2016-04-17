@@ -26,10 +26,10 @@ instance ConstructFrom (Vec1, Vec2) Vec3
 instance ConstructFrom (Vec1, Vec1, Vec1, Vec1) Vec4
 instance ConstructFrom (Vec2, Vec1, Vec1) Vec4
 instance ConstructFrom (Vec1, Vec2, Vec1) Vec4
-instance ConstructFrom (Vec1, Vec1, Vec2) Vec4
+instance (a ~ Vec1, b ~ Vec1) => ConstructFrom (a, b, Vec2) Vec4
 instance ConstructFrom (Vec3, Vec1) Vec4
-instance ConstructFrom (Vec1, Vec3) Vec4
-instance ConstructFrom (Vec2, Vec2) Vec4
+instance (a ~ Vec1) => ConstructFrom (a, Vec3) Vec4
+instance (a ~ Vec2) => ConstructFrom (a, Vec2) Vec4
 
 type family (ConstructFrom' tuple hprim) :: Constraint where
   ConstructFrom' a Vec1 = a ~ Float
@@ -43,8 +43,14 @@ type family (ConstructFrom' tuple hprim) :: Constraint where
   ConstructFrom' (Vec3, b) Vec4 = (b ~ Vec1)
   ConstructFrom' (Vec2, b) Vec4 = (b ~ Vec2)
   ConstructFrom' (a, Vec3) Vec4 = (a ~ Vec1)
-  ConstructFrom' (a, Vec2, c) Vec4 = (a ~ Vec1, c ~ Vec1)
+
+
+  -- ConstructFrom' (Vec1, Vec1, Vec2) Vec4 = ()
+  -- ConstructFrom' (Vec1, Vec2, Vec1) Vec4 = ()
+  -- ConstructFrom' (Vec2, Vec1, Vec1) Vec4 = ()
+
   ConstructFrom' (Vec2, b, c) Vec4 = (b ~ Vec1, c ~ Vec1)
+  ConstructFrom' (a, Vec2, c) Vec4 = (a ~ Vec1, c ~ Vec1) -- works
   ConstructFrom' (a, b, Vec2) Vec4 = (a ~ Vec1, b ~ Vec1)
 
 
