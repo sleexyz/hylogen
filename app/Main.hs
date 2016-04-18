@@ -1,24 +1,21 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE ViewPatterns #-}
 {-# LANGUAGE LambdaCase #-}
 
 
 import Paths_hylogen (getDataFileName)
-import Control.Monad
 import Control.Concurrent
-import qualified Data.ByteString.Char8 as BS8
-import Data.ByteString (ByteString)
-import Network (PortID(..), withSocketsDo, listenOn)
-import Network.Socket (accept, sClose)
-import Network.Socket.ByteString (sendAll)
+import qualified Data.ByteString.Lazy.Char8 as LBS8
 
--- import Data.Monoid
 import qualified Data.Text as T
 import Network.WebSockets
 import System.Environment (getArgs)
 import System.FilePath
 import System.FSNotify
 import System.Process
+
+import Network.Wai
+import Network.Wai.Handler.Warp
+import Network.HTTP.Types (status200, status404)
 
 -- import System.Random
 
@@ -59,21 +56,27 @@ getNewSource pathToWatch = do
    return c
 
 serveIndex :: IO ()
-serveIndex = withSocketsDo $ do
-   htmlString <- readFile =<< getDataFileName "app/index.html"
-   sock <- listenOn $ PortNumber 5678
-   forever $ do
-      (conn, _) <- accept sock
-      _ <- forkIO $ do
-         sendAll conn $ wrapHtml $ BS8.pack htmlString
-         sClose conn
-      return ()
-
-wrapHtml :: ByteString -> ByteString
-wrapHtml bs = mconcat [
-     "HTTP/1.0 200 OK\r\nContent-Length: "
-   , BS8.pack . show $ BS8.length bs
-   , "\r\n\r\n", bs, "\r\n"
-   ]
+serveIndex = do
+  let port = 5678
+  htmlString <- readFile =<< getDataFileName "web/index.html"
+  jsString <- readFile =<< getDataFileName "web/entry.js"
+  run port $ app htmlString jsString
 
 
+app :: String -> String -> Application
+app htmlString jsString req respond = respond $
+  case pathInfo req of
+    ["entry.js"] -> serveJS jsString
+    []           -> serveHTML htmlString
+    _            -> error404
+
+serveHTML :: String -> Network.Wai.Response
+serveHTML htmlString = responseLBS status200 [("Content-Type", "text/html")]
+  $ LBS8.pack htmlString
+
+serveJS :: String -> Network.Wai.Response
+serveJS jsString = responseLBS status200 [("Content-Type", "application/javascript")] 
+  $ LBS8.pack jsString
+
+error404 :: Network.Wai.Response
+error404 = responseBuilder status404 [("Content-Type", "text/plain")] "404 - Not Found"
