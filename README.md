@@ -1,4 +1,4 @@
-# [HYLOGEN.COM](http://hylogen.com)
+# *web app for [HYLOGEN](http://hylogen.com)*
 
 For [hylogen](https://github.com/sleexyz/hylogen), a tiny haskell EDSL for live-coding fragment shaders.
 
@@ -11,3 +11,8 @@ For [hylogen](https://github.com/sleexyz/hylogen), a tiny haskell EDSL for live-
 ...
 
 ```
+
+Site for a local hylogen server: `localhost:8081`
+
+Site for hylogen.com: `localhost:8082`
+
