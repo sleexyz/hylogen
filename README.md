@@ -1,6 +1,6 @@
 # *web app for [HYLOGEN](http://hylogen.com)*
 
-For [hylogen](https://github.com/sleexyz/hylogen), a tiny haskell EDSL for live-coding fragment shaders.
+For [hylogen](https://github.com/sleexyz/hylogen), a Haskell EDSL for live-coding fragment shaders.
 
 
 ```
