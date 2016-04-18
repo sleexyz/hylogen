@@ -1,1 +1,1 @@
-aws s3 sync --delete ./dist s3://hylogen.com
+aws s3 sync --delete ./dist-public s3://hylogen.com
