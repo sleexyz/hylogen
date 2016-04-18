@@ -1,5 +1,5 @@
 {
-  "name": "hylogen-server",
+  "name": "hylogen-app",
   "version": "1.0.0",
   "description": "web application for hylogen, an EDSL for writing shaders in Haskell for live-coding",
   "scripts": {
