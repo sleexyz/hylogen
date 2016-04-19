@@ -1,7 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom";
 
-import Program from "./Program.jsx";
+import Program from "./Program";
+import Audio from "./Audio";
 
 const initialFsSource = `
 void main() {
@@ -39,25 +40,17 @@ const App = React.createClass({
   },
   render: function() {
     return (
-      <div>
         <Program startAnimating={true}
                  fsSource={this.state.fsSource}/>
-      </div>
     );
   }
 });
 
 ReactDOM.render(<App/>, document.getElementById("entry"));
+Audio.initializeAudioUserMedia();
+
 
 
 
 // TODO: add hylogen landing screen
-
-
-// function fadeOut(elem) {
-//   elem.className =  "removing";
-//   window.setTimeout(function() {
-//     elem.remove();
-//   }, 1000);
-// }
-
+// TODO:

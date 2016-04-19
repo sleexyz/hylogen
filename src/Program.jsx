@@ -1,5 +1,6 @@
 import React, {PropTypes} from "react";
 import ReactDOM from "react-dom";
+import Audio from "./Audio";
 
 
 const vsSource = ` attribute vec3 aPosition;
@@ -20,14 +21,6 @@ varying vec2 uvN;
 vec2 uv() {
   return 0.5 * uvN  + 0.5;
 }`;
-
-
-
-
-
-
-// stateful variables
-
 
 export default React.createClass({
   propTypes: {
@@ -54,6 +47,7 @@ export default React.createClass({
     state.bit = 0;
     state.fb = [null, null];
     state.time0 = new Date() / 1000;
+    state.audioCallback = null;
 
 
     function setMouse (event) {
@@ -69,69 +63,13 @@ export default React.createClass({
 
 
     state.audio = {low: 0.0, mid: 0.0, upper: 0.0, high: 0.0};
-    state.audioAgain = null;
 
-    function onAccept (stream) {
-      var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      var source = audioCtx.createMediaStreamSource(stream);
-      var analyser = audioCtx.createAnalyser();
-      source.connect(analyser);
-
-      analyser.fftSize = 512;
-      var bufferLength = analyser.frequencyBinCount;
-      var dataArray = new Uint8Array(bufferLength);
-
-
-      function toAudio() {
-        state.audioAgain = requestAnimationFrame(toAudio);
-        analyser.getByteFrequencyData(dataArray);
-
-        // Taken from The_Force
-        var k = 0, f = 0.0;
-        var a = 5, b = 11, c = 24, d = bufferLength, i = 0;
-
-        for(; i < a; i++) {
-          f += dataArray[i];
-        }
-
-        f *= .2; // 1/(a-0)
-        f *= .003921569; // 1/255
-        state.audio.low = f;
-
-        f = 0.0;
-        for(; i < b; i++) {
-          f += dataArray[i];
-        }
-
-        f *= .166666667; // 1/(b-a)
-        f *= .003921569; // 1/255
-        state.audio.mid = f;
-
-        f = 0.0;
-        for(; i < c; i++) {
-          f += dataArray[i];
-        }
-
-        f *= .076923077; // 1/(c-b)
-        f *= .003921569; // 1/255
-        state.audio.upper = f;
-
-        f = 0.0;
-        for(; i < d; i++) {
-          f += dataArray[i];
-        }
-        f *= .00204918; // 1/(d-c)
-        f *= .003921569; // 1/255
-        state.audio.high = f;
-      };
-
-      toAudio();
-    }
-    function onFail(e) {
-      console.error(e);
-    }
-    navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
-    navigator.getUserMedia({audio: true}, onAccept, onFail);
+    state.audioCallback = Audio.addCallback(function(bands) {
+      state.audio.low = bands.low;
+      state.audio.mid = bands.mid;
+      state.audio.upper = bands.upper;
+      state.audio.high = bands.high;
+    });
 
     this.loadProgram();
   },
@@ -277,6 +215,7 @@ export default React.createClass({
   },
   componentWillUnmount() {
     cancelAnimationFrame(this.state_.animationFrameRequest);
+    Audio.removeCallback(this.state_.audioCallback);
   },
   render() {
 
@@ -284,9 +223,7 @@ export default React.createClass({
       <canvas ref={(ref) => this.canvas = ref}
               className={"program"}
               width={this.props.width}
-              height={this.props.height}>
-        Insert webgl here!
-      </canvas>
+              height={this.props.height}/>
     );
   }
 });
