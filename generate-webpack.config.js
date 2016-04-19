@@ -24,9 +24,20 @@ module.exports = function (entryPath, outputPath, portNum) {
       publicPath: "http://localhost:" + portNum + "/"
       // publicPath: "http://localhost:8081/"
     },
-
+    module: {
+      loaders: [
+        {
+          test: /\.jsx?$/,
+          exclude: /(node_modules|bower_components)/,
+          loader: 'babel',
+          query: {
+            presets: ['es2015']
+          }
+        }
+      ]
+    },
     resolve: {
-      extensions: ["", ".js"]
+      extensions: ["", ".js", ".jsx"]
     },
     entry: entry,
     plugins: plugins,
