@@ -7,7 +7,7 @@ import Audio from "./Audio";
 
 const initialFsSource = `
 void main() {
-  gl_FragColor = vec4(sin(time) * 0.5 + 0.5, 1.0, 1.0, 1.0);
+  gl_FragColor = vec4(audio.x, 1.0, 1.0, 1.0);
 }
 `;
 
@@ -21,18 +21,18 @@ const App = React.createClass({
         <div className="page grad"/>
         <div className="text">
           <p>
-            <a href="https://github.com/sleexyz/hylogen"><i className="cool">hylogen</i></a> is domain-specific language embedded in Haskell for writing fragment shaders.
-          </p>
-          <br/>
-          <p>
-            It is designed to be
-          </p>
-          <ul>
-            <li>easy, concise, and ergonomic for live coding</li>
-            <li>close to both GLSL and plain Haskell</li>
-          </ul>
+        <i className="cool">Hylogen</i> is a domain-specific language embedded in Haskell for writing fragment shaders, designed to be ergonomic for live coding.
+        </p>
+
+        <br/>
+        <p className="right">
+        [<a href="https://github.com/sleexyz/hylogen">github</a>]
+        </p>
+        <p className="right">
+        [<a href="https://hackage.haskell.org/package/hylogen">hackage</a>]
+      </p>
         </div>
-        <div id="ProgramContainer">
+        <div className="programContainer">
           <Program startAnimating={true}
                   fsSource={initialFsSource}/>
         </div>
