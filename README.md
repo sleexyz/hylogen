@@ -12,7 +12,7 @@ For [hylogen](https://github.com/sleexyz/hylogen), a Haskell EDSL for live-codin
 
 ```
 
-Site for a local hylogen server: `localhost:8081`
+Site for a local hylogen server: [`localhost:8081`](http://localhost:8081)
 
-Site for hylogen.com: `localhost:8082`
+Site for hylogen.com: [`localhost:8082`](http://localhost:8081)
 
