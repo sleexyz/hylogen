@@ -1,23 +1,34 @@
+var SoundCloudAudio = require("soundcloud-audio");
+
 let idCounter = 0;
 let callbacks = [];
 
+let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+let analyser = audioCtx.createAnalyser();
+let source = null;
+
+analyser.fftSize = 512;
+let bufferLength = analyser.frequencyBinCount;
+let dataArray = new Uint8Array(bufferLength);
+let audioAgain = null;
+let bands = {low: 0.0, mid: 0.0, upper: 0.0, high: 0.0};
 
 
-function onAccept (stream) {
-  let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  let source = audioCtx.createMediaStreamSource(stream);
-  let analyser = audioCtx.createAnalyser();
+let scPlayer = null;
+
+let keepPlaying = true;
+
+let cleanup = function() {
+  console.log("Nothing to clean up!");
+};
+
+function onAccept () {
   source.connect(analyser);
 
-  analyser.fftSize = 512;
-  let bufferLength = analyser.frequencyBinCount;
-  let dataArray = new Uint8Array(bufferLength);
-  let audioAgain = null;
-  let bands = {low: 0.0, mid: 0.0, upper: 0.0, high: 0.0};
-
-
   function toAudio() {
-    audioAgain = requestAnimationFrame(toAudio);
+    if (keepPlaying) {
+      audioAgain = requestAnimationFrame(toAudio);
+    }
     analyser.getByteFrequencyData(dataArray);
 
     // Taken from The_Force
@@ -62,24 +73,50 @@ function onAccept (stream) {
       callbacks[i](bands);
     }
   };
-
-
   toAudio();
 }
 
 
 export default {
   initializeAudioUserMedia: function() {
+    cleanup();
+    keepPlaying = true;
 
     navigator.getUserMedia = navigator.getUserMedia
       || navigator.webkitGetUserMedia
       || navigator.mozGetUserMedia
       || navigator.msGetUserMedia;
 
-    navigator.getUserMedia({audio: true}, onAccept, (e) => {console.error(e);});
+    navigator.getUserMedia({audio: true}, function(stream) {
+      source = audioCtx.createMediaStreamSource(stream);
+      onAccept();
+    }, (e) => {console.error(e);});
+    cleanup = function() {
+      keepPlaying = false;
+      source.disconnect(analyser);
+    };
   },
-  initializeAudioSoundcloud: function() {
-    //TODO: implement
+  initializeAudioSoundCloud: function() {
+    cleanup();
+    keepPlaying = true;
+
+    let scPlayer = this.scPlayer = new SoundCloudAudio("4c869ec7222590da0f39838b2cd86740");
+    scPlayer.audio.crossOrigin = "anonymous";
+
+    let url = "https://soundcloud.com/aslamin/strannoe-chuvstvo";
+    scPlayer.resolve(url, function(track) {
+      console.log(track);
+    });
+
+    source = audioCtx.createMediaElementSource(scPlayer.audio);
+    source.connect(audioCtx.destination);
+    onAccept();
+
+    cleanup = function() {
+      keepPlaying = false;
+      scPlayer.stop();
+      source.disconnect(analyser);
+    };
   },
   addCallback: function(fn) {
     let i = idCounter;

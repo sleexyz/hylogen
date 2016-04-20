@@ -15,10 +15,14 @@
     "file-loader": "^0.8.5",
     "react": "^15.0.1",
     "react-dom": "^15.0.1",
+    "soundcloud-audio": "^1.0.0",
     "webpack": "^2.1.0-beta.5",
     "webpack-dev-middleware": "^1.6.1",
     "webpack-dev-server": "^1.14.1",
     "webpack-glsl-loader": "^1.0.1",
     "webpack-hot-middleware": "^2.10.0"
+  },
+  "dependencies": {
+    "react-soundplayer": "^0.3.4"
   }
 }

@@ -13,6 +13,25 @@
          letter-spacing: 0.1em;
      }
      .programContainer {
+         position: relative;
+         height: 100vh;
+     }
+     .audioControls {
+         position: absolute;
+         display: flex;
+         bottom: 0;
+         left: 0;
+         z-index: 10;
+         color: white;
+         background: rgba(0, 0, 0, 0.7);
+         padding: 10px;
+     }
+     .audioControls > div {
+         padding-left: 20px;
+         width: 30vw;
+     }
+     .programContainerInner {
+         position: absolute;
          display: flex;
          justify-content: center;
          align-items: center;
@@ -56,6 +75,26 @@
          color: #333333;
          line-height: 1.5em;
      }
+     .scPlayer {
+         display: flex;
+         justify-content: center;
+         align-items: center;
+     }
+     .sb-soundplayer-progress-container {
+         background-color: #DDD;
+         width: 100%;
+         height: 10px;
+         overflow: hidden;
+         cursor: pointer;
+     }
+
+     .sb-soundplayer-progress-inner {
+         background-color: #ff88ee;
+         height: 100%;
+         -webkit-transition: width .2s ease-in;
+                 transition: width .2s ease-in;
+     }
+
      .text p, .text ul {
          width: 80vw;
      }
