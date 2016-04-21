@@ -23,10 +23,10 @@ function runServer(entryPath, outputPath, publicPath, portNum) {
 
   app.use(hot(compiler));
 
-  app.use(express.static(outputPath));
-  // app.get("/", function(req, res) {
-  //   res.sendFile(path.join(__dirname, outputPath + "/index.html"));
-  // });
+  // app.use(express.static(outputPath));
+  app.get("/", function(req, res) {
+    res.sendFile(path.join(__dirname, outputPath + "/index.html"));
+  });
 
   app.listen(portNum, "localhost", function (err) {
     if(err) {
@@ -36,5 +36,5 @@ function runServer(entryPath, outputPath, publicPath, portNum) {
   });
 }
 
-runServer("./src/local.js", "dist-local", "http://localhost:8081", 8081);
-runServer("./src/public.js", "dist-public", "http://localhost:8082", 8082);
+runServer("./src/local.js", "dist-local", "http://localhost:8081/", 8081);
+runServer("./src/public.js", "dist-public", "http://localhost:8082/", 8082);

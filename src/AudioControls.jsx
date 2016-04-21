@@ -68,7 +68,7 @@ const SC = React.createClass({
     }.bind(this));
   },
   render: function() {
-    let buttonVal = this.state.playing ? "[⏸]" : "[▶]";
+    let buttonVal = this.state.playing ? "[||]" : "[|>]";
     return (
         <div className="scPlayer">
         <div className="inputPicker row"
