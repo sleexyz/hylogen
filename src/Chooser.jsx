@@ -15,12 +15,12 @@ export default React.createClass({
   },
   next: function() {
     this.setState((prev) => {
-      return (prev + 1) % fsSources.length;
+      return {i: (prev.i + 1) % this.props.fsSources.length};
     });
   },
   prev: function() {
     this.setState((prev) => {
-      return (prev - 1) % fsSources.length;
+      return {i: (prev.i - 1) % this.props.fsSources.length};
     });
   },
   render: function() {
@@ -28,9 +28,10 @@ export default React.createClass({
 
     return (
       <div className="programContainer">
-        <div className="programContainerInner">
+        <div className="programContainerInner"
+             onClick={this.next}>
           <Program startAnimating={true}
-                    fsSource={source}/>
+                   fsSource={source}/>
         </div>
         {this.props.children}
       </div>

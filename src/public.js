@@ -6,11 +6,7 @@ import Chooser from "./Chooser";
 import Audio from "./Audio";
 import AudioControls from "./AudioControls.jsx";
 
-const sources=[`
-void main() {
-    gl_FragColor = ( (true && (abs((uvN.x + (-(1.0 / 100.0)))) < (1.0 / 100.0))) ? vec4(fract(((audio.z * uv().y) * 4.0)),fract(((audio.z * uv().y) * 4.0)),fract(((audio.z * uv().y) * 4.0)),1.0) : texture2D(backBuffer, ((vec2(((cos((audio.x * 2.0e-2)) * (vec2(vec2(abs(uvN.x),uvN.y).x,(vec2(abs(uvN.x),uvN.y).y * (0.8 * pow((1.1 / 0.8), ((audio.x + (-0.0)) / (1.0 + (-0.0))))))) + (-vec2(((1.0 / 100.0) * sign(uvN.x)),0.0))).x) + (sin((audio.x * 2.0e-2)) * (vec2(vec2(abs(uvN.x),uvN.y).x,(vec2(abs(uvN.x),uvN.y).y * (0.8 * pow((1.1 / 0.8), ((audio.x + (-0.0)) / (1.0 + (-0.0))))))) + (-vec2(((1.0 / 100.0) * sign(uvN.x)),0.0))).y)),((((-1.0) * sin((audio.x * 2.0e-2))) * (vec2(vec2(abs(uvN.x),uvN.y).x,(vec2(abs(uvN.x),uvN.y).y * (0.8 * pow((1.1 / 0.8), ((audio.x + (-0.0)) / (1.0 + (-0.0))))))) + (-vec2(((1.0 / 100.0) * sign(uvN.x)),0.0))).x) + (cos((audio.x * 2.0e-2)) * (vec2(vec2(abs(uvN.x),uvN.y).x,(vec2(abs(uvN.x),uvN.y).y * (0.8 * pow((1.1 / 0.8), ((audio.x + (-0.0)) / (1.0 + (-0.0))))))) + (-vec2(((1.0 / 100.0) * sign(uvN.x)),0.0))).y))) * vec2(0.5,0.5)) + vec2(0.5,0.5))));
-}
-`];
+import sources from "./Sources";
 
 
 
