@@ -96,14 +96,13 @@ export default {
       source.disconnect(analyser);
     };
   },
-  initializeAudioSoundCloud: function() {
+  initializeAudioSoundCloud: function(url) {
     cleanup();
     keepPlaying = true;
 
     let scPlayer = this.scPlayer = new SoundCloudAudio("4c869ec7222590da0f39838b2cd86740");
     scPlayer.audio.crossOrigin = "anonymous";
 
-    let url = "https://soundcloud.com/aslamin/strannoe-chuvstvo";
     scPlayer.resolve(url, function(track) {
       console.log(track);
     });

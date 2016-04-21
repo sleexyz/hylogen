@@ -10,25 +10,56 @@
          padding: 0;
          overflow-x: hidden;
          font-family: monospace, Courier New;
+         font-size: 12px;
          letter-spacing: 0.1em;
      }
      .programContainer {
          position: relative;
          height: 100vh;
+         overflow:hidden;
+         /* display: flex; */
+         /* justify-content: center; */
+         /* align-items: center; */
+     }
+     .inputPicker {
+         color: #DDD;
      }
      .audioControls {
-         position: absolute;
+         position: fixed;
          display: flex;
          bottom: 0;
          left: 0;
          z-index: 10;
          color: white;
-         background: rgba(0, 0, 0, 0.7);
-         padding: 10px;
+         background: rgba(0, 0, 0, 0.2);
+         width: 100vw;
+         height: auto;
      }
      .audioControls > div {
-         padding-left: 20px;
          width: 30vw;
+         margin: 1em;
+     }
+     input {
+         font-family: inherit;
+         background: none;
+         border: none;
+         color: white;
+     }
+     button {
+         font-family: inherit;
+         background: none;
+         border: none;
+         color: white;
+         padding-left: 2em;
+     }
+     .scPlayer {
+
+     }
+     .row {
+         display: flex;
+         margin-top: 0.5em;
+         justify-content: center;
+         align-items: center;
      }
      .programContainerInner {
          position: absolute;
@@ -74,11 +105,6 @@
          /* text-transform: uppercase; */
          color: #333333;
          line-height: 1.5em;
-     }
-     .scPlayer {
-         display: flex;
-         justify-content: center;
-         align-items: center;
      }
      .sb-soundplayer-progress-container {
          background-color: #DDD;

@@ -8,21 +8,27 @@ import Audio from "./Audio";
 
 const SC = React.createClass({
   getInitialState() {
+    console.log(localStorage.getItem("scurl"));
+    let defaulturl = localStorage.getItem("scurl")
+                  || "https://soundcloud.com/herzeloyde/deception"
+                  || "https://soundcloud.com/aslamin/strannoe-chuvstvo";
     return {
       playing: false,
-      val: 0
+      val: 0,
+      url: defaulturl
     };
   },
   componentWillMount() {
-    Audio.initializeAudioSoundCloud();
+    Audio.initializeAudioSoundCloud(this.state.url);
+    console.log(this.state.url);
     console.log(Audio.scPlayer);
     this.scPlayer = Audio.scPlayer;
-    this.update();
+    this.startUpdating();
   },
   componentWillUpdate(nprops, nstate) {
     if (nstate.playing !== this.state.playing){
       if (nstate.playing) {
-        this.update();
+        this.startUpdating();
         this.scPlayer.play();
       } else {
         window.clearTimeout(this.intervalId);
@@ -34,10 +40,11 @@ const SC = React.createClass({
     this.setState((prev) => {return {playing: !prev.playing};});
   },
   update() {
-    this.intervalId = window.setInterval(() => {
-      let val = this.scPlayer.audio.currentTime/(this.scPlayer.duration / 100);
-      this.setState({val: val});
-    }, 1000);
+    let val = this.scPlayer.audio.currentTime/(this.scPlayer.duration / 100);
+    this.setState({val: val});
+  },
+  startUpdating() {
+    this.intervalId = window.setInterval(this.update, 1000);
   },
   componentWillUnmount() {
     window.clearTimeout(this.intervalId);
@@ -46,16 +53,39 @@ const SC = React.createClass({
     console.log(e);
     console.log(e.offsetX);
   },
+  onUrlChange(e) {
+    this.setState({url: e.currentTarget.value});
+  },
+  onSubmit(e) {
+    e.preventDefault();
+    localStorage.setItem("scurl", this.state.url);
+    this.scPlayer.resolve(this.state.url, function(track) {
+      console.log(track);
+      this.setState({playing: false}, function() {
+        console.log("callback");
+        this.setState({playing: true});
+      }.bind(this));
+    }.bind(this));
+  },
   render: function() {
     let buttonVal = this.state.playing ? "[⏸]" : "[▶]";
     return (
-      <div className="scPlayer">
-        <span onClick={this.togglePlay}> {buttonVal}</span>
-        {/* <Progress value={this.state.pos} onSeekTrack={onSeekTrack}/> */}
-        <Progress innerStyle={{}}
-                  soundCloudAudio={this.scPlayer}
-                  value={this.state.val}/>
-      </div>
+        <div className="scPlayer">
+        <div className="inputPicker row"
+                      onClick={this.update} >
+            <span onClick={this.togglePlay}> {buttonVal}</span>
+            <Progress innerStyle={{}}
+                      soundCloudAudio={this.scPlayer}
+                      value={this.state.val}/>
+          </div>
+          <div className="row">
+            <form onSubmit={this.onSubmit}>
+              <input value={this.state.url}
+                    onChange={this.onUrlChange}/>
+              <button onClick={this.onSubmit}>submit</button>
+            </form>
+          </div>
+        </div>
     );
   }
 });
@@ -95,12 +125,12 @@ export default React.createClass({
       <div className="audioControls">
         <div>
           <br/>
-          Soundcloud: <input type="radio"
+          soundcloud: <input type="radio"
                  checked={this.state.state === "sc"}
                  value="sc"
                  onChange={this.onChange}/>
           <br/>
-          Microphone: <input type="radio"
+          microphone: <input type="radio"
                  checked={this.state.state === "usermedia"}
                  value="usermedia"
                  onChange={this.onChange}/>
