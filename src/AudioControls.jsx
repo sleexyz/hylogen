@@ -10,6 +10,7 @@ const SC = React.createClass({
   getInitialState() {
     console.log(localStorage.getItem("scurl"));
     let defaulturl = localStorage.getItem("scurl")
+                  || "https://soundcloud.com/tennysonmusic/angus-julia-stone-for-you"
                   || "https://soundcloud.com/herzeloyde/deception"
                   || "https://soundcloud.com/aslamin/strannoe-chuvstvo";
     return {
@@ -44,7 +45,7 @@ const SC = React.createClass({
     this.setState({val: val});
   },
   startUpdating() {
-    this.intervalId = window.setInterval(this.update, 1000);
+    this.intervalId = window.setInterval(this.update, 100);
   },
   componentWillUnmount() {
     window.clearTimeout(this.intervalId);
@@ -71,7 +72,7 @@ const SC = React.createClass({
     let buttonVal = this.state.playing ? "[||]" : "[|>]";
     return (
         <div className="scPlayer">
-        <div className="inputPicker row"
+        <div className="row"
                       onClick={this.update} >
             <span onClick={this.togglePlay}> {buttonVal}</span>
             <Progress innerStyle={{}}
@@ -81,6 +82,7 @@ const SC = React.createClass({
           <div className="row">
             <form onSubmit={this.onSubmit}>
               <input value={this.state.url}
+                     style={{width: "40vw"}}
                     onChange={this.onUrlChange}/>
               <button onClick={this.onSubmit}>submit</button>
             </form>
@@ -123,7 +125,7 @@ export default React.createClass({
 
     return (
       <div className="audioControls">
-        <div>
+        <div className="inputPicker">
           <br/>
           soundcloud: <input type="radio"
                  checked={this.state.state === "sc"}
