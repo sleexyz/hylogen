@@ -10,9 +10,9 @@ const hot = require("webpack-hot-middleware");
 
 
 
-function runServer(entryPath, outputPath, portNum) {
+function runServer(entryPath, outputPath, publicPath, portNum) {
   const app = express();
-  const config = generateConfig(entryPath, outputPath, portNum);
+  const config = generateConfig(entryPath, outputPath, publicPath, false);
 
   const compiler = webpack(config);
 
@@ -36,5 +36,5 @@ function runServer(entryPath, outputPath, portNum) {
   });
 }
 
-runServer("./src/local.js", "dist-local", 8081);
-runServer("./src/public.js", "dist-public", 8082);
+runServer("./src/local.js", "dist-local", "http://localhost:8081", 8081);
+runServer("./src/public.js", "dist-public", "http://localhost:8082", 8082);

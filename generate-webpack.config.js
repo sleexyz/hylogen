@@ -1,28 +1,34 @@
 var webpack = require("webpack");
 var path = require("path");
 
-module.exports = function (entryPath, outputPath, portNum) {
+module.exports = function (entryPath, outputPath, publicPath, isProd) {
+  var entry =  isProd
+        ? [
+          entryPath,
+        ]
+        : [
+          "webpack-hot-middleware/client",
+          entryPath
+        ];
 
-  var entry = [
-    "webpack-hot-middleware/client",
-    entryPath  
-    // "./src/local.js"
-  ];
 
-
-  var plugins = [
-    new webpack.HotModuleReplacementPlugin(),
-    new webpack.NoErrorsPlugin()
-  ];
+  var plugins = isProd
+        ? [
+          new webpack.optimize.UglifyJsPlugin({compressor: {warnings: false}}),
+          new webpack.optimize.DedupePlugin(),
+          new webpack.NoErrorsPlugin()
+        ]
+        : [
+          new webpack.HotModuleReplacementPlugin(),
+          new webpack.NoErrorsPlugin()
+        ];
 
 
   return {
     output: {
       path: path.join(__dirname, outputPath),
-      // path: path.join(__dirname, "local/"),
       filename: "bundle.js",
-      publicPath: "http://localhost:" + portNum + "/"
-      // publicPath: "http://localhost:8081/"
+      publicPath: publicPath
     },
     module: {
       loaders: [
@@ -41,7 +47,7 @@ module.exports = function (entryPath, outputPath, portNum) {
     },
     entry: entry,
     plugins: plugins,
-    devtool: "cheap-module-eval-source-map"
+    devtool: isProd ? null : "cheap-module-eval-source-map"
   };
 }
 
