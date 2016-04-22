@@ -7,6 +7,14 @@ import Audio from "./Audio";
 
 
 const SC = React.createClass({
+  propTypes: {
+    initPlaying: PropTypes.bool
+  },
+  getDefaultProps() {
+    return {
+      initPlaying: false
+    };
+  },
   getInitialState() {
     console.log(localStorage.getItem("scurl"));
     let defaulturl = localStorage.getItem("scurl")
@@ -15,26 +23,38 @@ const SC = React.createClass({
                   || "https://soundcloud.com/herzeloyde/deception"
                   || "https://soundcloud.com/aslamin/strannoe-chuvstvo";
     return {
-      playing: false,
+      playing: this.props.initPlaying,
       val: 0,
       url: defaulturl
     };
   },
+  startPlaying() {
+    this.startUpdating();
+    this.scPlayer.play();
+  },
+  stopPlaying() {
+    console.log("clearing ", this.intervalId);
+    window.clearTimeout(this.intervalId);
+    this.scPlayer.pause();
+  },
   componentWillMount() {
-    Audio.initializeAudioSoundCloud(this.state.url);
+    console.log(this.props.initPlaying);
+    Audio.initializeAudioSoundCloud(this.state.url, this.props.initPlaying);
     console.log(this.state.url);
     console.log(Audio.scPlayer);
     this.scPlayer = Audio.scPlayer;
-    this.startUpdating();
+  },
+  componentDidMount() {
+    if (this.props.initPlaying) {
+      this.startUpdating();
+    }
   },
   componentWillUpdate(nprops, nstate) {
     if (nstate.playing !== this.state.playing){
       if (nstate.playing) {
-        this.startUpdating();
-        this.scPlayer.play();
+        this.startPlaying();
       } else {
-        window.clearTimeout(this.intervalId);
-        this.scPlayer.pause();
+        this.stopPlaying();
       }
     }
   },
@@ -47,8 +67,10 @@ const SC = React.createClass({
   },
   startUpdating() {
     this.intervalId = window.setInterval(this.update, 100);
+    console.log("made new interval:", this.intervalId);
   },
   componentWillUnmount() {
+    console.log("clearing: ", this.intervalId);
     window.clearTimeout(this.intervalId);
   },
   seek(e) {

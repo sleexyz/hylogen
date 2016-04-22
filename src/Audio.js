@@ -96,7 +96,7 @@ export default {
       source.disconnect(analyser);
     };
   },
-  initializeAudioSoundCloud: function(url) {
+  initializeAudioSoundCloud: function(url, initPlaying) {
     cleanup();
     keepPlaying = true;
 
@@ -105,6 +105,9 @@ export default {
 
     scPlayer.resolve(url, function(track) {
       console.log(track);
+      if (initPlaying) {
+        scPlayer.play();
+      }
     });
 
     source = audioCtx.createMediaElementSource(scPlayer.audio);
