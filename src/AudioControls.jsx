@@ -96,7 +96,12 @@ const SC = React.createClass({
     return (
         <div className="scPlayer">
         <div className="row"
-                      onClick={this.update} >
+             onClick={() => {
+                 if (!this.state.playing) {
+                   this.startPlaying();
+                 }
+                 this.update();
+               }} >
             <button onClick={this.togglePlay}> {buttonVal}</button>
             <Progress innerStyle={{}}
                       soundCloudAudio={this.scPlayer}
