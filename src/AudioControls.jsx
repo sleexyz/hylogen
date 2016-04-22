@@ -70,12 +70,12 @@ const SC = React.createClass({
     }.bind(this));
   },
   render: function() {
-    let buttonVal = this.state.playing ? "[||]" : "[|>]";
+    let buttonVal = this.state.playing ? "[pause]" : "[play]";
     return (
         <div className="scPlayer">
         <div className="row"
                       onClick={this.update} >
-            <span onClick={this.togglePlay}> {buttonVal}</span>
+            <button onClick={this.togglePlay}> {buttonVal}</button>
             <Progress innerStyle={{}}
                       soundCloudAudio={this.scPlayer}
                       value={this.state.val}/>
@@ -107,17 +107,21 @@ const UserMedia = React.createClass({
 export default React.createClass({
   getInitialState: function() {
     return {
-      state: "sc"
+      state: "sc",
+      initPlaying: false
     };
   },
   onChange(e) {
     this.setState({
-      state: e.currentTarget.value
+      state: e.currentTarget.value,
+      initPlaying: true
     });
   },
   render() {
 
-    let component = React.createElement(this.state.state === "sc" ? SC : UserMedia);
+    let component = this.state.state === "sc"
+                  ? <SC initPlaying={this.state.initPlaying}/>
+                  : <UserMedia/>;
 
     let onChanged = function(e) {
       console.log(e);

@@ -42,11 +42,12 @@
          bottom: 0;
          left: 0;
          z-index: 10;
-         color: white;
+         color: rgba(255, 255, 255, 0.7);
          background: rgba(0, 0, 0, 0.2);
          width: 100vw;
          height: auto;
          pointer-events: all;
+         /* mix-blend-mode: screen; */
      }
      input {
          font-family: inherit;
@@ -54,12 +55,20 @@
          border: none;
          color: rgba(255, 255, 255, 0.7);
      }
+     input:hover {
+         background: rgba(255, 255, 255, 0.5);
+     }
+     input[type="radio"] {
+         opacity: 0.5;
+     }
      button {
          font-family: inherit;
          background: none;
          border: none;
          color: rgba(255, 255, 255, 0.7);
-         margin-left: 2em;
+     }
+     button:hover {
+         background: rgba(255, 255, 255, 0.5);
      }
      .scPlayer {
          width: 60vw;
@@ -101,7 +110,7 @@
          position: fixed;
          z-index: 20;
          bottom: 2em;
-         right: 5vw;
+         right: 0;
          color: rgba(255, 255, 255, 0.7);
      }
 

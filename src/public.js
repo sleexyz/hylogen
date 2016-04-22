@@ -51,8 +51,8 @@ const App = React.createClass({
         </div>
         <div className="page trans"> </div>
         <div className="page trans"> </div>
-        <div className="chooserNextButton"
-              onClick={this.next}> next vis</div>
+        <button className="chooserNextButton"
+              onClick={this.next}> next vis</button>
         <div className="programContainer">
         <div className="programContainerInner">
         <Program startAnimating={true}
