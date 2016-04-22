@@ -10,6 +10,7 @@ const SC = React.createClass({
   getInitialState() {
     console.log(localStorage.getItem("scurl"));
     let defaulturl = localStorage.getItem("scurl")
+                  || "https://soundcloud.com/tennysonmusic/xyz"
                   || "https://soundcloud.com/tennysonmusic/angus-julia-stone-for-you"
                   || "https://soundcloud.com/herzeloyde/deception"
                   || "https://soundcloud.com/aslamin/strannoe-chuvstvo";
@@ -84,7 +85,6 @@ const SC = React.createClass({
               <input value={this.state.url}
                      style={{width: "40vw"}}
                     onChange={this.onUrlChange}/>
-              <button onClick={this.onSubmit}>submit</button>
             </form>
           </div>
         </div>

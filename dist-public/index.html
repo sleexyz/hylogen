@@ -13,12 +13,23 @@
          font-size: 12px;
          letter-spacing: 0.1em;
      }
+     #entry {
+         position: relative;
+     }
      .programContainer {
+         position: fixed;
+         top: 0;
+         left: 0;
          height: 100vh;
          overflow:hidden;
          display: flex;
          justify-content: center;
          align-items: center;
+         z-index: -1;
+     }
+     #back {
+         position: fixed;
+         left: 0;
      }
      .inputPicker {
          color: rgba(255, 255, 255, 0.5);
@@ -35,6 +46,7 @@
          background: rgba(0, 0, 0, 0.2);
          width: 100vw;
          height: auto;
+         pointer-events: all;
      }
      input {
          font-family: inherit;
@@ -63,6 +75,7 @@
          display: flex;
          justify-content: center;
          align-items: center;
+         z-index: -1;
      }
      .program {
          width: 100vmax;
@@ -70,7 +83,9 @@
      }
 
      #banner {
-         background: black;
+         position: absolute;
+         background: none;
+         pointer-events: none;
          width: 100%;
          height: 100vh;
          color: white;
@@ -79,6 +94,15 @@
          align-items: center;
          margin: 0;
          padding: 0;
+         pointer-events: none;
+         z-index: 0;
+     }
+     .chooserNextButton {
+         position: fixed;
+         z-index: 20;
+         bottom: 2em;
+         right: 5vw;
+         color: rgba(255, 255, 255, 0.7);
      }
 
      #title {
@@ -94,14 +118,14 @@
      .text {
          width: 100%;
          height: auto;
-         padding: 0;
-         margin: 5vw;
+         padding: 5vw;
          font-size: 30px;
          word-wrap: normal;
          color: black;
          /* text-transform: uppercase; */
          color: #333333;
          line-height: 1.5em;
+         background: white;
      }
      .sb-soundplayer-progress-container {
          background-color: rgba(255, 255, 255, 0.2);
@@ -138,14 +162,22 @@
      }
      .page {
          width: 100%;
-         height: 100vh;
+         height: 50vh;
          margin: 0;
          display: flex;
          justify-content: center;
          align-items: center;
+         background: white;
+     }
+     .trans {
+         pointer-events: none;
+         background: none;
      }
      .grad {
-         background: linear-gradient(to bottom, black,white);
+         background: linear-gradient(to bottom, rgba(0, 0, 0, 0),white);
+     }
+     .gradRev {
+         background: linear-gradient(to top, rgba(0, 0, 0, 0),white);
      }
     </style>
   </head>
