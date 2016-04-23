@@ -59,14 +59,14 @@ serveIndex :: IO ()
 serveIndex = do
   let port = 5678
   htmlString <- readFile =<< getDataFileName "web/index.html"
-  jsString <- readFile =<< getDataFileName "web/entry.js"
+  jsString <- readFile =<< getDataFileName "web/bundle.js"
   run port $ app htmlString jsString
 
 
 app :: String -> String -> Application
 app htmlString jsString req respond = respond $
   case pathInfo req of
-    ["entry.js"] -> serveJS jsString
+    ["bundle.js"] -> serveJS jsString
     []           -> serveHTML htmlString
     _            -> error404
 

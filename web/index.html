@@ -10,38 +10,42 @@
          padding: 0;
          overflow: hidden;
      }
-     body {
+     div {
+         margin: 0;
+         padding: 0;
+     }
+     #entry {
+         width: 100%;
+         height: 100%;
+         margin: 0;
+         padding: 0;
          display: flex;
          justify-content: center;
          align-items: center;
+         font-family: "Lucida Sans Typewriter", "Lucida Sans", "Andale Mono", AndaleMono, monospace;
+         font-size: 12px;
      }
-     #canvas {
+     .program {
          width: 100vmax;
          height: 100vmax;
-         background: white;
      }
-     #landing {
-         width: 100vw;
-         height: 100vh;
+
+     #banner {
          position: fixed;
-         right: 0;
+         background: none;
+         pointer-events: none;
+         left: 0;
          top: 0;
-         color: white;
+         width: 100%;
+         height: 100vh;
+         color: rgba(255, 255, 255, 1);
          display: flex;
          justify-content: center;
          align-items: center;
-         font-family: arial;
-         line-height: 10em;
+         margin: 0;
+         padding: 0;
          pointer-events: none;
-     }
-     #bg {
-         background: black;
-         width: 100vw;
-         height: 100vh;
-         position: fixed;
-         right: 0;
-         top: 0;
-         pointer-events: none;
+         z-index: 0;
      }
 
      #title {
@@ -50,40 +54,118 @@
          font-weight: bold;
          font-size: 15vw;
          letter-spacing: 0.1em;
-         text-shadow: 0 0 0.2em white;
-         pointer-events: auto;
+         text-shadow: 0 0 0.2em rgba(255, 255, 255, 1);
+         font-family: arial;
      }
-     @keyframes fadeOut {
-         0% {opacity: 1;}
-         100% {opacity: 0;} 
-     } 
-     .removing {
-         -webkit-animation: fadeOut 1000ms;
-         -moz-animation: fadeOut 1000ms;
-         animation: fadeOut 1000ms;
+
+
+
+
+     .inputPicker {
+         color: rgba(255, 255, 255, 0.5);
+         width:20vw;
+         margin: 1em;
+     }
+
+     .audioControls {
+         position: fixed;
+         display: flex;
+         bottom: 0;
+         left: 0;
+         z-index: 10;
+         color: rgba(255, 255, 255, 0.7);
+         background: rgba(0, 0, 0, 0.2);
+         width: 100vw;
+         height: auto;
+         pointer-events: all;
+         /* mix-blend-mode: screen; */
+     }
+     input {
+         font-family: inherit;
+         background: none;
+         border: none;
+         color: rgba(255, 255, 255, 0.7);
+     }
+     input:hover {
+         background: rgba(255, 255, 255, 0.5);
+     }
+     input[type="radio"] {
+         opacity: 0.5;
+     }
+     button {
+         font-family: inherit;
+         background: none;
+         border: none;
+         color: rgba(255, 255, 255, 0.7);
+     }
+     button:hover {
+         background: rgba(255, 255, 255, 0.5);
+     }
+     .sb-soundplayer-progress-container {
+         background-color: rgba(255, 255, 255, 0.2);
+         width: 100%;
+         height: 10px;
+         overflow: hidden;
+         cursor: pointer;
+     }
+
+     .sb-soundplayer-progress-inner {
+         background-color: #ff88ee;
+         height: 100%;
+         -webkit-transition: width .2s ease-in;
+                 transition: width .2s ease-in;
+     }
+     .scPlayer {
+         width: 60vw;
+         margin: 1em;
+     }
+     .row {
+         display: flex;
+         margin-top: 0.5em;
+         justify-content: center;
+         align-items: center;
+     }
+     #hideButton{
+         position: fixed;
+         z-index: 20;
+         bottom: 0;
+         right: 0;
+         background: rgba(0, 0, 0, 0.1);
+         color: rgba(255, 255, 255, 0.4);
      }
      a {
-         text-decoration: inherit;
-         color: white;
-     }
-
-     a:visited {
+         text-decoration: none;
          color: inherit;
+         color: #888888;
      }
-
+     .hidden {
+         visibility: hidden;
+         -webkit-transition: visibility 0s 3s, opacity 3s ease-in-out;
+         -moz-transition: visibility 0s 3s, opacity 3s ease-in-out;
+         -ms-transition: visibility 0s 3s, opacity 3s ease-in-out;
+         -o-transition: visibility 0s 3s, opacity 3s ease-in-out;
+         opacity: 0;
+     }
+     .hiddenFast {
+         visibility: hidden;
+         -webkit-transition: visibility 0s 0.5s, opacity 0.5s ease-in-out;
+         -moz-transition: visibility 0s 0.5s, opacity 0.5s ease-in-out;
+         -ms-transition: visibility 0s 0.5s, opacity 0.5s ease-in-out;
+         -o-transition: visibility 0s 0.5s, opacity 0.5s ease-in-out;
+         opacity: 0;
+     }
+     .unhiddenFast {
+         visibility: visible;
+         -webkit-transition: opacity 0.5s ease-in-out;
+         -moz-transition: opacity 0.5s ease-in-out;
+         -ms-transition: opacity 0.5s ease-in-out;
+         -o-transition: opacity 0.5s ease-in-out;
+         opacity: 1;
+     }
     </style>
   </head>
   <body>
-    <div id="bg"> </div>
-    <div id="landing">
-      <div id="title">
-        <a href="https://github.com/sleexyz/hylogen">
-          Hylogen
-        </a>
-      </div>
-    </div>
-
-    <canvas id="canvas"></canvas>
-    <script src="./entry.js"> </script>
+    <div id="entry"></div>
+    <script src="./bundle.js"></script>
   </body>
 </html>

@@ -459,5 +459,13 @@ instance Num Booly where
     | otherwise = Bu "false"
 
 
+data Variable where
+  VVec1 :: Vec1 -> Variable
+  VVec2 :: Vec2 -> Variable
+  VVec3 :: Vec3 -> Variable
+  VBooly :: Booly -> Variable
+
+-- instance Num (Context Vec1) where
+
 -- data Expr a where
 --   Node a :: ID -> a

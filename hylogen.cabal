@@ -2,7 +2,7 @@ name:                hylogen
 version:             0.1.0.10
 synopsis:            an EDSL for live-coding fragment shaders
 description:         an EDSL for live-coding fragment shaders
-homepage:            https://github.com/sleexyz/hylogen
+homepage:            https://hylogen.com
 author:              Sean Lee
 license:             MIT
 maintainer:          freshdried@gmail.com
@@ -10,7 +10,7 @@ category:            Graphics
 build-type:          Simple
 extra-source-files:  README.md
 data-files:          web/index.html
-                   , web/entry.js
+                   , web/bundle.js
 cabal-version:       >=1.10
 stability:           experimental
 
