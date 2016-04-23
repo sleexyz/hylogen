@@ -17,9 +17,10 @@ let bands = {low: 0.0, mid: 0.0, upper: 0.0, high: 0.0};
 let scPlayer = null;
 
 let keepPlaying = true;
+let mode = null;
 
 let cleanup = function() {
-  console.log("Nothing to clean up!");
+  // console.log("Nothing to clean up!");
 };
 
 function onAccept () {
@@ -79,6 +80,7 @@ function onAccept () {
 
 export default {
   initializeAudioUserMedia: function() {
+    mode = "usermedia";
     cleanup();
     keepPlaying = true;
 
@@ -97,6 +99,7 @@ export default {
     };
   },
   initializeAudioSoundCloud: function(url, initPlaying) {
+    mode = "sc";
     cleanup();
     keepPlaying = true;
 
@@ -104,7 +107,12 @@ export default {
     scPlayer.audio.crossOrigin = "anonymous";
 
     scPlayer.resolve(url, function(track) {
-      console.log(track);
+      if (mode !== "sc") {
+        return;
+      }
+      scPlayer.audio.crossOrigin = "anonymous";
+
+      // console.log(track);
       if (initPlaying) {
         scPlayer.play();
       }

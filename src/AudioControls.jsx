@@ -16,7 +16,7 @@ const SC = React.createClass({
     };
   },
   getInitialState() {
-    console.log(localStorage.getItem("scurl"));
+    /* console.log(localStorage.getItem("scurl")); */
     let defaulturl = localStorage.getItem("scurl")
                   || "https://soundcloud.com/tennysonmusic/xyz"
                   || "https://soundcloud.com/tennysonmusic/angus-julia-stone-for-you"
@@ -33,15 +33,15 @@ const SC = React.createClass({
     this.scPlayer.play();
   },
   stopPlaying() {
-    console.log("clearing ", this.intervalId);
+    /* console.log("clearing ", this.intervalId); */
     window.clearTimeout(this.intervalId);
     this.scPlayer.pause();
   },
   componentWillMount() {
-    console.log(this.props.initPlaying);
+    /* console.log(this.props.initPlaying); */
     Audio.initializeAudioSoundCloud(this.state.url, this.props.initPlaying);
-    console.log(this.state.url);
-    console.log(Audio.scPlayer);
+    /* console.log(this.state.url);
+       console.log(Audio.scPlayer); */
     this.scPlayer = Audio.scPlayer;
   },
   componentDidMount() {
@@ -67,15 +67,11 @@ const SC = React.createClass({
   },
   startUpdating() {
     this.intervalId = window.setInterval(this.update, 100);
-    console.log("made new interval:", this.intervalId);
+    /* console.log("made new interval:", this.intervalId); */
   },
   componentWillUnmount() {
     console.log("clearing: ", this.intervalId);
     window.clearTimeout(this.intervalId);
-  },
-  seek(e) {
-    console.log(e);
-    console.log(e.offsetX);
   },
   onUrlChange(e) {
     this.setState({url: e.currentTarget.value});
@@ -84,9 +80,9 @@ const SC = React.createClass({
     e.preventDefault();
     localStorage.setItem("scurl", this.state.url);
     this.scPlayer.resolve(this.state.url, function(track) {
-      console.log(track);
+      /* console.log(track); */
       this.setState({playing: false}, function() {
-        console.log("callback");
+        /* console.log("callback"); */
         this.setState({playing: true});
       }.bind(this));
     }.bind(this));
@@ -95,13 +91,7 @@ const SC = React.createClass({
     let buttonVal = this.state.playing ? "[pause]" : "[play]";
     return (
         <div className="scPlayer">
-        <div className="row"
-             onClick={() => {
-                 if (!this.state.playing) {
-                   this.startPlaying();
-                 }
-                 this.update();
-               }} >
+        <div className="row">
             <button onClick={this.togglePlay}> {buttonVal}</button>
             <Progress innerStyle={{}}
                       soundCloudAudio={this.scPlayer}
@@ -132,9 +122,17 @@ const UserMedia = React.createClass({
 });
 
 export default React.createClass({
+  propTypes: {
+    initialState: PropTypes.string
+  },
+  getDefaultProps() {
+    return {
+      initialState: "sc"
+    };
+  },
   getInitialState: function() {
     return {
-      state: "sc",
+      state: this.props.initialState,
       initPlaying: false
     };
   },
@@ -150,9 +148,6 @@ export default React.createClass({
                   ? <SC initPlaying={this.state.initPlaying}/>
                   : <UserMedia/>;
 
-    let onChanged = function(e) {
-      console.log(e);
-    };
 
     return (
       <div className="audioControls">
