@@ -70,7 +70,7 @@ const SC = React.createClass({
     /* console.log("made new interval:", this.intervalId); */
   },
   componentWillUnmount() {
-    console.log("clearing: ", this.intervalId);
+    /* console.log("clearing: ", this.intervalId); */
     window.clearTimeout(this.intervalId);
   },
   onUrlChange(e) {
