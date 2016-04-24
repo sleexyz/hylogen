@@ -9,6 +9,9 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
 
 module Hylogen.Types where
 
@@ -16,20 +19,36 @@ module Hylogen.Types where
 import Data.Monoid
 import Data.VectorSpace
 import GHC.Exts (Constraint)
+import Data.Hashable
+import GHC.Generics
 
-class (ConstructFrom' tuple hprim, Show tuple, Vec hprim) => ConstructFrom tuple hprim
-instance ConstructFrom Float Vec1
-instance ConstructFrom (Vec1, Vec1) Vec2
-instance ConstructFrom (Vec1, Vec1, Vec1) Vec3
-instance ConstructFrom (Vec2, Vec1) Vec3
-instance ConstructFrom (Vec1, Vec2) Vec3
-instance ConstructFrom (Vec1, Vec1, Vec1, Vec1) Vec4
-instance ConstructFrom (Vec2, Vec1, Vec1) Vec4
-instance ConstructFrom (Vec1, Vec2, Vec1) Vec4
-instance (a ~ Vec1, b ~ Vec1) => ConstructFrom (a, b, Vec2) Vec4
-instance ConstructFrom (Vec3, Vec1) Vec4
-instance (a ~ Vec1) => ConstructFrom (a, Vec3) Vec4
-instance (a ~ Vec2) => ConstructFrom (a, Vec2) Vec4
+class (ConstructFrom' tuple hprim, Show tuple, Vec hprim) => ConstructFrom tuple hprim where
+  hashConstructor :: tuple -> hprim -> HashTree
+
+instance ConstructFrom Float Vec1 where
+  hashConstructor x _ = Leaf . Hash . hash $ x
+instance ConstructFrom (Vec1, Vec1) Vec2 where
+  hashConstructor (x, y) _  = mkBranch2 "vec2" x y
+instance ConstructFrom (Vec1, Vec1, Vec1) Vec3 where
+  hashConstructor (x, y, z) _  = mkBranch3 "vec3" x y z
+instance ConstructFrom (Vec2, Vec1) Vec3 where
+  hashConstructor (x, y) _  = mkBranch2 "vec3" x y
+instance ConstructFrom (Vec1, Vec2) Vec3 where
+  hashConstructor (x, y) _  = mkBranch2 "vec3" x y
+instance ConstructFrom (Vec1, Vec1, Vec1, Vec1) Vec4 where
+  hashConstructor (x, y, z, w) _  = mkBranch4 "vec4" x y z w
+instance ConstructFrom (Vec2, Vec1, Vec1) Vec4 where
+  hashConstructor (x, y, z) _  = mkBranch3 "vec4" x y z
+instance ConstructFrom (Vec1, Vec2, Vec1) Vec4 where
+  hashConstructor (x, y, z) _  = mkBranch3 "vec4" x y z
+instance (a ~ Vec1, b ~ Vec1) => ConstructFrom (a, b, Vec2) Vec4 where
+  hashConstructor (x, y, z) _  = mkBranch3 "vec4" x y z
+instance ConstructFrom (Vec3, Vec1) Vec4 where
+  hashConstructor (x, y) _  = mkBranch2 "vec4" x y
+instance (a ~ Vec1) => ConstructFrom (a, Vec3) Vec4 where
+  hashConstructor (x, y) _  = mkBranch2 "vec4" x y
+instance (a ~ Vec2) => ConstructFrom (a, Vec2) Vec4 where
+  hashConstructor (x, y) _  = mkBranch2 "vec4" x y
 
 type family (ConstructFrom' tuple hprim) :: Constraint where
   ConstructFrom' a Vec1 = a ~ Float
@@ -55,7 +74,7 @@ type family (ConstructFrom' tuple hprim) :: Constraint where
 
 
 
-class (Show v) => Vec v where
+class (HashStuff v, Show v) => Vec v where
   vec :: (ConstructFrom tuple v) => tuple -> v
   vu :: String -> v
   vuop :: String -> v -> v
@@ -68,7 +87,7 @@ class (Show v) => Vec v where
 
 
 
-class Show a => HasX a
+class (HashStuff a, Show a) => HasX a
 class HasX a => HasY a
 class HasY a => HasZ a
 class HasZ a => HasW a
@@ -174,6 +193,7 @@ data Vec2 where
   V2boppre :: String -> Vec2 -> Vec2 -> Vec2
   V2bops :: String -> Vec1 -> Vec2 -> Vec2
   V2select :: Booly -> Vec2 -> Vec2 -> Vec2
+
 
 instance Vec Vec2 where
   vec = Vec2
@@ -459,13 +479,113 @@ instance Num Booly where
     | otherwise = Bu "false"
 
 
-data Variable where
-  VVec1 :: Vec1 -> Variable
-  VVec2 :: Vec2 -> Variable
-  VVec3 :: Vec3 -> Variable
-  VBooly :: Booly -> Variable
+-- data Variable where
+--   VVec1 :: Vec1 -> Variable
+--   VVec2 :: Vec2 -> Variable
+--   VVec3 :: Vec3 -> Variable
+--   VBooly :: Booly -> Variable
 
 -- instance Num (Context Vec1) where
 
 -- data Expr a where
 --   Node a :: ID -> a
+
+
+
+instance Hashable Vec1 where
+  hashWithSalt salt x = hashWithSalt salt $ ("vec1", show x)
+instance Hashable Vec2 where
+  hashWithSalt salt x = hashWithSalt salt $ ("vec2", show x)
+instance Hashable Vec3 where
+  hashWithSalt salt x = hashWithSalt salt $ ("vec3", show x)
+instance Hashable Vec4 where
+  hashWithSalt salt x = hashWithSalt salt $ ("vec4", show x)
+instance Hashable Booly where
+  hashWithSalt salt x = hashWithSalt salt $ ("booly", show x)
+
+instance Hashable Texture where
+  hashWithSalt salt x = hashWithSalt salt $ ("texture2D", show x)
+
+
+
+newtype Hash = Hash Int
+  deriving (Generic, Hashable, Show, Eq, Ord)
+data HashTree = Leaf Hash | Branch Hash [HashTree]
+  deriving (Generic, Hashable, Show, Eq, Ord)
+
+class HashStuff a where
+  hashStuff :: a -> HashTree
+
+mkBranch1 str x = Branch (Hash $ hash (str, subTree)) subTree
+  where
+    subTree = [hashStuff x]
+
+mkBranch2 str x y = Branch (Hash $ hash (str, subTree)) subTree
+  where
+    subTree = [hashStuff x, hashStuff y]
+
+mkBranch3 str x y z = Branch (Hash $ hash (str, subTree)) subTree
+  where
+    subTree = [hashStuff x, hashStuff y, hashStuff z]
+
+mkBranch4 str x y z w = Branch (Hash $ hash (str, subTree)) subTree
+  where
+    subTree = [hashStuff x, hashStuff y, hashStuff z, hashStuff w]
+
+-- TODO: tag strings so hash is correct
+
+instance HashStuff Vec1 where
+  hashStuff a@(Vec1 x)  = hashConstructor x a
+  hashStuff a@(V1u _) = Leaf $ Hash $ hash a
+  hashStuff (V1uop str x) = mkBranch1 str x
+  hashStuff (V1uoppre str x) = mkBranch1 str x
+  hashStuff (V1bop str x y) = mkBranch2 str x y
+  hashStuff (V1boppre str x y) = mkBranch2 str x y
+  hashStuff (V1select str x y) = mkBranch2 str x y
+  hashStuff (Dot x y) = mkBranch2 "dot" x y
+  hashStuff (X x) = mkBranch1 "X" x
+  hashStuff (Y x) = mkBranch1 "Y" x
+  hashStuff (Z x) = mkBranch1 "Z" x
+  hashStuff (W x) = mkBranch1 "W" x
+
+instance HashStuff Vec2 where
+  hashStuff a@(Vec2 x)  = hashConstructor x a
+  hashStuff a@(V2u _) = Leaf $ Hash $ hash a
+  hashStuff (V2uop str x) = mkBranch1 str x
+  hashStuff (V2uoppre str x) = mkBranch1 str x
+  hashStuff (V2bop str x y) = mkBranch2 str x y
+  hashStuff (V2boppre str x y) = mkBranch2 str x y
+  hashStuff (V2bops str x y) = mkBranch2 str x y
+  hashStuff (V2select str x y) = mkBranch2 str x y
+
+instance HashStuff Vec3 where
+  hashStuff a@(Vec3 x)  = hashConstructor x a
+  hashStuff a@(V3u _) = Leaf $ Hash $ hash a
+  hashStuff (V3uop str x) = mkBranch1 str x
+  hashStuff (V3uoppre str x) = mkBranch1 str x
+  hashStuff (V3bop str x y) = mkBranch2 str x y
+  hashStuff (V3boppre str x y) = mkBranch2 str x y
+  hashStuff (V3bops str x y) = mkBranch2 str x y
+  hashStuff (V3select str x y) = mkBranch2 str x y
+
+instance HashStuff Vec4 where
+  hashStuff a@(Vec4 x)  = hashConstructor x a
+  hashStuff a@(V4u _) = Leaf $ Hash $ hash a
+  hashStuff (V4uop str x) = mkBranch1 str x
+  hashStuff (V4uoppre str x) = mkBranch1 str x
+  hashStuff (V4bop str x y) = mkBranch2 str x y
+  hashStuff (V4boppre str x y) = mkBranch2 str x y
+  hashStuff (V4bops str x y) = mkBranch2 str x y
+  hashStuff (V4select str x y) = mkBranch2 str x y
+  hashStuff (Texture2D t x) = mkBranch2 "texture2D" t x
+
+instance HashStuff Booly where
+  hashStuff a@(Bu _) = Leaf $ Hash $ hash a
+  hashStuff (Buop str x) = mkBranch1 str x
+  hashStuff (Buoppre str x) = mkBranch1 str x
+  hashStuff (Bbop str x y) = mkBranch2 str x y
+  hashStuff (Bcomp str x y) = mkBranch2 str x y -- will this work with the weird show implementation?
+  hashStuff (Bcomp_ str x y) = mkBranch2 str x y -- will this work with the weird show implementation?
+
+instance HashStuff Texture where
+  hashStuff a = Leaf $ Hash $ hash a
