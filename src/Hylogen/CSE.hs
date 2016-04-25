@@ -23,5 +23,11 @@ hashTreeToCount (Branch h expr subTrees) = Map.unionsWith fn
 
 
 -- State monad?
-newtype GLSL = GLSL ([(Hash, Expr)], Expr)
 
+-- Now do depth-first traversal of the tree
+data GLSL = GLSL [(Hash, Expr)] Expr
+instance Show GLSL where
+  show (GLSL context fragColor) = fn context ++ "\ngl_FragColor = " ++ show fragColor ++ ";"
+    where
+      fn xs = mconcat $ showStatement <$> xs
+      showStatement (hash, expr) = show (getType expr) <> " var" <> show hash <> " = " <> show expr <> ";\n"

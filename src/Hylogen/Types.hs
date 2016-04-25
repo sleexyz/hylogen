@@ -541,8 +541,21 @@ data Expr = Uniform GLSLType String
           | Access GLSLType String Expr -- field accessor
           deriving (Generic, Hashable, Eq, Ord)
 
+-- TODO: is there any way to do this automatically?
+getType :: Expr -> GLSLType
+getType x = case x of
+  Uniform ty _ -> ty
+  UnaryOp ty _ _ -> ty
+  UnaryOpPre ty _ _ -> ty
+  BinaryOp ty _ _ _ -> ty
+  BinaryOpPre ty _ _ _ -> ty
+  TernaryOpPre ty _ _ _ _ -> ty
+  QuaternaryOpPre ty _ _ _ _ _ -> ty
+  Select ty _ _ _ -> ty
+  Access ty _ _ -> ty
+
 instance Show Expr where
-  show x = case x of
+  show foo = case foo of
     Uniform _ x -> x
     UnaryOp _  u x -> u <> "(" <> show x <> ")"
     UnaryOpPre _  u x -> "(" <> u <> show x <> ")"
@@ -557,35 +570,38 @@ instance Show Expr where
 -- STring information?
 toHashTree :: Expr -> HashTree
 toHashTree exprForm = case exprForm of
-  a@(Uniform _ _)               -> mkLeaf a
-  UnaryOp _  str x               -> mkBranch1 exprForm x
-  UnaryOpPre _  str x            -> mkBranch1 exprForm x
-  BinaryOp _  str x y            -> mkBranch2 exprForm x y
-  BinaryOpPre _  str x y         -> mkBranch2 exprForm x y
-  TernaryOpPre _  str x y z      -> mkBranch3 exprForm x y z
-  QuaternaryOpPre _  str x y z w -> mkBranch4 exprForm x y z w
-  Select _  str x y              -> mkBranch2 exprForm x y
+  a@(Uniform ty str)              -> mkLeaf (ty, str) a
+  UnaryOp ty  str x               -> mkBranch1 (ty, str) exprForm x
+  UnaryOpPre ty  str x            -> mkBranch1 (ty, str) exprForm x
+  BinaryOp ty  str x y            -> mkBranch2 (ty, str) exprForm x y
+  BinaryOpPre ty  str x y         -> mkBranch2 (ty, str) exprForm x y
+  TernaryOpPre ty  str x y z      -> mkBranch3 (ty, str) exprForm x y z
+  QuaternaryOpPre ty  str x y z w -> mkBranch4 (ty, str) exprForm x y z w
+  Select ty b x y                 -> mkBranch3 (ty, "?:") exprForm b x y
+  Access ty str x                 -> mkBranch1 (ty, "." <> str) exprForm x
 
-mkLeaf :: Expr -> HashTree
-mkLeaf exprForm = Leaf (Hash $ hash exprForm) exprForm
+type HashContext = (GLSLType, String)
 
-mkBranch1 :: Expr -> Expr -> HashTree
-mkBranch1 exprForm x = Branch (Hash $ hash (exprForm, subTrees)) exprForm subTrees
+mkLeaf :: HashContext -> Expr -> HashTree
+mkLeaf hc expr = Leaf (Hash $ hash (expr, hc)) expr
+
+mkBranch1 :: HashContext -> Expr -> Expr -> HashTree
+mkBranch1 hc expr x = Branch (Hash $ hash (expr, hc, subTrees)) expr subTrees
   where
     subTrees = [toHashTree x]
 
-mkBranch2 :: Expr -> Expr -> Expr -> HashTree
-mkBranch2 exprForm x y = Branch (Hash $ hash (exprForm, subTrees)) exprForm subTrees
+mkBranch2 :: HashContext -> Expr -> Expr -> Expr -> HashTree
+mkBranch2 hc expr x y = Branch (Hash $ hash (expr, hc, subTrees)) expr subTrees
   where
     subTrees = [toHashTree x, toHashTree y]
 
-mkBranch3 :: Expr -> Expr -> Expr -> Expr -> HashTree
-mkBranch3 exprForm x y z = Branch (Hash $ hash (exprForm, subTrees)) exprForm subTrees
+mkBranch3 :: HashContext -> Expr -> Expr -> Expr -> Expr -> HashTree
+mkBranch3 hc expr x y z = Branch (Hash $ hash (expr, hc, subTrees)) expr subTrees
   where
     subTrees = [toHashTree x, toHashTree y, toHashTree z]
 
-mkBranch4 :: Expr -> Expr -> Expr -> Expr -> Expr -> HashTree
-mkBranch4 exprForm x y z w = Branch (Hash $ hash (exprForm, subTrees)) exprForm subTrees
+mkBranch4 :: HashContext -> Expr -> Expr -> Expr -> Expr -> Expr -> HashTree
+mkBranch4 hc expr x y z w = Branch (Hash $ hash (expr, hc, subTrees)) expr subTrees
   where
     subTrees = [toHashTree x, toHashTree y, toHashTree z, toHashTree w]
 
