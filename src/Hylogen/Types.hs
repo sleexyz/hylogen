@@ -74,7 +74,7 @@ type family (ConstructFrom' tuple hprim) :: Constraint where
 
 
 
-class (Expression v, Show v) => Vec v where
+class (Expressible v, Show v) => Vec v where
   vec :: (ConstructFrom tuple v) => tuple -> v
   vu :: String -> v
   vuop :: String -> v -> v
@@ -87,7 +87,7 @@ class (Expression v, Show v) => Vec v where
 
 
 
-class (Expression a, Show a) => HasX a
+class (Expressible a, Show a) => HasX a
 class HasX a => HasY a
 class HasY a => HasZ a
 class HasZ a => HasW a
@@ -506,45 +506,66 @@ instance Hashable Booly where
 instance Hashable Texture where
   hashWithSalt salt x = hashWithSalt salt $ ("texture2D", show x)
 
+-- TODO: textures cannot be saved as variable!
 
+
+
+data GLSLType = GLSLFloat
+              | GLSLVec1
+              | GLSLVec2
+              | GLSLVec3
+              | GLSLVec4
+              | GLSLBool
+              deriving Eq
+
+instance Show GLSLType where
+  show x = case x of
+    GLSLFloat -> "float"
+    GLSLVec1 -> "vec1"
+    GLSLVec2 -> "vec2"
+    GLSLVec3 -> "vec3"
+    GLSLVec4 -> "vec4"
+    GLSLBool -> "bool"
 
 newtype Hash = Hash Int
   deriving (Generic, Hashable, Show, Eq, Ord)
+
 data HashTree = Leaf Hash | Branch Hash [HashTree]
   deriving (Generic, Hashable, Show, Eq, Ord)
 
-class Expression a where
+class (Show a) => Expressible a where
+  getType ::  a -> GLSLType
   toHashTree :: a -> HashTree
 
 mkBranch1 :: ( Hashable t
-             , Expression a
+             , Expressible a
              ) => t -> a -> HashTree
 mkBranch1 str x = Branch (Hash $ hash (str, subTrees)) subTrees
   where
     subTrees = [toHashTree x]
 
 mkBranch2 :: ( Hashable t
-             , Expression a
-             , Expression b
+             , Expressible a
+             , Expressible b
              ) => t -> a -> b-> HashTree
 mkBranch2 str x y = Branch (Hash $ hash (str, subTrees)) subTrees
   where
     subTrees = [toHashTree x, toHashTree y]
 
 mkBranch3 :: ( Hashable t
-             , Expression a
-             , Expression b
-             , Expression c
+             , Expressible a
+             , Expressible b
+             , Expressible c
              ) => t -> a -> b -> c -> HashTree
 mkBranch3 str x y z = Branch (Hash $ hash (str, subTrees)) subTrees
   where
     subTrees = [toHashTree x, toHashTree y, toHashTree z]
 
 mkBranch4 :: ( Hashable t
-             , Expression a
-             , Expression b
-             , Expression c
-             , Expression d
+             , Expressible a
+             , Expressible b
+             , Expressible c
+             , Expressible d
              ) => t -> a -> b -> c -> d -> HashTree
 mkBranch4 str x y z w = Branch (Hash $ hash (str, subTrees)) subTrees
   where
@@ -552,7 +573,8 @@ mkBranch4 str x y z w = Branch (Hash $ hash (str, subTrees)) subTrees
 
 -- TODO: tag strings so hash is correct
 
-instance Expression Vec1 where
+instance Expressible Vec1 where
+  getType _ = GLSLVec1
   toHashTree a@(Vec1 x)  = hashConstructor x a
   toHashTree a@(V1u _) = Leaf $ Hash $ hash a
   toHashTree (V1uop str x) = mkBranch1 str x
@@ -566,7 +588,8 @@ instance Expression Vec1 where
   toHashTree (Z x) = mkBranch1 "Z" x
   toHashTree (W x) = mkBranch1 "W" x
 
-instance Expression Vec2 where
+instance Expressible Vec2 where
+  getType _ = GLSLVec2
   toHashTree a@(Vec2 x)  = hashConstructor x a
   toHashTree a@(V2u _) = Leaf $ Hash $ hash a
   toHashTree (V2uop str x) = mkBranch1 str x
@@ -576,7 +599,8 @@ instance Expression Vec2 where
   toHashTree (V2bops str x y) = mkBranch2 str x y
   toHashTree (V2select str x y) = mkBranch2 str x y
 
-instance Expression Vec3 where
+instance Expressible Vec3 where
+  getType _ = GLSLVec3
   toHashTree a@(Vec3 x)  = hashConstructor x a
   toHashTree a@(V3u _) = Leaf $ Hash $ hash a
   toHashTree (V3uop str x) = mkBranch1 str x
@@ -586,7 +610,8 @@ instance Expression Vec3 where
   toHashTree (V3bops str x y) = mkBranch2 str x y
   toHashTree (V3select str x y) = mkBranch2 str x y
 
-instance Expression Vec4 where
+instance Expressible Vec4 where
+  getType _ = GLSLVec4
   toHashTree a@(Vec4 x)  = hashConstructor x a
   toHashTree a@(V4u _) = Leaf $ Hash $ hash a
   toHashTree (V4uop str x) = mkBranch1 str x
@@ -595,9 +620,10 @@ instance Expression Vec4 where
   toHashTree (V4boppre str x y) = mkBranch2 str x y
   toHashTree (V4bops str x y) = mkBranch2 str x y
   toHashTree (V4select str x y) = mkBranch2 str x y
-  toHashTree (Texture2D t x) = mkBranch2 "texture2D" t x
+  toHashTree (Texture2D t x) = mkBranch1 ("texture2D", show t) x
 
-instance Expression Booly where
+instance Expressible Booly where
+  getType _ = GLSLBool
   toHashTree a@(Bu _) = Leaf $ Hash $ hash a
   toHashTree (Buop str x) = mkBranch1 str x
   toHashTree (Buoppre str x) = mkBranch1 str x
@@ -605,6 +631,9 @@ instance Expression Booly where
   toHashTree (Bcomp str x y) = mkBranch2 str x y -- will this work with the weird show implementation?
   toHashTree (Bcomp_ str x y) = mkBranch2 str x y -- will this work with the weird show implementation?
 
-instance Expression Texture where
-  toHashTree a = Leaf $ Hash $ hash a
+-- | Existential
+data Expr where
+  ToExpr :: (Expressible a) => a -> Expr
+
+deriving instance Show Expr
 
