@@ -16,16 +16,14 @@ module Hylogen
        ( module Hylogen
        , module Hylogen.Types
        , module Hylogen.Globals
+       , module Hylogen.CSE
        )
        where
 
-import           Hylogen.Types ( Vec1 (X, Y, Z, W)
-                               , Vec2
-                               , Vec3
-                               , Vec4
-                               , Vec (select, fromVec1, toList)
-                               )
+import           Hylogen.CSE
 import           Hylogen.Globals
+import           Hylogen.Types   (Vec (fromVec1, select, toList),
+                                  Vec1 (W, X, Y, Z), Vec2, Vec3, Vec4)
 
 toGLSL :: Vec4 -> String
 toGLSL x = unlines $ [ "void main() {"

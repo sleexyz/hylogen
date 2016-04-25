@@ -74,7 +74,7 @@ type family (ConstructFrom' tuple hprim) :: Constraint where
 
 
 
-class (HashStuff v, Show v) => Vec v where
+class (Expression v, Show v) => Vec v where
   vec :: (ConstructFrom tuple v) => tuple -> v
   vu :: String -> v
   vuop :: String -> v -> v
@@ -87,7 +87,7 @@ class (HashStuff v, Show v) => Vec v where
 
 
 
-class (HashStuff a, Show a) => HasX a
+class (Expression a, Show a) => HasX a
 class HasX a => HasY a
 class HasY a => HasZ a
 class HasZ a => HasW a
@@ -513,79 +513,98 @@ newtype Hash = Hash Int
 data HashTree = Leaf Hash | Branch Hash [HashTree]
   deriving (Generic, Hashable, Show, Eq, Ord)
 
-class HashStuff a where
-  hashStuff :: a -> HashTree
+class Expression a where
+  toHashTree :: a -> HashTree
 
-mkBranch1 str x = Branch (Hash $ hash (str, subTree)) subTree
+mkBranch1 :: ( Hashable t
+             , Expression a
+             ) => t -> a -> HashTree
+mkBranch1 str x = Branch (Hash $ hash (str, subTrees)) subTrees
   where
-    subTree = [hashStuff x]
+    subTrees = [toHashTree x]
 
-mkBranch2 str x y = Branch (Hash $ hash (str, subTree)) subTree
+mkBranch2 :: ( Hashable t
+             , Expression a
+             , Expression b
+             ) => t -> a -> b-> HashTree
+mkBranch2 str x y = Branch (Hash $ hash (str, subTrees)) subTrees
   where
-    subTree = [hashStuff x, hashStuff y]
+    subTrees = [toHashTree x, toHashTree y]
 
-mkBranch3 str x y z = Branch (Hash $ hash (str, subTree)) subTree
+mkBranch3 :: ( Hashable t
+             , Expression a
+             , Expression b
+             , Expression c
+             ) => t -> a -> b -> c -> HashTree
+mkBranch3 str x y z = Branch (Hash $ hash (str, subTrees)) subTrees
   where
-    subTree = [hashStuff x, hashStuff y, hashStuff z]
+    subTrees = [toHashTree x, toHashTree y, toHashTree z]
 
-mkBranch4 str x y z w = Branch (Hash $ hash (str, subTree)) subTree
+mkBranch4 :: ( Hashable t
+             , Expression a
+             , Expression b
+             , Expression c
+             , Expression d
+             ) => t -> a -> b -> c -> d -> HashTree
+mkBranch4 str x y z w = Branch (Hash $ hash (str, subTrees)) subTrees
   where
-    subTree = [hashStuff x, hashStuff y, hashStuff z, hashStuff w]
+    subTrees = [toHashTree x, toHashTree y, toHashTree z, toHashTree w]
 
 -- TODO: tag strings so hash is correct
 
-instance HashStuff Vec1 where
-  hashStuff a@(Vec1 x)  = hashConstructor x a
-  hashStuff a@(V1u _) = Leaf $ Hash $ hash a
-  hashStuff (V1uop str x) = mkBranch1 str x
-  hashStuff (V1uoppre str x) = mkBranch1 str x
-  hashStuff (V1bop str x y) = mkBranch2 str x y
-  hashStuff (V1boppre str x y) = mkBranch2 str x y
-  hashStuff (V1select str x y) = mkBranch2 str x y
-  hashStuff (Dot x y) = mkBranch2 "dot" x y
-  hashStuff (X x) = mkBranch1 "X" x
-  hashStuff (Y x) = mkBranch1 "Y" x
-  hashStuff (Z x) = mkBranch1 "Z" x
-  hashStuff (W x) = mkBranch1 "W" x
+instance Expression Vec1 where
+  toHashTree a@(Vec1 x)  = hashConstructor x a
+  toHashTree a@(V1u _) = Leaf $ Hash $ hash a
+  toHashTree (V1uop str x) = mkBranch1 str x
+  toHashTree (V1uoppre str x) = mkBranch1 str x
+  toHashTree (V1bop str x y) = mkBranch2 str x y
+  toHashTree (V1boppre str x y) = mkBranch2 str x y
+  toHashTree (V1select str x y) = mkBranch2 str x y
+  toHashTree (Dot x y) = mkBranch2 "dot" x y
+  toHashTree (X x) = mkBranch1 "X" x
+  toHashTree (Y x) = mkBranch1 "Y" x
+  toHashTree (Z x) = mkBranch1 "Z" x
+  toHashTree (W x) = mkBranch1 "W" x
 
-instance HashStuff Vec2 where
-  hashStuff a@(Vec2 x)  = hashConstructor x a
-  hashStuff a@(V2u _) = Leaf $ Hash $ hash a
-  hashStuff (V2uop str x) = mkBranch1 str x
-  hashStuff (V2uoppre str x) = mkBranch1 str x
-  hashStuff (V2bop str x y) = mkBranch2 str x y
-  hashStuff (V2boppre str x y) = mkBranch2 str x y
-  hashStuff (V2bops str x y) = mkBranch2 str x y
-  hashStuff (V2select str x y) = mkBranch2 str x y
+instance Expression Vec2 where
+  toHashTree a@(Vec2 x)  = hashConstructor x a
+  toHashTree a@(V2u _) = Leaf $ Hash $ hash a
+  toHashTree (V2uop str x) = mkBranch1 str x
+  toHashTree (V2uoppre str x) = mkBranch1 str x
+  toHashTree (V2bop str x y) = mkBranch2 str x y
+  toHashTree (V2boppre str x y) = mkBranch2 str x y
+  toHashTree (V2bops str x y) = mkBranch2 str x y
+  toHashTree (V2select str x y) = mkBranch2 str x y
 
-instance HashStuff Vec3 where
-  hashStuff a@(Vec3 x)  = hashConstructor x a
-  hashStuff a@(V3u _) = Leaf $ Hash $ hash a
-  hashStuff (V3uop str x) = mkBranch1 str x
-  hashStuff (V3uoppre str x) = mkBranch1 str x
-  hashStuff (V3bop str x y) = mkBranch2 str x y
-  hashStuff (V3boppre str x y) = mkBranch2 str x y
-  hashStuff (V3bops str x y) = mkBranch2 str x y
-  hashStuff (V3select str x y) = mkBranch2 str x y
+instance Expression Vec3 where
+  toHashTree a@(Vec3 x)  = hashConstructor x a
+  toHashTree a@(V3u _) = Leaf $ Hash $ hash a
+  toHashTree (V3uop str x) = mkBranch1 str x
+  toHashTree (V3uoppre str x) = mkBranch1 str x
+  toHashTree (V3bop str x y) = mkBranch2 str x y
+  toHashTree (V3boppre str x y) = mkBranch2 str x y
+  toHashTree (V3bops str x y) = mkBranch2 str x y
+  toHashTree (V3select str x y) = mkBranch2 str x y
 
-instance HashStuff Vec4 where
-  hashStuff a@(Vec4 x)  = hashConstructor x a
-  hashStuff a@(V4u _) = Leaf $ Hash $ hash a
-  hashStuff (V4uop str x) = mkBranch1 str x
-  hashStuff (V4uoppre str x) = mkBranch1 str x
-  hashStuff (V4bop str x y) = mkBranch2 str x y
-  hashStuff (V4boppre str x y) = mkBranch2 str x y
-  hashStuff (V4bops str x y) = mkBranch2 str x y
-  hashStuff (V4select str x y) = mkBranch2 str x y
-  hashStuff (Texture2D t x) = mkBranch2 "texture2D" t x
+instance Expression Vec4 where
+  toHashTree a@(Vec4 x)  = hashConstructor x a
+  toHashTree a@(V4u _) = Leaf $ Hash $ hash a
+  toHashTree (V4uop str x) = mkBranch1 str x
+  toHashTree (V4uoppre str x) = mkBranch1 str x
+  toHashTree (V4bop str x y) = mkBranch2 str x y
+  toHashTree (V4boppre str x y) = mkBranch2 str x y
+  toHashTree (V4bops str x y) = mkBranch2 str x y
+  toHashTree (V4select str x y) = mkBranch2 str x y
+  toHashTree (Texture2D t x) = mkBranch2 "texture2D" t x
 
-instance HashStuff Booly where
-  hashStuff a@(Bu _) = Leaf $ Hash $ hash a
-  hashStuff (Buop str x) = mkBranch1 str x
-  hashStuff (Buoppre str x) = mkBranch1 str x
-  hashStuff (Bbop str x y) = mkBranch2 str x y
-  hashStuff (Bcomp str x y) = mkBranch2 str x y -- will this work with the weird show implementation?
-  hashStuff (Bcomp_ str x y) = mkBranch2 str x y -- will this work with the weird show implementation?
+instance Expression Booly where
+  toHashTree a@(Bu _) = Leaf $ Hash $ hash a
+  toHashTree (Buop str x) = mkBranch1 str x
+  toHashTree (Buoppre str x) = mkBranch1 str x
+  toHashTree (Bbop str x y) = mkBranch2 str x y
+  toHashTree (Bcomp str x y) = mkBranch2 str x y -- will this work with the weird show implementation?
+  toHashTree (Bcomp_ str x y) = mkBranch2 str x y -- will this work with the weird show implementation?
 
-instance HashStuff Texture where
-  hashStuff a = Leaf $ Hash $ hash a
+instance Expression Texture where
+  toHashTree a = Leaf $ Hash $ hash a
+
