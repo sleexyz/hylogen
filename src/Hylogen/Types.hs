@@ -518,7 +518,9 @@ instance Show GLSLType where
     GLSLTexture -> "(texture2D)" -- this should never be variablized
 
 newtype Hash = Hash Int
-  deriving (Generic, Hashable, Show, Eq, Ord)
+  deriving (Generic, Hashable, Eq, Ord)
+instance Show Hash where
+  show (Hash i) = "h_" <> show i
 
 data HashTree = Leaf Hash Expr | Branch Hash Expr [HashTree]
   deriving (Generic, Hashable, Show, Eq, Ord)
