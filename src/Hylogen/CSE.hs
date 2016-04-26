@@ -47,7 +47,7 @@ addNode hashish expr = do
 addTree :: HashTree -> GLSLState ()
 addTree ht = case ht of
   Leaf h e -> do
-    _ <- addNode h e
+    -- _ <- addNode h e
     return ()
   Branch h e subTrees -> do
     -- | post-order traversal guarantees topological ordering!
@@ -118,4 +118,12 @@ variablize expr subTrees = case expr of
     -> Access ty st
     <$> f x (subTrees !! 0)
   where
-    f x h = Uniform (getType x) <$> (getName h)
+    f :: Expr -> HashTree -> GLSLState Expr
+    f x ht = do
+      let h = case ht of
+                Leaf h _ -> h
+                Branch h _ _ -> h
+      (GLSL (_, hash2id)) <- get
+      if Map.member h hash2id
+        then Uniform (getType x) <$> (getName ht)
+        else return x

@@ -515,7 +515,7 @@ instance Show GLSLType where
     GLSLVec3 -> "vec3"
     GLSLVec4 -> "vec4"
     GLSLBool -> "bool"
-    GLSLTexture -> "(texture2D)" -- this should never be variablized
+    GLSLTexture -> "(texture)" -- this should never be variablized
 
 newtype Hash = Hash Int
   deriving (Generic, Hashable, Eq, Ord)
@@ -662,7 +662,7 @@ instance Expressible Vec4 where
     V4boppre str x y -> BinaryOpPre ty str (toExpr x) (toExpr y)
     V4bops str x y   -> BinaryOp ty str (toExpr x) (toExpr y)
     V4select b x y   -> Select ty (toExpr b) (toExpr x) (toExpr y)
-    Texture2D t x    -> BinaryOpPre ty "texture2D" (toExpr t) (toExpr t)
+    Texture2D t x    -> BinaryOpPre ty "texture2D" (toExpr t) (toExpr x)
     where
       ty = GLSLVec4
 
@@ -673,7 +673,7 @@ instance Expressible Booly where
     Buoppre str x -> UnaryOpPre ty str (toExpr x)
     Bbop str x y -> BinaryOp ty str (toExpr x) (toExpr y)
     Bcomp_ str x y -> BinaryOp ty str (toExpr x) (toExpr y)
-    Bcomp str x y -> undefined
+    Bcomp str x y -> toExpr . product $ zipWith (Bcomp_ str) (toList x) (toList y)
     where
       ty = GLSLBool
 
