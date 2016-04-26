@@ -8,131 +8,114 @@ import           Data.Monoid
 
 import           Hylogen.Types
 import           Control.Monad.State.Lazy
+import           Data.List
 
 type Id = Int
 type Count = Int
 
 -- | Add if in first, variabalize!
-type Context = (Map.Map Id Expr, Map.Map Hash (Id, Count))
+newtype GLSL = GLSL (Map.Map Id Expr, Map.Map Hash (Id, Count))
 
-type GLSL = State Context
+getTopLevel :: GLSL -> Expr
+getTopLevel (GLSL (id2expr, _)) = case Map.maxViewWithKey id2expr of
+  Nothing -> error "must have top level?"
+  Just ((k, e), _) -> Uniform (getType e) ("_" <> show k)
 
-addNode:: Hash -> Expr -> GLSL ()
+
+
+type GLSLState = State GLSL
+
+addNode:: Hash -> Expr -> GLSLState Id
 addNode hashish expr = do
-  (id2expr, hash2id) <- get
+  GLSL (id2expr, hash2id) <- get
   let newid = case Map.maxViewWithKey id2expr of
                 Nothing -> 0
                 Just ((k, _), _) -> k + 1
 
   if Map.member hashish hash2id
-    then modify (\(foo, bar) -> ( foo
-                                , Map.adjust (\(a, b) -> (a, b+1)) hashish bar
-                                ))
-    else modify (\(foo, bar) -> ( Map.insert newid expr foo
-                                , Map.insert hashish (newid, 1) bar
-                                ))
+    then do
+         modify (\(GLSL (foo, bar)) -> GLSL ( foo
+                                                  , Map.adjust (\(a, b) -> (a, b+1)) hashish bar
+                                                  ))
+         return $ fst $ hash2id Map.! hashish
+    else do
+         modify (\(GLSL (foo, bar)) -> GLSL ( Map.insert newid expr foo
+                                                , Map.insert hashish (newid, 1) bar
+                                                ))
+         return $ newid
 
-addTree :: HashTree -> GLSL ()
+addTree :: HashTree -> GLSLState ()
 addTree ht = case ht of
-  Leaf h e -> addNode h e
+  Leaf h e -> do
+    _ <- addNode h e
+    return ()
   Branch h e subTrees -> do
-    addNode h e
+    -- | post-order traversal guarantees topological ordering!
     forM_ subTrees addTree
+    i <- addNode h e
+    newExpr <- variablize e subTrees
+    modify (\(GLSL (foo, bar)) -> GLSL ( Map.adjust (const newExpr) i foo
+                                             , bar ))
 
-initialContext :: Context
-initialContext = (Map.empty, Map.empty)
-
-foobar :: (Expressible a) => a -> Context
-foobar x = execState (addTree . toHashTree . toExpr $ x ) initialContext
-
-printFoobar :: (Expressible a) => a -> IO ()
-printFoobar x = do
-  let (id2expr, hash2id) = foobar x
-  forM_ (Map.toList id2expr) $ print
-
-
--- hashTreeToCount :: HashTree -> Map.Map Hash (Expr, Int)
--- hashTreeToCount (Leaf h expr) = Map.singleton h (expr, 1)
--- hashTreeToCount (Branch h expr subTrees) = Map.unionsWith fn
---   $ (Map.singleton h (expr, 1)) : (hashTreeToCount <$> subTrees)
---   where
---     fn :: (Expr, Int) -> (Expr, Int) -> (Expr, Int)
---     fn (exprA, a) (exprB, b)
---       | exprA == exprB = (exprA, a + b)
---       | otherwise      = error $ (show exprA) <> "\ndoesn't equal\n" <> (show exprB)
-
-
-type Name = String
-getName :: HashTree -> String
-getName (Leaf h _) = show h
-getName (Branch h _ _) = show h
-
-
-variablize:: HashTree -> Expr
-variablize a@(Leaf h expr) =  expr
-variablize (Branch h expr subTrees) = expr'
+genGLSL :: (Expressible a) => a -> GLSL
+genGLSL x = execState (addTree . toHashTree . toExpr $ x ) initialGLSL
   where
-    expr' = case expr of
-      Uniform ty st -> Uniform ty st
-      UnaryOp ty st x -> UnaryOp ty st (f x $ subTrees !! 0)
-      UnaryOpPre ty st x -> UnaryOpPre ty st (f x $ subTrees !! 0)
-      BinaryOp ty st x y -> BinaryOp ty st (f x $ subTrees !! 0) (f y $ subTrees !! 1)
-      BinaryOpPre ty st x y -> BinaryOp ty st (f x $ subTrees !! 0) (f y $ subTrees !! 1)
-      TernaryOpPre ty st x y z -> TernaryOpPre ty st (f x $ subTrees !! 0) (f y $ subTrees !! 1) (f z $ subTrees !! 2)
-      QuaternaryOpPre ty st x y z w -> QuaternaryOpPre ty st (f x $ subTrees !! 0) (f y $ subTrees !! 1) (f z $ subTrees !! 2) (f w $ subTrees !! 3)
-      Select ty x y z -> Select ty (f x $ subTrees !! 0) (f y $ subTrees !! 1) (f z $ subTrees !! 2)
-      Access ty st x -> Access ty st (f x $ subTrees !! 0)
-      where
-        f x h = Uniform (getType x) (getName h)
+    initialGLSL :: GLSL
+    initialGLSL = GLSL (Map.empty, Map.empty)
 
--- showWithVariable :: HashTree -> String
--- showWithVariable (Leaf h expr) = show h
--- showWithVariable (Branch h expr subTrees) = show $ case expr of
---     Uniform ty st -> Uniform ty st
---     UnaryOp ty st x -> UnaryOp ty st (f x $ subTrees !! 0)
---     UnaryOpPre ty st x -> UnaryOpPre ty st (f x $ subTrees !! 0)
---     BinaryOp ty st x y -> BinaryOp ty st (f x $ subTrees !! 0) (f y $ subTrees !! 1)
---     BinaryOpPre ty st x y -> BinaryOp ty st (f x $ subTrees !! 0) (f y $ subTrees !! 1)
---     TernaryOpPre ty st x y z -> TernaryOpPre ty st (f x $ subTrees !! 0) (f y $ subTrees !! 1) (f z $ subTrees !! 2)
---     QuaternaryOpPre ty st x y z w -> QuaternaryOpPre ty st (f x $ subTrees !! 0) (f y $ subTrees !! 1) (f z $ subTrees !! 2) (f w $ subTrees !! 3)
---     Select ty x y z -> Select ty (f x $ subTrees !! 0) (f y $ subTrees !! 1) (f z $ subTrees !! 2)
---     Access ty st x -> Access ty st (f x $ subTrees !! 0)
---   where
---     f x h = Uniform (getType x) (getName h)
+glslToAssignments:: GLSL -> [String]
+glslToAssignments glsl = do
+  let (GLSL (id2expr, _)) = glsl
+  fmap assign $ Map.toList id2expr
+  where
+    assign :: (Id, Expr) -> String
+    assign (i, e) = show (getType e) <> " " <> "_" <> show i <> " = " <> show e <> ";"
 
 
+getName :: HashTree -> GLSLState String
+getName ht = do
+  let h = case ht of
+            Leaf h _ -> h
+            Branch h _ _ -> h
+  GLSL (_, hash2id) <- get
+  return $ "_" <> show (fst $ hash2id Map.! h)
 
--- type Context = (Map.Map Hash (Expr, Int, Bool), [(Hash, Expr)])
-
--- TODO: actually get working..?
-
--- variablize :: Expr -> ([(Hash, Expr)], Expr)
--- variablize input= variablize' (toHashTree input) ([], input)
---   where
---     variablize' :: HashTree -> ([(Hash, Expr)], Expr) -> ([(Hash, Expr)], Expr)
---     variablize' (Leaf h expr) (ctx, lastExpr) = ((h, expr):ctx, lastExpr)
---     variablize' (Branch h expr subTrees) (ctx, lastExpr) = (newctx ++ (h, expr):ctx, lastExpr)
---       where
---         newctx = mconcat $ fn <$> subTrees
---         fn subTree = fst $ variablize' subTree (ctx, lastExpr)
-
--- toGLSL :: Vec4 -> GLSL
--- toGLSL v = fn top m
---   where
---     top = toExpr v
---     ht = toHashTree top
---     m = hashTreeToCount ht
-
---     fn :: Expr -> Map.Map Hash (Expr, Int)
-
-
--- Now do depth-first traversal of the tree
-
--- data GLSL = GLSL [(Hash, Expr)] Expr
--- instance Show GLSL where
---   show (GLSL context fragColor) = fn context ++ "\ngl_FragColor = " ++ show fragColor ++ ";"
---     where
---       fn xs = mconcat $ showStatement <$> xs
---       showStatement (hash, expr) = show (getType expr) <> " var" <> show hash <> " = " <> show expr <> ";\n"
-
--- State monad?
+variablize :: Expr -> [HashTree] -> GLSLState Expr
+variablize expr subTrees = case expr of
+  Uniform ty st
+    -> return $ Uniform ty st
+  UnaryOp ty st x
+    -> UnaryOp ty st
+    <$> f x (subTrees !! 0)
+  UnaryOpPre ty st x
+    -> UnaryOpPre ty st
+    <$> f x (subTrees !! 0)
+  BinaryOp ty st x y
+    -> BinaryOp ty st
+    <$> f x (subTrees !! 0)
+    <*> f y (subTrees !! 1)
+  BinaryOpPre ty st x y
+    -> BinaryOpPre ty st
+    <$> f x (subTrees !! 0)
+    <*> f y (subTrees !! 1)
+  TernaryOpPre ty st x y z
+    -> TernaryOpPre ty st
+    <$> f x (subTrees !! 0)
+    <*> f y (subTrees !! 1)
+    <*> f z (subTrees !! 2)
+  QuaternaryOpPre ty st x y z w
+    -> QuaternaryOpPre ty st
+    <$> f x (subTrees !! 0)
+    <*> f y (subTrees !! 1)
+    <*> f z (subTrees !! 2)
+    <*> f w (subTrees !! 3)
+  Select ty x y z
+    -> Select ty
+    <$> f x (subTrees !! 0)
+    <*> f y (subTrees !! 1)
+    <*> f z (subTrees !! 2)
+  Access ty st x
+    -> Access ty st
+    <$> f x (subTrees !! 0)
+  where
+    f x h = Uniform (getType x) <$> (getName h)

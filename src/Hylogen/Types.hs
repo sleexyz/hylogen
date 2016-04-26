@@ -558,15 +558,15 @@ getType x = case x of
 
 instance Show Expr where
   show foo = case foo of
-    Uniform _ x -> x
-    UnaryOp _  u x -> u <> "(" <> show x <> ")"
-    UnaryOpPre _  u x -> "(" <> u <> show x <> ")"
-    BinaryOp _  b x y -> "(" <> show x <> " " <> b <> " " <> show y <> ")"
-    BinaryOpPre _  b x y -> b <> "(" <> show x <> ", " <> show y <> ")"
-    TernaryOpPre _  b x y z -> b <> "(" <> show x <> ", " <> show y <> ", " <> show z <> ")"
+    Uniform _ x                  -> x
+    UnaryOp _  u x               -> u <> "(" <> show x <> ")"
+    UnaryOpPre _  u x            -> "(" <> u <> show x <> ")"
+    BinaryOp _  b x y            -> "(" <> show x <> " " <> b <> " " <> show y <> ")"
+    BinaryOpPre _  b x y         -> b <> "(" <> show x <> ", " <> show y <> ")"
+    TernaryOpPre _  b x y z      -> b <> "(" <> show x <> ", " <> show y <> ", " <> show z <> ")"
     QuaternaryOpPre _  b x y z w -> b <> "(" <> show x <> ", " <> show y <> ", " <> show z <> ", " <> show w <> ")"
-    Select _  b x y -> "( " <> show b <> " ? " <> show x <> " : " <> show y <> ")"
-    Access _  field x ->  show x <> "." <> field
+    Select _  b x y              -> "( " <> show b <> " ? " <> show x <> " : " <> show y <> ")"
+    Access _  field x            ->  show x <> "." <> field
 
 -- Type information?
 -- STring information?
