@@ -66,6 +66,9 @@ audio = V4u "audio"
 backBuffer :: Texture
 backBuffer = Tu "backBuffer"
 
+channel1 :: Texture
+channel1 = Tu "channel1"
+
 mix :: Vec1 -> Vec4 -> Vec4 -> Vec4
 mix p a b = p *^ a + (1 - p) *^ b
 
