@@ -1,6 +1,6 @@
 # [*H Y L O G E N*](https://hylogen.com)
 
-Hylogen is a language [embedded in Haskell](https://wiki.haskell.org/Embedded_domain_specific_language) for live-coding fragment shaders.
+Hylogen is a purely functional language [embedded in Haskell](https://wiki.haskell.org/Embedded_domain_specific_language) for live-coding fragment shaders.
 
 ## Setup
 ```

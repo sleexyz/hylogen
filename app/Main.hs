@@ -12,6 +12,7 @@ import System.Environment (getArgs)
 import System.FilePath
 import System.FSNotify
 import System.Process
+import System.Exit (ExitCode(ExitFailure, ExitSuccess))
 
 import Network.Wai
 import Network.Wai.Handler.Warp
@@ -25,35 +26,47 @@ main = getArgs >>= \case
   _ -> error "Name a file to watch!"
 
 main' :: FilePath ->  IO ()
-main' pathToWatch = withManager $ \mgr -> do
-  _ <- forkIO $ serveIndex
-  runServer "127.0.0.1" 8080 $ handleConnection pathToWatch mgr
+main' pathToWatch = do
+  _ <- forkIO serveIndex
+  withManager
+    $ runServer "127.0.0.1" 8080
+    . handleConnection pathToWatch
 
 handleConnection :: FilePath -> WatchManager -> PendingConnection -> IO ()
 handleConnection pathToWatch mgr pending = do
-   let (dirToWatch, fileToWatch) = splitFileName pathToWatch
+   let (dirToWatch, _) = splitFileName pathToWatch
    connection <- acceptRequest pending
 
-   (sendTextData connection . T.pack) =<< getNewSource pathToWatch
+   let update = do
+         maybeNewSource <- getNewSource pathToWatch
+         case maybeNewSource of
+           Just source -> sendTextData connection . T.pack $ source
+           Nothing -> return ()
+   update
 
    let onChange e = case e of
-         Modified _ _ -> (sendTextData connection . T.pack) =<< getNewSource pathToWatch
+         Modified _ _ -> update
          _ -> return ()
    _ <- watchDir mgr dirToWatch (const True) onChange
    _ <- getLine -- temp hack to keep the socket open
    return ()
 
-getNewSource :: FilePath -> IO String
+getNewSource :: FilePath -> IO (Maybe String)
 getNewSource pathToWatch = do
    -- TODO: more robust paths!:
    -- c <- readFile pathToWatch
    let (dirToWatch, fileToWatch) = splitFileName pathToWatch
-   c <- readProcess "runghc" [
+   (ec, stdout, stderr) <- readProcessWithExitCode "runghc" [
         "-i"++dirToWatch
       , pathToWatch
       ] ""
-   putStrLn "updated"
-   return c
+   case ec of
+     ExitSuccess -> do
+       putStrLn "updated"
+       return (Just stdout)
+     ExitFailure i -> do
+       putStrLn stderr
+       return Nothing
 
 serveIndex :: IO ()
 serveIndex = do
