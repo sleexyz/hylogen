@@ -4,3 +4,4 @@ TAGS
 src/Audio.hs
 src/NonAudio.hs
 shader.glsl
+core
