@@ -11,6 +11,8 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveFoldable #-}
+{-# LANGUAGE LambdaCase #-}
 
 module Hylogen.Types where
 
@@ -520,10 +522,20 @@ instance Show GLSLType where
 newtype Hash = Hash Int
   deriving (Generic, Hashable, Eq, Ord)
 instance Show Hash where
-  show (Hash i) = "h_" <> show i
+  show = const "_"
 
-data HashTree = Leaf Hash Expr | Branch Hash Expr [HashTree]
-  deriving (Generic, Hashable, Show, Eq, Ord)
+-- data HashTree a = Leaf Hash a | Branch Hash a [HashTree a]
+--   deriving (Generic, Hashable, Show, Eq, Ord, Foldable)
+
+data RoseTree a = Leaf a | Branch a [RoseTree a]
+  deriving (Generic, Hashable, Show, Eq, Ord, Foldable)
+
+type HashTree = RoseTree (Hash, Expr, [Hash])
+getHash :: HashTree -> Hash
+getHash = \case
+  Leaf (h, _, _) -> h
+  Branch (h, _, _) _ -> h
+
 
 class (Show a) => Expressible a where
   toExpr :: a -> Expr
@@ -585,25 +597,25 @@ toHashTree exprForm = case exprForm of
 type HashContext = (GLSLType, String)
 
 mkLeaf :: HashContext -> Expr -> HashTree
-mkLeaf hc expr = Leaf (Hash $ hash (expr, hc)) expr
+mkLeaf hc expr = Leaf (Hash $ hash (expr, hc),  expr, [])
 
 mkBranch1 :: HashContext -> Expr -> Expr -> HashTree
-mkBranch1 hc expr x = Branch (Hash $ hash (expr, hc, subTrees)) expr subTrees
+mkBranch1 hc expr x = Branch (Hash $ hash (expr, hc, subTrees), expr, getHash <$> subTrees) subTrees
   where
     subTrees = [toHashTree x]
 
 mkBranch2 :: HashContext -> Expr -> Expr -> Expr -> HashTree
-mkBranch2 hc expr x y = Branch (Hash $ hash (expr, hc, subTrees)) expr subTrees
+mkBranch2 hc expr x y = Branch (Hash $ hash (expr, hc, subTrees), expr, getHash <$> subTrees) subTrees
   where
     subTrees = [toHashTree x, toHashTree y]
 
 mkBranch3 :: HashContext -> Expr -> Expr -> Expr -> Expr -> HashTree
-mkBranch3 hc expr x y z = Branch (Hash $ hash (expr, hc, subTrees)) expr subTrees
+mkBranch3 hc expr x y z = Branch (Hash $ hash (expr, hc, subTrees), expr, getHash <$> subTrees) subTrees
   where
     subTrees = [toHashTree x, toHashTree y, toHashTree z]
 
 mkBranch4 :: HashContext -> Expr -> Expr -> Expr -> Expr -> Expr -> HashTree
-mkBranch4 hc expr x y z w = Branch (Hash $ hash (expr, hc, subTrees)) expr subTrees
+mkBranch4 hc expr x y z w = Branch (Hash $ hash (expr, hc, subTrees), expr, getHash <$> subTrees) subTrees
   where
     subTrees = [toHashTree x, toHashTree y, toHashTree z, toHashTree w]
 
@@ -682,9 +694,12 @@ instance Expressible Texture where
     where
       ty = GLSLTexture
 
+-- Look at ezyang's gadt guide
 -- | Existential
 -- data Expr where
---   ToExpr :: (Expressible a) => a -> Expr
+--   Foo :: (Expressible a) => a -> Expr
+
+
 
 -- instance Show Expr where
 --   show (ToExpr a) = show (getType a) <> " blah = " <> show a <> ";"

@@ -28,6 +28,10 @@ main = getArgs >>= \case
 main' :: FilePath ->  IO ()
 main' pathToWatch = do
   _ <- forkIO serveIndex
+  serveGLSL pathToWatch
+
+serveGLSL :: FilePath -> IO ()
+serveGLSL pathToWatch = do
   withManager
     $ runServer "127.0.0.1" 8080
     . handleConnection pathToWatch
@@ -55,7 +59,7 @@ getNewSource :: FilePath -> IO (Maybe String)
 getNewSource pathToWatch = do
    -- TODO: more robust paths!:
    -- c <- readFile pathToWatch
-   let (dirToWatch, fileToWatch) = splitFileName pathToWatch
+   let (dirToWatch, _) = splitFileName pathToWatch
    (ec, stdout, stderr) <- readProcessWithExitCode "runghc" [
         "-i"++dirToWatch
       , pathToWatch
@@ -64,7 +68,7 @@ getNewSource pathToWatch = do
      ExitSuccess -> do
        putStrLn "updated"
        return (Just stdout)
-     ExitFailure i -> do
+     ExitFailure _ -> do
        putStrLn stderr
        return Nothing
 
