@@ -10,10 +10,9 @@ import           Hylogen.Types
 import           Control.Arrow
 
 type Id = Int
-type Count = Int
 
 -- | Add if in first, variabalize!
-newtype GLSL = GLSL (Map.Map Id (Expr, [Hash]), Map.Map Hash (Id, Count))
+newtype GLSL = GLSL (Map.Map Id (Expr, [Hash]), Map.Map Hash Id)
                deriving (Show)
 
 
@@ -22,14 +21,27 @@ initialGLSL = GLSL (Map.empty, Map.empty)
 
 
 
+-- genContext :: HashTree -> GLSL
+-- genContext = foldr fn initialGLSL
+--   where
+--     fn :: (Hash, Expr, [Hash]) -> GLSL -> GLSL
+--     fn (h, e, children) glsl =
+--       case e of
+--         Uniform _ _ -> glsl
+--         _ -> snd $ addNode' h e children glsl
+
 genContext :: HashTree -> GLSL
-genContext = foldr fn initialGLSL
+genContext ht = genContext' ht initialGLSL
   where
-    fn :: (Hash, Expr, [Hash]) -> GLSL -> GLSL
-    fn (h, e, children) glsl =
-      case e of
-        Uniform _ _ -> glsl
-        _ -> snd $ addNode' h e children glsl
+    genContext' :: HashTree -> GLSL -> GLSL
+    genContext' (Leaf _) glsl = glsl
+    genContext' (Branch (h, e, hs) subTrees) glsl = fn (h, e, hs) (foldr genContext' glsl subTrees)
+      where
+        fn :: (Hash, Expr, [Hash]) -> GLSL -> GLSL
+        fn (h, e, children) glslAfterChildren@(GLSL (_, hash2id))
+          = if Map.member h hash2id
+            then glsl -- short circuit the branch
+            else snd $ addNode' h e children glslAfterChildren
 
 
 addNode' :: Hash -> Expr -> [Hash] -> GLSL -> (Id, GLSL)
@@ -38,21 +50,14 @@ addNode' hashish expr children glsl =
       newid = case Map.maxViewWithKey id2expr of
                 Nothing -> 0
                 Just ((k, _), _) -> k + 1
-  in
-    if Map.member hashish hash2id
-    then ( fst $ hash2id Map.! hashish
-         , GLSL ( id2expr
-                , Map.adjust (\(a, b) -> (a, b+1)) hashish hash2id
-                )
-         )
-    else ( newid
-         , GLSL ( Map.insert newid (expr, children) id2expr
-                , Map.insert hashish (newid, 1) hash2id
-                )
-         )
+  in ( newid
+     , GLSL ( Map.insert newid (expr, children) id2expr
+            , Map.insert hashish newid hash2id
+            )
+     )
 
 getName :: Hash -> GLSL -> String
-getName h (GLSL (_, hash2id)) = "_" <> show (fst $ hash2id Map.! h)
+getName h (GLSL (_, hash2id)) = "_" <> show (hash2id Map.! h)
 
 variablize :: Expr -> [Hash] -> GLSL -> Expr
 variablize expr hashes glsl =
