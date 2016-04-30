@@ -519,10 +519,7 @@ instance Show GLSLType where
     GLSLBool -> "bool"
     GLSLTexture -> "(texture)" -- this should never be variablized
 
-newtype Hash = Hash Int
-  deriving (Generic, Hashable, Eq, Ord)
-instance Show Hash where
-  show = const "_"
+type Hash = Int
 
 -- data HashTree a = Leaf Hash a | Branch Hash a [HashTree a]
 --   deriving (Generic, Hashable, Show, Eq, Ord, Foldable)
@@ -582,6 +579,7 @@ instance Show Expr where
 
 -- Type information?
 -- STring information?
+-- TODO: slow
 toHashTree :: Expr -> HashTree
 toHashTree exprForm = case exprForm of
   a@(Uniform ty str)              -> mkLeaf (ty, str) a
@@ -597,25 +595,25 @@ toHashTree exprForm = case exprForm of
 type HashContext = (GLSLType, String)
 
 mkLeaf :: HashContext -> Expr -> HashTree
-mkLeaf hc expr = Leaf (Hash $ hash (expr, hc),  expr, [])
+mkLeaf hc expr = Leaf (hash (expr, hc),  expr, [])
 
 mkBranch1 :: HashContext -> Expr -> Expr -> HashTree
-mkBranch1 hc expr x = Branch (Hash $ hash (expr, hc, subTrees), expr, getHash <$> subTrees) subTrees
+mkBranch1 hc expr x = Branch (hash (expr, hc, subTrees), expr, getHash <$> subTrees) subTrees
   where
     subTrees = [toHashTree x]
 
 mkBranch2 :: HashContext -> Expr -> Expr -> Expr -> HashTree
-mkBranch2 hc expr x y = Branch (Hash $ hash (expr, hc, subTrees), expr, getHash <$> subTrees) subTrees
+mkBranch2 hc expr x y = Branch (hash (expr, hc, subTrees), expr, getHash <$> subTrees) subTrees
   where
     subTrees = [toHashTree x, toHashTree y]
 
 mkBranch3 :: HashContext -> Expr -> Expr -> Expr -> Expr -> HashTree
-mkBranch3 hc expr x y z = Branch (Hash $ hash (expr, hc, subTrees), expr, getHash <$> subTrees) subTrees
+mkBranch3 hc expr x y z = Branch (hash (expr, hc, subTrees), expr, getHash <$> subTrees) subTrees
   where
     subTrees = [toHashTree x, toHashTree y, toHashTree z]
 
 mkBranch4 :: HashContext -> Expr -> Expr -> Expr -> Expr -> Expr -> HashTree
-mkBranch4 hc expr x y z w = Branch (Hash $ hash (expr, hc, subTrees), expr, getHash <$> subTrees) subTrees
+mkBranch4 hc expr x y z w = Branch (hash (expr, hc, subTrees), expr, getHash <$> subTrees) subTrees
   where
     subTrees = [toHashTree x, toHashTree y, toHashTree z, toHashTree w]
 

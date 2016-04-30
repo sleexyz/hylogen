@@ -3,21 +3,26 @@
 
 module Hylogen.CSE where
 
-import qualified Data.Map      as Map
+import           Data.IntMap.Lazy (IntMap)
+import qualified Data.IntMap      as IntMap
 import           Data.Monoid
 
 import           Hylogen.Types
 import           Control.Arrow
 
-type Id = Int
 
+type Id = Int
 -- | Add if in first, variabalize!
-newtype GLSL = GLSL (Map.Map Id (Expr, [Hash]), Map.Map Hash Id)
+newtype GLSL = GLSL (IntMap (Expr, [Hash]), IntMap Id)
                deriving (Show)
+
+-- TODO:
+-- newtype GLSL = GLSL ([(Id, (Expr, [Hash]))], IntMap.Map Hash Id)
+--                deriving (Show)
 
 
 initialGLSL :: GLSL
-initialGLSL = GLSL (Map.empty, Map.empty)
+initialGLSL = GLSL (IntMap.empty, IntMap.empty)
 
 
 
@@ -30,6 +35,9 @@ initialGLSL = GLSL (Map.empty, Map.empty)
 --         Uniform _ _ -> glsl
 --         _ -> snd $ addNode' h e children glsl
 
+
+-- TODO: slow
+
 genContext :: HashTree -> GLSL
 genContext ht = genContext' ht initialGLSL
   where
@@ -39,7 +47,7 @@ genContext ht = genContext' ht initialGLSL
       where
         fn :: (Hash, Expr, [Hash]) -> GLSL -> GLSL
         fn (h, e, children) glslAfterChildren@(GLSL (_, hash2id))
-          = if Map.member h hash2id
+          = if IntMap.member h hash2id
             then glsl -- short circuit the branch
             else snd $ addNode' h e children glslAfterChildren
 
@@ -47,17 +55,17 @@ genContext ht = genContext' ht initialGLSL
 addNode' :: Hash -> Expr -> [Hash] -> GLSL -> (Id, GLSL)
 addNode' hashish expr children glsl =
   let (GLSL (id2expr, hash2id)) = glsl
-      newid = case Map.maxViewWithKey id2expr of
+      newid = case IntMap.maxViewWithKey id2expr of
                 Nothing -> 0
                 Just ((k, _), _) -> k + 1
   in ( newid
-     , GLSL ( Map.insert newid (expr, children) id2expr
-            , Map.insert hashish newid hash2id
+     , GLSL ( IntMap.insert newid (expr, children) id2expr
+            , IntMap.insert hashish newid hash2id
             )
      )
 
 getName :: Hash -> GLSL -> String
-getName h (GLSL (_, hash2id)) = "_" <> show (hash2id Map.! h)
+getName h (GLSL (_, hash2id)) = "_" <> show (hash2id IntMap.! h)
 
 variablize :: Expr -> [Hash] -> GLSL -> Expr
 variablize expr hashes glsl =
@@ -65,7 +73,7 @@ variablize expr hashes glsl =
     GLSL (_, hash2id) = glsl
 
     f :: Expr -> Hash -> Expr
-    f x h = if Map.member h hash2id
+    f x h = if IntMap.member h hash2id
             then Uniform (getType x) (getName h glsl)
             else x
   in case expr of
@@ -109,7 +117,7 @@ type GLSL' = [(Id, Expr)]
 
 replaceWithVariables :: GLSL -> GLSL'
 replaceWithVariables glsl@(GLSL (id2expr, _))
-  = foldr fn [] (Map.toList id2expr)
+  = foldr fn [] (IntMap.toList id2expr)
   where
     fn :: (Id, (Expr, [Hash])) -> GLSL' -> GLSL'
     fn (i, (e, hashes)) xs = (i, (variablize e hashes glsl)) : xs
