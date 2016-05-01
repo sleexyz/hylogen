@@ -85,7 +85,7 @@ class (Expressible v, Show v) => Vec v where
   vbop :: String -> v -> v -> v
   vboppre :: String -> v -> v -> v
   select :: Booly -> v -> v -> v
-  fromVec1 :: Vec1 -> v
+  copy :: Vec1 -> v
   toList :: v -> [Vec1]
 
 
@@ -136,7 +136,7 @@ instance Vec Vec1 where
   vbop = V1bop
   vboppre = V1boppre
   select = V1select
-  fromVec1 = id
+  copy = id
   toList x = [x]
 
 instance Num Vec1 where
@@ -206,7 +206,7 @@ instance Vec Vec2 where
   vbop = V2bop
   vboppre = V2boppre
   select = V2select
-  fromVec1 x = Vec2 (x, x)
+  copy x = Vec2 (x, x)
   toList x = [X x, Y x]
 
 
@@ -227,12 +227,12 @@ instance Num Vec2 where
   negate = vuoppre "-"
   abs = vuop "abs"
   signum = vuop "sign"
-  fromInteger = fromVec1 . fromInteger
+  fromInteger = copy . fromInteger
 
 instance Fractional Vec2 where
   (/) = vbop "/"
   recip = vbop "/" 1
-  fromRational = fromVec1 . fromRational
+  fromRational = copy . fromRational
 
 
 instance Floating Vec2 where
@@ -291,7 +291,7 @@ instance Vec Vec3 where
   vbop = V3bop
   vboppre = V3boppre
   select = V3select
-  fromVec1 x = Vec3 (x, x, x)
+  copy x = Vec3 (x, x, x)
   toList x = [X x, Y x, Z x]
 
 instance Show Vec3 where
@@ -311,12 +311,12 @@ instance Num Vec3 where
   negate = vuoppre "-"
   abs = vuop "abs"
   signum = vuop "sign"
-  fromInteger = fromVec1 . fromInteger
+  fromInteger = copy . fromInteger
 
 instance Fractional Vec3 where
   (/) = vbop "/"
   recip = vbop "/" 1
-  fromRational = fromVec1 . fromRational
+  fromRational = copy . fromRational
 
 
 instance Floating Vec3 where
@@ -379,7 +379,7 @@ instance Vec Vec4 where
   vbop = V4bop
   vboppre = V4boppre
   select = V4select
-  fromVec1 x = Vec4 (x, x, x, x)
+  copy x = Vec4 (x, x, x, x)
   toList x = [X x, Y x, Z x, W x]
 
 instance Show Vec4 where
@@ -400,12 +400,12 @@ instance Num Vec4 where
   negate = vuoppre "-"
   abs = vuop "abs"
   signum = vuop "sign"
-  fromInteger = fromVec1 . fromInteger
+  fromInteger = copy . fromInteger
 
 instance Fractional Vec4 where
   (/) = vbop "/"
   recip = vbop "/" 1
-  fromRational = fromVec1 . fromRational
+  fromRational = copy . fromRational
 
 
 instance Floating Vec4 where
@@ -524,7 +524,7 @@ data ExprForm = Uniform
 data Tree a  = Tree { getElem     :: a
                     , getChildren :: [Tree a]
                     }
-               deriving (Functor)
+               -- deriving (Functor)
 
 type Expr = Tree (ExprForm, GLSLType, String)
 

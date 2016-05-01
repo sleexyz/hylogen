@@ -1,9 +1,6 @@
 {-# LANGUAGE DeriveAnyClass            #-}
 {-# LANGUAGE NoMonomorphismRestriction #-}
 {-# LANGUAGE LambdaCase#-}
-{-# LANGUAGE DeriveFoldable #-}
-{-# LANGUAGE DeriveFunctor #-}
-{-# LANGUAGE TupleSections #-}
 
 module Hylogen.CSE where
 
@@ -11,19 +8,19 @@ import           Data.IntMap.Lazy (IntMap)
 import qualified Data.IntMap      as IntMap
 import           Data.Monoid
 import Data.Hashable
-import GHC.Generics
 
 import           Hylogen.Types
 import           Control.Arrow
 
 type Hash = Int
+type Tags = ( ExprForm,               -- AST node form (eg. BinaryOp)
+              GLSLType,               -- GLSL type (eg. vec3)
+              String,                 -- String tag (eg. "sin")
+              Hash,                   -- Hash of the node
+              [Either Expr Hash]      -- Hash of children iff they are to be variablized
+            )
+type HashTree = Tree Tags
 
--- data HashTree a = Leaf Hash a | Branch Hash a [HashTree a]
---   deriving (Generic, Hashable, Show, Eq, Ord, Foldable)
-
-type Tags = (ExprForm, GLSLType, String, Hash, [Either Expr Hash])
-
-type HashTree = Tree (ExprForm, GLSLType, String, Hash, [Either Expr Hash])
 
 getHash :: HashTree -> Hash
 getHash (Tree (_, _, _, h, _) _) = h
@@ -32,9 +29,9 @@ getExprForm :: HashTree -> ExprForm
 getExprForm (Tree (ef, _, _, _, _) _) = ef
 
 
-toHashTree :: Tree (ExprForm, GLSLType, String) -> Tree (ExprForm, GLSLType, String, Hash, [Either Expr Hash])
+toHashTree :: Tree (ExprForm, GLSLType, String) -> HashTree
 toHashTree  (Tree (ef, ty, str)  subtrees) = let
-  subHashTrees :: [Tree (ExprForm, GLSLType, String, Hash, [Either Expr Hash])]
+  subHashTrees :: [HashTree]
   subHashTrees = toHashTree <$> subtrees
 
   subHashes :: [Hash]
@@ -47,16 +44,11 @@ toHashTree  (Tree (ef, ty, str)  subtrees) = let
   subHashes' = zipWith fn subHashes subtrees
     where
       fn :: Hash -> Expr -> Either Expr Hash
-      fn h expr@(Tree (ef, _, _) _)  = case ef of
+      fn h expr@(Tree (ef', _, _) _)  = case ef' of
         Uniform -> Left expr
         _       -> Right h
-      
   in Tree (ef, ty, str, parentHash, subHashes') subHashTrees
 
--- variablize :: [Hash] -> HashTree -> [Hash] -> HashTree
--- variablize subHashes tree@(Tree (ef, ty, str, h) _) = case ef of
---   Uniform -> tree
---   _       -> tree
 
 
 
@@ -68,29 +60,10 @@ type GLSL = ( IntMap (ExprForm, GLSLType, String, [Either Expr Hash])
             , [(ExprForm, GLSLType, String, Hash, [Either Expr Hash])]
             )
 
--- TODO:
--- newtype GLSL = GLSL ([(Id, (Expr, [Hash]))], IntMap.Map Hash Id)
---                deriving (Show)
-
 
 initialGLSL :: GLSL
 initialGLSL = (IntMap.empty, [])
 
-
-
--- genContext :: HashTree -> GLSL
--- genContext = foldr fn initialGLSL
---   where
---     fn :: (Hash, Expr, [Hash]) -> GLSL -> GLSL
---     fn (h, e, children) glsl =
---       case e of
---         Uniform _ _ -> glsl
---         _ -> snd $ addNode' h e children glsl
-
-
--- TODO: slow
-
--- HashTree = Tree (ExprForm, GLSLType, String, Hash, [Hash])
 toContext :: HashTree -> GLSL
 toContext ht = genContext' ht initialGLSL
   where
@@ -131,11 +104,9 @@ contextToAssignments (_, output) = foldl fn [] output
     fn bs tags@(ef, _, _, _, _) = case ef of
       Uniform -> bs
       _       -> assign tags : bs
--- contextToAssignments :: GLSL -> [String]
--- contextToAssignments (_, output) = assign <$> reverse output
 
 assign :: (ExprForm, GLSLType, String, Hash, [Either Expr Hash]) -> String
-assign tags@(ef, ty, str, h, hs)
+assign tags@(_, ty, _, h, _)
   = show ty <> " "
   <> hash2Name h <> " = "
   <> show expr <> ";"
@@ -144,10 +115,9 @@ assign tags@(ef, ty, str, h, hs)
 
 -- type Tags = (ExprForm, GLSLType, String, Hash, [Hash])
 tagsToExpr :: Tags -> Expr
-tagsToExpr (ef, ty, str, h, hs) = case ef of
-  _ -> Tree (ef, ty, str) $ fn <$> hs
+tagsToExpr (ef, ty, str, _, hs) = Tree (ef, ty, str) $ fn <$> hs
   where
     fn :: Either Expr Hash -> Expr
-    fn (Left e) = e
-    fn (Right h) = Tree (Variable, GLSLFloat, hash2Name h) []
+    fn (Left expr) = expr
+    fn (Right h') = Tree (Variable, GLSLFloat, hash2Name h') []
 

@@ -23,7 +23,7 @@ import           Data.Monoid
 import           Data.List
 import           Hylogen.CSE     (contextToAssignments, getTopLevel, genContext)
 import           Hylogen.Globals
-import           Hylogen.Types   (Vec (fromVec1, select, toList),
+import           Hylogen.Types   (Vec (copy , select, toList),
                                   Vec1 (W, X, Y, Z), Vec2, Vec3, Vec4)
 
 toGLSL' :: Vec4 -> String
