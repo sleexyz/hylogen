@@ -2,7 +2,9 @@
 
 Hylogen is a purely functional language [embedded in Haskell](https://wiki.haskell.org/Embedded_domain_specific_language) for live-coding fragment shaders.
 
-Hylogen programs are compiled down to GLSL code, which can be compiled and executed in a realtime WebGL rendering context.
+<br/>
+
+Hylogen programs are compiled down to GLSL code, which can be compiled and executed in Hylogen's realtime WebGL rendering context.
 
 ## Features
 
@@ -10,6 +12,7 @@ Hylogen programs are compiled down to GLSL code, which can be compiled and execu
 - syntax is simple, concise and close to GLSL
 - primitives implement standard Haskell typeclasses (`Num`, `Floating`, `VectorSpace`, `InnerSpace`, etc)
 - automatic common subexpression elimination of derived GLSL code
+- includes an audio-responsive live-rendering environment in the browser
 
 ## Setup
 ```
