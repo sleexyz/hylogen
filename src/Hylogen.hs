@@ -21,7 +21,7 @@ module Hylogen
 
 import           Data.Monoid
 import           Data.List
-import           Hylogen.CSE     (glslToAssignments, getTopLevel, genGLSL)
+import           Hylogen.CSE     (contextToAssignments, getTopLevel, genContext)
 import           Hylogen.Globals
 import           Hylogen.Types   (Vec (fromVec1, select, toList),
                                   Vec1 (W, X, Y, Z), Vec2, Vec3, Vec4)
@@ -41,7 +41,7 @@ toGLSL v = unlines [ "void main() {"
                    , "}"
                    ]
   where
-    assignments = mconcat . fmap ("\n    "<>) $ glslToAssignments glsl
-    glsl = genGLSL v
+    assignments = mconcat . fmap ("\n    "<>) $ contextToAssignments glsl
+    glsl = genContext v
     topLevel = getTopLevel glsl
 

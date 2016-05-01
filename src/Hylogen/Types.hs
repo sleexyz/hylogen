@@ -11,7 +11,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveAnyClass #-}
-{-# LANGUAGE DeriveFoldable #-}
+{-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE LambdaCase #-}
 
 module Hylogen.Types where
@@ -27,29 +27,29 @@ class (ConstructFrom' tuple hprim, Show tuple, Vec hprim) => ConstructFrom tuple
   exprFormFromTuple :: tuple -> hprim -> Expr
 
 instance ConstructFrom Float Vec1 where
-  exprFormFromTuple x _ = Uniform GLSLFloat (show x) -- TODO: this is a hack!
+  exprFormFromTuple x _ = Tree (Uniform, GLSLFloat, (show x)) [] -- TODO: this is a hack!
 instance ConstructFrom (Vec1, Vec1) Vec2 where
-  exprFormFromTuple (x, y) _  = BinaryOpPre GLSLVec2 "vec2" (toExpr x) (toExpr y)
+  exprFormFromTuple (x, y) _  = Tree (BinaryOpPre, GLSLVec2, "vec2") [toExpr x, toExpr y]
 instance ConstructFrom (Vec1, Vec1, Vec1) Vec3 where
-  exprFormFromTuple (x, y, z) _  = TernaryOpPre GLSLVec3 "vec3" (toExpr x) (toExpr y) (toExpr z)
+  exprFormFromTuple (x, y, z) _  = Tree (TernaryOpPre, GLSLVec3, "vec3") [toExpr x, toExpr y, toExpr z]
 instance ConstructFrom (Vec2, Vec1) Vec3 where
-  exprFormFromTuple (x, y) _  = BinaryOpPre  GLSLVec3 "vec3" (toExpr x) (toExpr y)
+  exprFormFromTuple (x, y) _  = Tree (BinaryOpPre, GLSLVec3, "vec3") [toExpr x, toExpr y]
 instance ConstructFrom (Vec1, Vec2) Vec3 where
-  exprFormFromTuple (x, y) _  = BinaryOpPre  GLSLVec3 "vec3" (toExpr x) (toExpr y)
+  exprFormFromTuple (x, y) _  = Tree (BinaryOpPre, GLSLVec3, "vec3") [toExpr x, toExpr y]
 instance ConstructFrom (Vec1, Vec1, Vec1, Vec1) Vec4 where
-  exprFormFromTuple (x, y, z, w) _  = QuaternaryOpPre GLSLVec4 "vec4" (toExpr x) (toExpr y) (toExpr z) (toExpr w)
+  exprFormFromTuple (x, y, z, w) _  = Tree (QuaternaryOpPre, GLSLVec4, "vec4") [toExpr x, toExpr y, toExpr z, toExpr w]
 instance ConstructFrom (Vec2, Vec1, Vec1) Vec4 where
-  exprFormFromTuple (x, y, z) _  = TernaryOpPre GLSLVec4 "vec4" (toExpr x) (toExpr y) (toExpr z)
+  exprFormFromTuple (x, y, z) _  = Tree (TernaryOpPre, GLSLVec4, "vec4") [toExpr x, toExpr y, toExpr z]
 instance ConstructFrom (Vec1, Vec2, Vec1) Vec4 where
-  exprFormFromTuple (x, y, z) _  = TernaryOpPre GLSLVec4 "vec4" (toExpr x) (toExpr y) (toExpr z)
+  exprFormFromTuple (x, y, z) _  = Tree (TernaryOpPre, GLSLVec4, "vec4") [toExpr x, toExpr y, toExpr z]
 instance (a ~ Vec1, b ~ Vec1) => ConstructFrom (a, b, Vec2) Vec4 where
-  exprFormFromTuple (x, y, z) _  = TernaryOpPre GLSLVec4 "vec4" (toExpr x) (toExpr y) (toExpr z)
+  exprFormFromTuple (x, y, z) _  = Tree (TernaryOpPre, GLSLVec4, "vec4") [toExpr x, toExpr y, toExpr z]
 instance ConstructFrom (Vec3, Vec1) Vec4 where
-  exprFormFromTuple (x, y) _  = BinaryOpPre GLSLVec4 "vec4" (toExpr x) (toExpr y)
+  exprFormFromTuple (x, y) _  = Tree (BinaryOpPre, GLSLVec4, "vec4") [toExpr x, toExpr y]
 instance (a ~ Vec1) => ConstructFrom (a, Vec3) Vec4 where
-  exprFormFromTuple (x, y) _  = BinaryOpPre GLSLVec4 "vec4" (toExpr x) (toExpr y)
+  exprFormFromTuple (x, y) _  = Tree (BinaryOpPre, GLSLVec4, "vec4") [toExpr x, toExpr y]
 instance (a ~ Vec2) => ConstructFrom (a, Vec2) Vec4 where
-  exprFormFromTuple (x, y) _  = BinaryOpPre GLSLVec4 "vec4" (toExpr x) (toExpr y)
+  exprFormFromTuple (x, y) _  = Tree (BinaryOpPre, GLSLVec4, "vec4") [toExpr x, toExpr y]
 
 type family (ConstructFrom' tuple hprim) :: Constraint where
   ConstructFrom' a Vec1 = a ~ Float
@@ -483,25 +483,6 @@ instance Num Booly where
 
 
 
-
-instance Hashable Vec1 where
-  hashWithSalt salt x = hashWithSalt salt $ ("vec1", show x)
-instance Hashable Vec2 where
-  hashWithSalt salt x = hashWithSalt salt $ ("vec2", show x)
-instance Hashable Vec3 where
-  hashWithSalt salt x = hashWithSalt salt $ ("vec3", show x)
-instance Hashable Vec4 where
-  hashWithSalt salt x = hashWithSalt salt $ ("vec4", show x)
-instance Hashable Booly where
-  hashWithSalt salt x = hashWithSalt salt $ ("booly", show x)
-
-instance Hashable Texture where
-  hashWithSalt salt x = hashWithSalt salt $ ("texture2D", show x)
-
--- TODO: textures cannot be saved as variable!
-
-
-
 data GLSLType = GLSLFloat
               | GLSLVec2
               | GLSLVec3
@@ -519,20 +500,6 @@ instance Show GLSLType where
     GLSLBool -> "bool"
     GLSLTexture -> "(texture)" -- this should never be variablized
 
-type Hash = Int
-
--- data HashTree a = Leaf Hash a | Branch Hash a [HashTree a]
---   deriving (Generic, Hashable, Show, Eq, Ord, Foldable)
-
-data RoseTree a = Leaf a | Branch a [RoseTree a]
-  deriving (Generic, Hashable, Show, Eq, Ord, Foldable)
-
-type HashTree = RoseTree (Hash, Expr, [Hash])
-getHash :: HashTree -> Hash
-getHash = \case
-  Leaf (h, _, _) -> h
-  Branch (h, _, _) _ -> h
-
 
 class (Show a) => Expressible a where
   toExpr :: a -> Expr
@@ -541,173 +508,108 @@ class (Show a) => Expressible a where
 
 -- TODO: get rid of Vec?, replace with Expr? at least get rid of all the duplicate show statements in my primitives!
 
-data Expr = Uniform GLSLType String
-          | UnaryOp  GLSLType String Expr
-          | UnaryOpPre GLSLType String Expr
-          | BinaryOp GLSLType String Expr Expr
-          | BinaryOpPre GLSLType String Expr Expr
-          | TernaryOpPre GLSLType String Expr Expr Expr
-          | QuaternaryOpPre GLSLType String Expr Expr Expr Expr
-          | Select GLSLType Expr Expr Expr -- for ternary selection
-          | Access GLSLType String Expr -- field accessor
-          deriving (Generic, Hashable, Eq, Ord)
+data ExprForm = Uniform
+              | Variable
+              | UnaryOp
+              | UnaryOpPre
+              | BinaryOp
+              | BinaryOpPre
+              | TernaryOpPre
+              | QuaternaryOpPre
+              | Select
+              | Access
+                deriving (Show, Generic, Hashable)
 
--- TODO: is there any way to do this automatically?
-getType :: Expr -> GLSLType
-getType x = case x of
-  Uniform ty _ -> ty
-  UnaryOp ty _ _ -> ty
-  UnaryOpPre ty _ _ -> ty
-  BinaryOp ty _ _ _ -> ty
-  BinaryOpPre ty _ _ _ -> ty
-  TernaryOpPre ty _ _ _ _ -> ty
-  QuaternaryOpPre ty _ _ _ _ _ -> ty
-  Select ty _ _ _ -> ty
-  Access ty _ _ -> ty
+
+data Tree a  = Tree { getElem     :: a
+                    , getChildren :: [Tree a]
+                    }
+               deriving (Functor)
+
+type Expr = Tree (ExprForm, GLSLType, String)
 
 instance Show Expr where
-  show foo = case foo of
-    Uniform _ x                  -> x
-    UnaryOp _  u x               -> u <> "(" <> show x <> ")"
-    UnaryOpPre _  u x            -> "(" <> u <> show x <> ")"
-    BinaryOp _  b x y            -> "(" <> show x <> " " <> b <> " " <> show y <> ")"
-    BinaryOpPre _  b x y         -> b <> "(" <> show x <> ", " <> show y <> ")"
-    TernaryOpPre _  b x y z      -> b <> "(" <> show x <> ", " <> show y <> ", " <> show z <> ")"
-    QuaternaryOpPre _  b x y z w -> b <> "(" <> show x <> ", " <> show y <> ", " <> show z <> ", " <> show w <> ")"
-    Select _  b x y              -> "( " <> show b <> " ? " <> show x <> " : " <> show y <> ")"
-    Access _  field x            ->  show x <> "." <> field
-
--- Type information?
--- STring information?
--- TODO: slow
-toHashTree :: Expr -> HashTree
-toHashTree exprForm = case exprForm of
-  a@(Uniform ty str)              -> mkLeaf (ty, str) a
-  UnaryOp ty  str x               -> mkBranch1 (ty, str) exprForm x
-  UnaryOpPre ty  str x            -> mkBranch1 (ty, str) exprForm x
-  BinaryOp ty  str x y            -> mkBranch2 (ty, str) exprForm x y
-  BinaryOpPre ty  str x y         -> mkBranch2 (ty, str) exprForm x y
-  TernaryOpPre ty  str x y z      -> mkBranch3 (ty, str) exprForm x y z
-  QuaternaryOpPre ty  str x y z w -> mkBranch4 (ty, str) exprForm x y z w
-  Select ty b x y                 -> mkBranch3 (ty, "?:") exprForm b x y
-  Access ty str x                 -> mkBranch1 (ty, "." <> str) exprForm x
-
-type HashContext = (GLSLType, String)
-
-mkLeaf :: HashContext -> Expr -> HashTree
-mkLeaf hc expr = Leaf (hash (expr, hc),  expr, [])
-
-mkBranch1 :: HashContext -> Expr -> Expr -> HashTree
-mkBranch1 hc expr x = Branch (hash (expr, hc, subTrees), expr, getHash <$> subTrees) subTrees
-  where
-    subTrees = [toHashTree x]
-
-mkBranch2 :: HashContext -> Expr -> Expr -> Expr -> HashTree
-mkBranch2 hc expr x y = Branch (hash (expr, hc, subTrees), expr, getHash <$> subTrees) subTrees
-  where
-    subTrees = [toHashTree x, toHashTree y]
-
-mkBranch3 :: HashContext -> Expr -> Expr -> Expr -> Expr -> HashTree
-mkBranch3 hc expr x y z = Branch (hash (expr, hc, subTrees), expr, getHash <$> subTrees) subTrees
-  where
-    subTrees = [toHashTree x, toHashTree y, toHashTree z]
-
-mkBranch4 :: HashContext -> Expr -> Expr -> Expr -> Expr -> Expr -> HashTree
-mkBranch4 hc expr x y z w = Branch (hash (expr, hc, subTrees), expr, getHash <$> subTrees) subTrees
-  where
-    subTrees = [toHashTree x, toHashTree y, toHashTree z, toHashTree w]
-
--- TODO: tag strings so hash is correct
+  show (Tree (form, _, str) xs) = case form of
+    Uniform -> str
+    Variable -> str
+    UnaryOp -> str <> "(" <> show (xs!!0) <> ")"
+    UnaryOpPre -> "(" <> str <> show (xs!!0) <> ")"
+    BinaryOp -> "(" <> show (xs !! 0) <> " " <> str <> " " <> show (xs !! 1) <> ")"
+    BinaryOpPre -> str <> "(" <> show (xs!!0) <> ", " <> show (xs!!1) <> ")"
+    TernaryOpPre -> str <> "(" <> show (xs!!0) <> ", " <> show (xs!!1) <> ", " <> show (xs!!2) <> ")"
+    QuaternaryOpPre  -> str <> "(" <> show (xs!!0) <> ", " <> show (xs!!1) <> ", " <> show (xs!!2) <> ", " <> show (xs!!3) <> ")"
+    Select -> "( " <> show (xs!!0) <> " ? " <> show (xs!!1) <> " : " <> show (xs!!2) <> ")"
+    Access ->  show (xs!!0) <> "." <> str
 
 instance Expressible Vec1 where
   toExpr foo = case foo of
     Vec1 x           -> exprFormFromTuple x foo
-    V1u str          -> Uniform ty str
-    V1uop str x      -> UnaryOp ty str (toExpr x)
-    V1uoppre str x   -> UnaryOpPre ty str (toExpr x)
-    V1bop str x y    -> BinaryOp ty str (toExpr x) (toExpr y)
-    V1boppre str x y -> BinaryOpPre ty str (toExpr x) (toExpr y)
-    V1select b x y   -> Select ty (toExpr b) (toExpr x) (toExpr y)
-    Dot x y          -> BinaryOpPre ty "dot" (toExpr x) (toExpr y)
-    X x              -> Access ty "x" (toExpr x)
-    Y x              -> Access ty "y" (toExpr x)
-    Z x              -> Access ty "z" (toExpr x)
-    W x              -> Access ty "w" (toExpr x)
+    V1u str          -> Tree (Uniform, ty, str) []
+    V1uop str x      -> Tree (UnaryOp, ty, str) [toExpr x]
+    V1uoppre str x   -> Tree (UnaryOpPre, ty, str) [toExpr x]
+    V1bop str x y    -> Tree (BinaryOp, ty, str) [toExpr x, toExpr y]
+    V1boppre str x y -> Tree (BinaryOpPre, ty, str) [toExpr x, toExpr y]
+    V1select b x y   -> Tree (Select, ty, "?:") [toExpr b, toExpr x, toExpr y]
+    Dot x y          -> Tree (BinaryOpPre, ty, "dot") [toExpr x, toExpr y]
+    X x              -> Tree (Access, ty, "x") [toExpr x]
+    Y x              -> Tree (Access, ty, "y") [toExpr x]
+    Z x              -> Tree (Access, ty, "z") [toExpr x]
+    W x              -> Tree (Access, ty, "w") [toExpr x]
     where
       ty = GLSLFloat
 
 instance Expressible Vec2 where
   toExpr foo = case foo of
     Vec2 x           -> exprFormFromTuple x foo
-    V2u str          -> Uniform ty str
-    V2uop str x      -> UnaryOp ty str (toExpr x)
-    V2uoppre str x   -> UnaryOpPre ty str (toExpr x)
-    V2bop str x y    -> BinaryOp ty str (toExpr x) (toExpr y)
-    V2boppre str x y -> BinaryOpPre ty str (toExpr x) (toExpr y)
-    V2bops str x y   -> BinaryOp ty str (toExpr x) (toExpr y)
-    V2select b x y   -> Select ty (toExpr b) (toExpr x) (toExpr y)
+    V2u str          -> Tree (Uniform, ty, str) []
+    V2uop str x      -> Tree (UnaryOp, ty, str) [toExpr x]
+    V2uoppre str x   -> Tree (UnaryOpPre, ty, str) [toExpr x]
+    V2bop str x y    -> Tree (BinaryOp, ty, str) [toExpr x, toExpr y]
+    V2boppre str x y -> Tree (BinaryOpPre, ty, str) [toExpr x, toExpr y]
+    V2bops str x y   -> Tree (BinaryOp , ty, str) [toExpr x, toExpr y]
+    V2select b x y   -> Tree (Select, ty, "?:") [toExpr b, toExpr x, toExpr y]
     where
       ty = GLSLVec2
 
 instance Expressible Vec3 where
   toExpr foo = case foo of
     Vec3 x           -> exprFormFromTuple x foo
-    V3u str          -> Uniform ty str
-    V3uop str x      -> UnaryOp ty str (toExpr x)
-    V3uoppre str x   -> UnaryOpPre ty str (toExpr x)
-    V3bop str x y    -> BinaryOp ty str (toExpr x) (toExpr y)
-    V3boppre str x y -> BinaryOpPre ty str (toExpr x) (toExpr y)
-    V3bops str x y   -> BinaryOp ty str (toExpr x) (toExpr y)
-    V3select b x y   -> Select ty (toExpr b) (toExpr x) (toExpr y)
+    V3u str          -> Tree (Uniform, ty, str) []
+    V3uop str x      -> Tree (UnaryOp, ty, str) [toExpr x]
+    V3uoppre str x   -> Tree (UnaryOpPre, ty, str) [toExpr x]
+    V3bop str x y    -> Tree (BinaryOp, ty, str) [toExpr x, toExpr y]
+    V3boppre str x y -> Tree (BinaryOpPre, ty, str) [toExpr x, toExpr y]
+    V3bops str x y   -> Tree (BinaryOp , ty, str) [toExpr x, toExpr y]
+    V3select b x y   -> Tree (Select, ty, "?:") [toExpr b, toExpr x, toExpr y]
     where
       ty = GLSLVec3
 
 instance Expressible Vec4 where
   toExpr foo = case foo of
     Vec4 x           -> exprFormFromTuple x foo
-    V4u str          -> Uniform ty str
-    V4uop str x      -> UnaryOp ty str (toExpr x)
-    V4uoppre str x   -> UnaryOpPre ty str (toExpr x)
-    V4bop str x y    -> BinaryOp ty str (toExpr x) (toExpr y)
-    V4boppre str x y -> BinaryOpPre ty str (toExpr x) (toExpr y)
-    V4bops str x y   -> BinaryOp ty str (toExpr x) (toExpr y)
-    V4select b x y   -> Select ty (toExpr b) (toExpr x) (toExpr y)
-    Texture2D t x    -> BinaryOpPre ty "texture2D" (toExpr t) (toExpr x)
+    V4u str          -> Tree (Uniform, ty, str) []
+    V4uop str x      -> Tree (UnaryOp, ty, str) [toExpr x]
+    V4uoppre str x   -> Tree (UnaryOpPre, ty, str) [toExpr x]
+    V4bop str x y    -> Tree (BinaryOp, ty, str) [toExpr x, toExpr y]
+    V4boppre str x y -> Tree (BinaryOpPre, ty, str) [toExpr x, toExpr y]
+    V4bops str x y   -> Tree (BinaryOp , ty, str) [toExpr x, toExpr y]
+    V4select b x y   -> Tree (Select, ty, "?:") [toExpr b, toExpr x, toExpr y]
+    Texture2D t x    -> Tree (BinaryOpPre, ty, "texture2D") [toExpr t, toExpr x]
     where
       ty = GLSLVec4
 
 instance Expressible Booly where
   toExpr foo = case foo of
-    Bu str -> Uniform ty str
-    Buop str x -> UnaryOp ty str (toExpr x)
-    Buoppre str x -> UnaryOpPre ty str (toExpr x)
-    Bbop str x y -> BinaryOp ty str (toExpr x) (toExpr y)
-    Bcomp_ str x y -> BinaryOp ty str (toExpr x) (toExpr y)
-    Bcomp str x y -> toExpr . product $ zipWith (Bcomp_ str) (toList x) (toList y)
+    Bu str          -> Tree (Uniform, ty, str) []
+    Buop str x      -> Tree (UnaryOp, ty, str) [toExpr x]
+    Buoppre str x   -> Tree (UnaryOpPre, ty, str) [toExpr x]
+    Bbop str x y    -> Tree (BinaryOp, ty, str) [toExpr x, toExpr y]
+    Bcomp_ str x y    -> Tree (BinaryOp, ty, str) [toExpr x, toExpr y]
+    Bcomp str x y    -> toExpr . product $ zipWith (Bcomp_ str) (toList x) (toList y)
     where
       ty = GLSLBool
 
 instance Expressible Texture where
-  toExpr (Tu str) = Uniform ty str
+  toExpr (Tu str) = Tree (Uniform, ty, str) []
     where
       ty = GLSLTexture
-
--- Look at ezyang's gadt guide
--- | Existential
--- data Expr where
---   Foo :: (Expressible a) => a -> Expr
-
-
-
--- instance Show Expr where
---   show (ToExpr a) = show (getType a) <> " blah = " <> show a <> ";"
-
-
-  -- TODO: implement Variable as a contructor for Expression
--- data Variable where
---   VVec1 :: Vec1 -> Variable
---   VVec2 :: Vec2 -> Variable
---   VVec3 :: Vec3 -> Variable
---   VBooly :: Booly -> Variable
-
--- instance Num (Context Vec1) where

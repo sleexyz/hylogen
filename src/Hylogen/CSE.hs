@@ -1,20 +1,72 @@
 {-# LANGUAGE DeriveAnyClass            #-}
 {-# LANGUAGE NoMonomorphismRestriction #-}
+{-# LANGUAGE LambdaCase#-}
+{-# LANGUAGE DeriveFoldable #-}
+{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE TupleSections #-}
 
 module Hylogen.CSE where
 
 import           Data.IntMap.Lazy (IntMap)
 import qualified Data.IntMap      as IntMap
 import           Data.Monoid
+import Data.Hashable
+import GHC.Generics
 
 import           Hylogen.Types
 import           Control.Arrow
 
+type Hash = Int
+
+-- data HashTree a = Leaf Hash a | Branch Hash a [HashTree a]
+--   deriving (Generic, Hashable, Show, Eq, Ord, Foldable)
+
+type Tags = (ExprForm, GLSLType, String, Hash, [Either Expr Hash])
+
+type HashTree = Tree (ExprForm, GLSLType, String, Hash, [Either Expr Hash])
+
+getHash :: HashTree -> Hash
+getHash (Tree (_, _, _, h, _) _) = h
+
+getExprForm :: HashTree -> ExprForm
+getExprForm (Tree (ef, _, _, _, _) _) = ef
+
+
+toHashTree :: Tree (ExprForm, GLSLType, String) -> Tree (ExprForm, GLSLType, String, Hash, [Either Expr Hash])
+toHashTree  (Tree (ef, ty, str)  subtrees) = let
+  subHashTrees :: [Tree (ExprForm, GLSLType, String, Hash, [Either Expr Hash])]
+  subHashTrees = toHashTree <$> subtrees
+
+  subHashes :: [Hash]
+  subHashes = getHash <$> subHashTrees
+
+  parentHash :: Hash
+  parentHash = hash (ef, ty, str, subHashes)
+
+  subHashes' :: [Either Expr Hash]
+  subHashes' = zipWith fn subHashes subtrees
+    where
+      fn :: Hash -> Expr -> Either Expr Hash
+      fn h expr@(Tree (ef, _, _) _)  = case ef of
+        Uniform -> Left expr
+        _       -> Right h
+      
+  in Tree (ef, ty, str, parentHash, subHashes') subHashTrees
+
+-- variablize :: [Hash] -> HashTree -> [Hash] -> HashTree
+-- variablize subHashes tree@(Tree (ef, ty, str, h) _) = case ef of
+--   Uniform -> tree
+--   _       -> tree
+
+
+
+
 
 type Id = Int
 -- | Add if in first, variabalize!
-newtype GLSL = GLSL (IntMap (Expr, [Hash]), IntMap Id)
-               deriving (Show)
+type GLSL = ( IntMap (ExprForm, GLSLType, String, [Either Expr Hash])
+            , [(ExprForm, GLSLType, String, Hash, [Either Expr Hash])]
+            )
 
 -- TODO:
 -- newtype GLSL = GLSL ([(Id, (Expr, [Hash]))], IntMap.Map Hash Id)
@@ -22,7 +74,7 @@ newtype GLSL = GLSL (IntMap (Expr, [Hash]), IntMap Id)
 
 
 initialGLSL :: GLSL
-initialGLSL = GLSL (IntMap.empty, IntMap.empty)
+initialGLSL = (IntMap.empty, [])
 
 
 
@@ -38,107 +90,64 @@ initialGLSL = GLSL (IntMap.empty, IntMap.empty)
 
 -- TODO: slow
 
-genContext :: HashTree -> GLSL
-genContext ht = genContext' ht initialGLSL
+-- HashTree = Tree (ExprForm, GLSLType, String, Hash, [Hash])
+toContext :: HashTree -> GLSL
+toContext ht = genContext' ht initialGLSL
   where
     genContext' :: HashTree -> GLSL -> GLSL
-    genContext' (Leaf _) glsl = glsl
-    genContext' (Branch (h, e, hs) subTrees) glsl = fn (h, e, hs) (foldr genContext' glsl subTrees)
+    genContext' (Tree foo subTrees) glsl = fn foo (foldr genContext' glsl subTrees)
       where
-        fn :: (Hash, Expr, [Hash]) -> GLSL -> GLSL
-        fn (h, e, children) glslAfterChildren@(GLSL (_, hash2id))
-          = if IntMap.member h hash2id
-            then glsl -- short circuit the branch
-            else snd $ addNode' h e children glslAfterChildren
+        fn :: (ExprForm, GLSLType, String, Hash, [Either Expr Hash]) -> GLSL -> GLSL
+        fn orig@(ef, ty, str, h, hs) (hashmap, output)
+          = if IntMap.member h hashmap
+            then ( hashmap
+                 , output
+                 )
+            else ( IntMap.insert h (ef, ty, str, hs) hashmap
+                 , orig:output
+                 )
 
-
-addNode' :: Hash -> Expr -> [Hash] -> GLSL -> (Id, GLSL)
-addNode' hashish expr children glsl =
-  let (GLSL (id2expr, hash2id)) = glsl
-      newid = case IntMap.maxViewWithKey id2expr of
-                Nothing -> 0
-                Just ((k, _), _) -> k + 1
-  in ( newid
-     , GLSL ( IntMap.insert newid (expr, children) id2expr
-            , IntMap.insert hashish newid hash2id
-            )
-     )
-
-getName :: Hash -> GLSL -> String
-getName h (GLSL (_, hash2id)) = "_" <> show (hash2id IntMap.! h)
-
-variablize :: Expr -> [Hash] -> GLSL -> Expr
-variablize expr hashes glsl =
-  let
-    GLSL (_, hash2id) = glsl
-
-    f :: Expr -> Hash -> Expr
-    f x h = if IntMap.member h hash2id
-            then Uniform (getType x) (getName h glsl)
-            else x
-  in case expr of
-  Uniform ty st
-    -> Uniform ty st
-  UnaryOp ty st x
-    -> UnaryOp ty st
-    ( f x (hashes !! 0))
-  UnaryOpPre ty st x
-    -> UnaryOpPre ty st
-    ( f x (hashes !! 0))
-  BinaryOp ty st x y
-    -> BinaryOp ty st
-    ( f x (hashes !! 0))
-    ( f y (hashes !! 1))
-  BinaryOpPre ty st x y
-    -> BinaryOpPre ty st
-    ( f x (hashes !! 0))
-    ( f y (hashes !! 1))
-  TernaryOpPre ty st x y z
-    -> TernaryOpPre ty st
-    ( f x (hashes !! 0))
-    ( f y (hashes !! 1))
-    ( f z (hashes !! 2))
-  QuaternaryOpPre ty st x y z w
-    -> QuaternaryOpPre ty st
-    ( f x (hashes !! 0))
-    ( f y (hashes !! 1))
-    ( f z (hashes !! 2))
-    ( f w (hashes !! 3))
-  Select ty x y z
-    -> Select ty
-    ( f x (hashes !! 0))
-    ( f y (hashes !! 1))
-    ( f z (hashes !! 2))
-  Access ty st x
-    -> Access ty st
-    ( f x (hashes !! 0))
-
-type GLSL' = [(Id, Expr)]
-
-replaceWithVariables :: GLSL -> GLSL'
-replaceWithVariables glsl@(GLSL (id2expr, _))
-  = foldr fn [] (IntMap.toList id2expr)
-  where
-    fn :: (Id, (Expr, [Hash])) -> GLSL' -> GLSL'
-    fn (i, (e, hashes)) xs = (i, (variablize e hashes glsl)) : xs
-
-foo :: GLSL -> String
-foo (GLSL (id2expr, _))= foldl (\b a ->b <>"\n" <> show a) "" id2expr
-
-genGLSL :: (Expressible a) => a -> GLSL'
-genGLSL = toExpr
+genContext :: (Expressible a) => a -> GLSL
+genContext = toExpr
   >>> toHashTree
-  >>> genContext
-  >>> replaceWithVariables
+  >>> toContext
+
+hash2Name :: Hash -> String
+hash2Name h
+  | h < 0     = "_n" <> tail shown
+  | otherwise = "_" <> shown
+    where
+      shown = show h
 
 
-getTopLevel :: GLSL' -> Expr
-getTopLevel id2expr = fn (last id2expr)
+
+
+getTopLevel :: GLSL -> Expr
+getTopLevel (_, output) = tagsToExpr $ head output
+
+contextToAssignments :: GLSL -> [String]
+contextToAssignments (_, output) = foldl fn [] output
   where
-    fn (i, e) = Uniform (getType e) ("_" <> show i)
+    fn bs tags@(ef, _, _, _, _) = case ef of
+      Uniform -> bs
+      _       -> assign tags : bs
+-- contextToAssignments :: GLSL -> [String]
+-- contextToAssignments (_, output) = assign <$> reverse output
 
-glslToAssignments:: GLSL' -> [String]
-glslToAssignments glsl' = assign <$> glsl'
+assign :: (ExprForm, GLSLType, String, Hash, [Either Expr Hash]) -> String
+assign tags@(ef, ty, str, h, hs)
+  = show ty <> " "
+  <> hash2Name h <> " = "
+  <> show expr <> ";"
   where
-    assign :: (Id, Expr) -> String
-    assign (i, e) = show (getType e) <> " " <> "_" <> show i <> " = " <> show e <> ";"
+    expr = tagsToExpr tags
+
+-- type Tags = (ExprForm, GLSLType, String, Hash, [Hash])
+tagsToExpr :: Tags -> Expr
+tagsToExpr (ef, ty, str, h, hs) = case ef of
+  _ -> Tree (ef, ty, str) $ fn <$> hs
+  where
+    fn :: Either Expr Hash -> Expr
+    fn (Left e) = e
+    fn (Right h) = Tree (Variable, GLSLFloat, hash2Name h) []
+

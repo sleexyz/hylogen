@@ -66,7 +66,7 @@ getNewSource pathToWatch = do
       ] ""
    case ec of
      ExitSuccess -> do
-       putStrLn "updated"
+       putStrLn stdout
        return (Just stdout)
      ExitFailure _ -> do
        putStrLn stderr
