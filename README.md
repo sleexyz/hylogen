@@ -4,7 +4,10 @@ Hylogen is a purely functional language [embedded in Haskell](https://wiki.haske
 
 <br/>
 
-Hylogen programs are compiled down to GLSL code, which can be compiled and executed in the packaged realtime WebGL rendering context.
+Hylogen programs are transpiled to GLSL, which can be compiled, executed, and *live-reloaded* in a WebGL rendering environment via the `hylogen` server executable.
+
+<br/>
+
 
 ## Features
 
@@ -12,7 +15,7 @@ Hylogen programs are compiled down to GLSL code, which can be compiled and execu
 - syntax is simple, concise and close to GLSL
 - primitives implement standard Haskell typeclasses (`Num`, `Floating`, `VectorSpace`, `InnerSpace`, etc)
 - automatic common subexpression elimination of derived GLSL code
-- includes an audio-responsive live-rendering environment in the browser
+- packaged with an audio-responsive realtime rendering environment in the browser
 
 ## Setup
 ```
@@ -44,7 +47,7 @@ hylogen Main.hs
 #### 2. play!
 Visit [localhost:5678](http://localhost:5678) in your browser.
 
-Changes in `Main.hs` will now be propagated in realtime to your WebGL rendering context!
+Changes in `Main.hs` will now be propagated in realtime to your WebGL rendering environment!
 
 ## References/Inspiration
 - [The_Force](https://github.com/shawnlawson/The_Force)
