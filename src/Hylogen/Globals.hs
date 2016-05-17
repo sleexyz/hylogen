@@ -60,29 +60,29 @@ mix p a b = p *^ a + (1 - p) *^ b
 
 -- -- | Booly's
 
--- true :: Booly
--- true = Bu "true"
+true :: Booly
+true = bu "true"
 
--- false :: Booly
--- false = Bu "false"
+false :: Booly
+false = bu "false"
 
--- eq :: (Vec v) => v -> v -> Booly
--- eq = Bcomp "=="
+eq :: (Veccable v) => Vec v -> Vec v -> Booly
+eq = bcomp "=="
 
--- neq :: (Vec v) => v -> v -> Booly
--- neq = Bcomp "!="
+neq :: (Veccable v) => Vec v -> Vec v -> Booly
+neq = bcomp "!="
 
--- lt :: (Vec v) => v -> v -> Booly
--- lt = Bcomp "<"
+lt :: (Veccable v) => Vec v -> Vec v -> Booly
+lt = bcomp "<"
 
--- gt :: (Vec v) => v -> v -> Booly
--- gt = Bcomp ">"
+gt :: (Veccable v) => Vec v -> Vec v -> Booly
+gt = bcomp ">"
 
--- leq :: (Vec v) => v -> v -> Booly
--- leq = Bcomp "<="
+leq :: (Veccable v) => Vec v -> Vec v -> Booly
+leq = bcomp "<="
 
--- geq :: (Vec v) => v -> v -> Booly
--- geq = Bcomp ">="
+geq :: (Veccable v) => Vec v -> Vec v -> Booly
+geq = bcomp ">="
 
 
 -- texture2D :: Texture -> Vec2 -> Vec4
