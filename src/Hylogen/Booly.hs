@@ -5,29 +5,29 @@ module Hylogen.Booly where
 import Hylogen.Expr
 import Hylogen.Vec
 
-data BoolyTag = BoolyTag
-instance ToGLSLType BoolyTag where
+data BoolyType = BoolyType
+instance ToGLSLType BoolyType where
   toGLSLType _ = GLSLBool
 
-type Booly = Expr BoolyTag
+type Booly = Expr BoolyType
 
 bu :: String -> Booly
-bu str = Expr BoolyTag (Tree (Uniform, toGLSLType BoolyTag, str) [])
+bu str = Expr BoolyType (Tree (Uniform, toGLSLType BoolyType, str) [])
 
 bop1 :: String -> Booly -> Booly
-bop1 str x = Expr BoolyTag (Tree (Op1, toGLSLType BoolyTag, str) [toMono x])
+bop1 str x = Expr BoolyType (Tree (Op1, toGLSLType BoolyType, str) [toMono x])
 
 bop1pre :: String -> Booly -> Booly
-bop1pre str x = Expr BoolyTag (Tree (Op1Pre, toGLSLType BoolyTag, str) [toMono x])
+bop1pre str x = Expr BoolyType (Tree (Op1Pre, toGLSLType BoolyType, str) [toMono x])
 
 bop2 :: String -> Booly -> Booly -> Booly
-bop2 str x y = Expr BoolyTag (Tree (Op2, toGLSLType BoolyTag, str) [toMono x, toMono y])
+bop2 str x y = Expr BoolyType (Tree (Op2, toGLSLType BoolyType, str) [toMono x, toMono y])
 
 bcomp :: (Veccable n) => String -> Vec n -> Vec n-> Booly
 bcomp str x y = product $ zipWith (bcomp_ str) (toList x) (toList y)
 
 bcomp_ :: String -> Vec1 -> Vec1 -> Booly
-bcomp_ str x y = Expr BoolyTag (Tree (Op2, toGLSLType BoolyTag, str) [toMono x, toMono y])
+bcomp_ str x y = Expr BoolyType (Tree (Op2, toGLSLType BoolyType, str) [toMono x, toMono y])
 
 instance Num Booly where
   (+) = bop2 "||"

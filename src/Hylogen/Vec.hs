@@ -5,8 +5,6 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE ConstraintKinds #-}
@@ -16,10 +14,7 @@
 
 module Hylogen.Vec where
 
-import Data.Hashable
-import GHC.Generics
 import GHC.TypeLits
-import Data.Reify
 import Data.VectorSpace
 
 import Hylogen.Expr
