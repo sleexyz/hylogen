@@ -13,13 +13,26 @@ import GHC.TypeLits
 
 
 
-inverseSqrt = vop1'' "inversesqrt"
-fract = vop1'' "fract"
-floor_ = vop1'' "fract"
-ceil_ = vop1'' "ceil"
-min_ = vop2pre'' "min"
-max_ = vop2pre'' "max"
-clamp x y z = (z `min_` y) `max_` x
+inverseSqrt :: forall n. (Veccable n) => Vec n -> Vec n
+inverseSqrt = op1'' "inversesqrt"
+
+fract :: forall n. (Veccable n) => Vec n -> Vec n
+fract = op1'' "fract"
+
+floor_:: forall n. (Veccable n) => Vec n -> Vec n
+floor_ = op1'' "fract"
+
+ceil_ :: forall n. (Veccable n) => Vec n -> Vec n
+ceil_ = op1'' "ceil"
+
+min_ :: forall n. (Veccable n) => Vec n -> Vec n -> Vec n
+min_ = op2pre'' "min"
+
+max_ :: forall n. (Veccable n) => Vec n -> Vec n -> Vec n
+max_ = op2pre'' "max"
+
+clamp :: forall n. (Veccable n) => (Vec n, Vec n) -> Vec n -> Vec n
+clamp (x, y) z = (z `min_` y) `max_` x
 
 
 linexp :: (Floating a) => (a, a, a, a) -> a -> a
@@ -30,60 +43,63 @@ linlin (a, b, c, d) x = c + (d - c) * ((x - a) / (b - a))
 
 
 time :: Vec1
-time = vu "time"
+time = uniform "time"
 
 -- TODO: flip these definitions! Normalized means ??
 uv :: Vec2
-uv = vu "uv()"
+uv = uniform "uv()"
 
 uvN :: Vec2
-uvN = vu "uvN"
+uvN = uniform "uvN"
 
 resolution :: Vec2
-resolution = vu "resolution"
+resolution = uniform "resolution"
 
 mouse :: Vec2
-mouse = vu "mouse"
+mouse = uniform "mouse"
 
 
 audio :: Vec4
-audio = vu "audio"
+audio = uniform "audio"
 
--- backBuffer :: Texture
--- backBuffer = Tu "backBuffer"
+backBuffer :: Texture
+backBuffer = uniform "backBuffer"
 
--- channel1 :: Texture
--- channel1 = Tu "channel1"
+channel1 :: Texture
+channel1 = uniform "channel1"
 
 mix :: Vec1 -> Vec4 -> Vec4 -> Vec4
 mix p a b = p *^ a + (1 - p) *^ b
 
--- -- | Booly's
-
 true :: Booly
-true = bu "true"
+true = uniform "true"
 
 false :: Booly
-false = bu "false"
+false = uniform "false"
 
 eq :: (Veccable v) => Vec v -> Vec v -> Booly
-eq = bcomp "=="
+eq = op2' "=="
 
 neq :: (Veccable v) => Vec v -> Vec v -> Booly
-neq = bcomp "!="
+neq = op2' "!="
 
 lt :: (Veccable v) => Vec v -> Vec v -> Booly
-lt = bcomp "<"
+lt = op2' "<"
 
 gt :: (Veccable v) => Vec v -> Vec v -> Booly
-gt = bcomp ">"
+gt = op2' ">"
 
 leq :: (Veccable v) => Vec v -> Vec v -> Booly
-leq = bcomp "<="
+leq = op2' "<="
 
 geq :: (Veccable v) => Vec v -> Vec v -> Booly
-geq = bcomp ">="
+geq = op2' ">="
 
+texture2D :: Texture -> Vec2 -> Vec4
+texture2D = op2pre "texture2D"
 
--- texture2D :: Texture -> Vec2 -> Vec4
--- texture2D = Texture2D
+select :: forall a
+          . (ToGLSLType a)
+          => Booly -> Expr a -> Expr a -> Expr a
+select a b c = Expr t (Tree (Select, toGLSLType t, "") ([toMono a, toMono b, toMono c]))
+  where t = tag :: a

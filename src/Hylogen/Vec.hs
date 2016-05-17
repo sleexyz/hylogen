@@ -30,101 +30,18 @@ type Vec4 = Vec 4
 
 instance ToGLSLType (FloatVec 1) where
   toGLSLType _ = GLSLFloat
+  tag = FloatVec
 instance ToGLSLType (FloatVec 2) where
   toGLSLType _ = GLSLVec2
+  tag = FloatVec
 instance ToGLSLType (FloatVec 3) where
   toGLSLType _ = GLSLVec3
+  tag = FloatVec
 instance ToGLSLType (FloatVec 4) where
   toGLSLType _ = GLSLVec4
-
-vu :: forall (n :: Nat). (Veccable n)
-      => String -> Vec n
-vu str = Expr fv (Tree (Uniform, toGLSLType fv, str) [])
-    where fv = FloatVec :: FloatVec n
-
-vop1 :: forall (m :: Nat) (n ::Nat). (Veccable n)
-        => String -> Vec m -> Vec n
-vop1 str a = Expr fv (Tree (Op1, toGLSLType fv, str) (fmap toMono [a]))
-    where fv = FloatVec :: FloatVec n
-
-vop1'' :: forall (n :: Nat). (Veccable n) => String -> Vec n -> Vec n
-vop1'' = vop1
+  tag = FloatVec
 
 
-vop1pre :: forall (m :: Nat) (n :: Nat). (Veccable n)
-           => String -> Vec m -> Vec n
-vop1pre str a = Expr fv (Tree (Op1Pre, toGLSLType fv, str) (fmap toMono [a]))
-    where fv = FloatVec :: FloatVec n
-
-vop1pre'' :: forall (n :: Nat). (Veccable n) => String -> Vec n -> Vec n
-vop1pre'' = vop1
-
-
-
-
-
-vop2 :: forall (m1 :: Nat) (m2 :: Nat) (n :: Nat). (Veccable n)
-        => String -> Vec m1 -> Vec m2 -> Vec n
-vop2 str a b = Expr fv (Tree (Op2, toGLSLType fv, str) [toMono a, toMono b])
-    where fv = FloatVec :: FloatVec n
-
-vop2' :: forall (m :: Nat) (n :: Nat). (Veccable n)
-        => String -> Vec m -> Vec m -> Vec n
-vop2' str a b = Expr fv (Tree (Op2, toGLSLType fv, str) (fmap toMono [a, b]))
-    where fv = FloatVec :: FloatVec n
-
-
-vop2'' :: forall (n :: Nat). (Veccable n) => String -> Vec n -> Vec n -> Vec n
-vop2'' = vop2''
-
-
-
-vop2pre :: forall (m1 :: Nat) (m2 :: Nat) (n :: Nat). (Veccable n)
-           => String -> Vec m1 -> Vec m2 -> Vec n
-vop2pre str a b = Expr fv (Tree (Op2Pre, toGLSLType fv, str) [toMono a, toMono b])
-    where fv = FloatVec :: FloatVec n
-
-vop2pre' :: forall (m :: Nat) (n :: Nat). (Veccable n)
-        => String -> Vec m -> Vec m -> Vec n
-vop2pre' str a b = Expr fv (Tree (Op2Pre, toGLSLType fv, str) (fmap toMono [a, b]))
-    where fv = FloatVec :: FloatVec n
-
-vop2pre'' :: forall (n :: Nat). (Veccable n) => String -> Vec n -> Vec n -> Vec n
-vop2pre'' = vop2''
-
-
-
-
-
-vop3pre :: forall (m1 :: Nat) (m2 :: Nat) (m3 :: Nat) (n :: Nat). (Veccable n)
-           => String -> Vec m1 -> Vec m2 -> Vec m3 -> Vec n
-vop3pre str a b c = Expr fv (Tree (Op3Pre, toGLSLType fv, str) [toMono a, toMono b, toMono c])
-    where fv = FloatVec :: FloatVec n
-
-vop3pre' :: forall (m :: Nat) (n :: Nat). (Veccable n)
-        => String -> Vec m -> Vec m -> Vec m -> Vec n
-vop3pre' str a b c = Expr fv (Tree (Op3Pre, toGLSLType fv, str) (fmap toMono [a, b, c]))
-    where fv = FloatVec :: FloatVec n
-
-vop3pre'' :: forall (n :: Nat). (Veccable n) => String -> Vec n -> Vec n -> Vec n -> Vec n
-vop3pre'' = vop3pre''
-
-
-
-
-
-vop4pre :: forall (m1 :: Nat) (m2 :: Nat) (m3 :: Nat) (m4 :: Nat) (n :: Nat). (Veccable n)
-           => String -> Vec m1 -> Vec m2 -> Vec m3 -> Vec m4 -> Vec n
-vop4pre str a b c d = Expr fv (Tree (Op4Pre, toGLSLType fv, str) [toMono a,toMono b,toMono c, toMono d])
-    where fv = FloatVec :: FloatVec n
-
-vop4pre' :: forall (m :: Nat) (n :: Nat). (Veccable n)
-        => String -> Vec m -> Vec m -> Vec m -> Vec m -> Vec n
-vop4pre' str a b c d = Expr fv (Tree (Op3Pre, toGLSLType fv, str) (fmap toMono [a, b, c, d]))
-    where fv = FloatVec :: FloatVec n
-
-vop4pre'' :: forall (n :: Nat). (Veccable n) => String -> Vec n -> Vec n -> Vec n -> Vec n -> Vec n
-vop4pre'' = vop4pre''
 
 class (ToGLSLType (FloatVec n), KnownNat n) => Veccable n where
   copy :: Vec1 -> Vec n
@@ -135,43 +52,43 @@ instance Veccable 1 where
   copy = id
   toList x = [x]
 instance Veccable 2 where
-  copy x = vop2pre' "vec2" x x
+  copy x = op2pre' "vec2" x x
   toList x = [x ! X, x ! Y]
 instance Veccable 3 where
-  copy x = vop3pre' "vec3" x x x
+  copy x = op3pre' "vec3" x x x
   toList x = [x ! X, x ! Y, x ! Z]
 instance Veccable 4 where
-  copy x = vop4pre' "vec4" x x x x
+  copy x = op4pre' "vec4" x x x x
   toList x = [x ! X, x ! Y, x ! Z, x ! W]
 
 
 
 instance (Veccable n) => Num (Vec n) where
-  (+) = vop2' "+"
-  (-) = vop2' "-"
-  (*) = vop2' "*"
-  abs = vop1pre "abs"
-  signum = vop1pre "sign"
-  negate = vop1 "-"
-  fromInteger x = vu . show $ (fromInteger x :: Float)
+  (+) = op2' "+"
+  (-) = op2' "-"
+  (*) = op2' "*"
+  abs = op1pre "abs"
+  signum = op1pre "sign"
+  negate = op1 "-"
+  fromInteger x = uniform . show $ (fromInteger x :: Float)
 
 
 instance (Veccable n) => Fractional (Vec n) where
-  (/) = vop2' "/"
-  fromRational x = vu . show $ (fromRational x :: Float)
+  (/) = op2' "/"
+  fromRational x = uniform . show $ (fromRational x :: Float)
 
 instance (Veccable n) => Floating (Vec n) where
-  pi = copy $ vu "pi"
-  exp = vop1pre "exp"
-  log = vop1pre "log"
-  sqrt = vop1pre "sqrt"
-  (**) = vop2pre' "pow"
-  sin = vop1pre "sin"
-  cos = vop1pre "cos"
-  tan = vop1pre "tan"
-  asin = vop1pre "asin"
-  acos = vop1pre "acos"
-  atan = vop1pre "atan"
+  pi = copy $ uniform "pi"
+  exp = op1pre "exp"
+  log = op1pre "log"
+  sqrt = op1pre "sqrt"
+  (**) = op2pre' "pow"
+  sin = op1pre "sin"
+  cos = op1pre "cos"
+  tan = op1pre "tan"
+  asin = op1pre "asin"
+  acos = op1pre "acos"
+  atan = op1pre "atan"
   sinh x = (exp x - exp (negate x)) / 2
   cosh x = (exp x + exp (negate x))/2
   tanh x = sinh x / cosh x
@@ -234,7 +151,7 @@ instance Swizzle W where
 
 
 vec2 :: (Vec1, Vec1) -> Vec2
-vec2 (x, y) = vop2pre' "vec2" x y
+vec2 (x, y) = op2pre' "vec2" x y
 
 
 class ToVec3 tuple where vec3 :: tuple -> Vec3
@@ -271,9 +188,101 @@ instance (a ~ Vec1, b ~ Vec1, c ~ Vec1, d ~ Vec1) => ToVec4 (a, b, c, d) where
   vec4 (x, y, z, w) = Expr fv (Tree (Op4Pre, toGLSLType fv, "vec4") (fmap toMono [x, y, z, w]))
       where fv = FloatVec :: FloatVec 4
 
--- Implement Boolean
--- Implement  
--- I need a typessafe programmer-facing thing
--- I also need a monomorphic implementation
--- Another solution is to introduce the notion of scope.
--- so I'll move to data.reify
+
+-- vu :: forall (n :: Nat)
+--       . (Veccable n)
+--       => String -> Vec n
+-- vu = uniform
+
+-- vop1 :: forall (m :: Nat) (n ::Nat)
+--         . (Veccable n, Veccable m)
+--         => String -> Vec m -> Vec n
+-- vop1 = op1
+
+-- vop1'' :: forall (n :: Nat). (Veccable n) => String -> Vec n -> Vec n
+-- vop1'' = op1''
+
+
+-- vop1pre :: forall (m :: Nat) (n :: Nat)
+--            . (Veccable n, Veccable m)
+--            => String -> Vec m -> Vec n
+-- vop1pre = op1pre
+
+-- vop1pre'' :: forall (n :: Nat)
+--              . (Veccable n)
+--              => String -> Vec n -> Vec n
+-- vop1pre'' = op1pre''
+
+
+
+
+
+-- vop2 :: forall (m1 :: Nat) (m2 :: Nat) (n :: Nat)
+--         . (Veccable n, Veccable m1, Veccable m2)
+--         => String -> Vec m1 -> Vec m2 -> Vec n
+-- vop2 = op2
+
+-- vop2' :: forall (m :: Nat) (n :: Nat)
+--          . (Veccable n, Veccable m)
+--         => String -> Vec m -> Vec m -> Vec n
+-- vop2' = op2'
+
+
+-- vop2'' :: forall (n :: Nat). (Veccable n)
+--           => String -> Vec n -> Vec n -> Vec n
+-- vop2'' = vop2''
+
+
+
+-- vop2pre :: forall (m1 :: Nat) (m2 :: Nat) (n :: Nat)
+--            . (Veccable n, Veccable m1, Veccable m2)
+--            => String -> Vec m1 -> Vec m2 -> Vec n
+-- vop2pre = op2pre
+
+-- vop2pre' :: forall (m :: Nat) (n :: Nat)
+--             . (Veccable n, Veccable m)
+--         => String -> Vec m -> Vec m -> Vec n
+-- vop2pre' = op2pre'
+
+-- vop2pre'' :: forall (n :: Nat)
+--              . (Veccable n)
+--              => String -> Vec n -> Vec n -> Vec n
+-- vop2pre'' = vop2''
+
+
+
+
+
+-- vop3pre :: forall (m1 :: Nat) (m2 :: Nat) (m3 :: Nat) (n :: Nat)
+--            . (Veccable n, Veccable m1, Veccable m2, Veccable m3)
+--            => String -> Vec m1 -> Vec m2 -> Vec m3 -> Vec n
+-- vop3pre = op3pre
+
+-- vop3pre' :: forall (m :: Nat) (n :: Nat)
+--             . (Veccable n, Veccable m)
+--             => String -> Vec m -> Vec m -> Vec m -> Vec n
+-- vop3pre' = op3pre'
+
+-- vop3pre'' :: forall (n :: Nat)
+--              . (Veccable n)
+--              => String -> Vec n -> Vec n -> Vec n -> Vec n
+-- vop3pre'' = vop3pre''
+
+
+
+
+
+-- vop4pre :: forall (m1 :: Nat) (m2 :: Nat) (m3 :: Nat) (m4 :: Nat) (n :: Nat)
+--            . (Veccable n, Veccable m1, Veccable m2, Veccable m3, Veccable m4)
+--            => String -> Vec m1 -> Vec m2 -> Vec m3 -> Vec m4 -> Vec n
+-- vop4pre = op4pre
+
+-- vop4pre' :: forall (m :: Nat) (n :: Nat)
+--             . (Veccable n, Veccable m)
+--             => String -> Vec m -> Vec m -> Vec m -> Vec m -> Vec n
+-- vop4pre' = op4pre'
+
+-- vop4pre'' :: forall (n :: Nat)
+--              . (Veccable n)
+--              => String -> Vec n -> Vec n -> Vec n -> Vec n -> Vec n
+-- vop4pre'' = vop4pre''

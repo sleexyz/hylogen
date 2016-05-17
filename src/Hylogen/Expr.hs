@@ -73,3 +73,109 @@ instance ToGLSLType ty => Show (Expr ty) where
 
 class ToGLSLType  ty where
   toGLSLType :: ty -> GLSLType
+  tag :: ty -- TODO: fill in!
+
+uniform :: forall a
+           . ToGLSLType a
+           => String -> Expr a
+uniform str = Expr t (Tree (Uniform, toGLSLType t, str) [])
+  where t = tag :: a
+
+op1 :: forall a b
+       . (ToGLSLType a, ToGLSLType b)
+       => String -> Expr a -> Expr b
+op1 str a = Expr t (Tree (Op1, toGLSLType t, str) [toMono a])
+  where t = tag :: b
+
+op1'' :: forall a
+       . (ToGLSLType a)
+       => String -> Expr a -> Expr a
+op1'' str a = Expr t (Tree (Op1, toGLSLType t, str) [toMono a])
+  where t = tag :: a
+
+op1pre :: forall a b
+          . (ToGLSLType a, ToGLSLType b)
+          => String -> Expr a -> Expr b
+op1pre str a = Expr t (Tree (Op1Pre, toGLSLType t, str) [toMono a])
+  where t = tag :: b
+
+op1pre'' :: forall a
+          . (ToGLSLType a)
+          => String -> Expr a -> Expr a
+op1pre'' str a = Expr t (Tree (Op1Pre, toGLSLType t, str) [toMono a])
+  where t = tag :: a
+
+op2 :: forall a b c
+       . (ToGLSLType a, ToGLSLType b, ToGLSLType c)
+       => String -> Expr a -> Expr b -> Expr c
+op2 str a b = Expr t (Tree (Op2, toGLSLType t, str) [toMono a, toMono b])
+  where t = tag :: c
+
+op2' :: forall a c
+       . (ToGLSLType a, ToGLSLType c)
+       => String -> Expr a -> Expr a -> Expr c
+op2' str a b = Expr t (Tree (Op2, toGLSLType t, str) (fmap toMono [a, b]))
+  where t = tag :: c
+
+op2'' :: forall a
+       . (ToGLSLType a)
+       => String -> Expr a -> Expr a -> Expr a
+op2'' str a b = Expr t (Tree (Op2, toGLSLType t, str) (fmap toMono [a, b]))
+  where t = tag :: a
+
+
+op2pre :: forall a b c
+          . (ToGLSLType a, ToGLSLType b, ToGLSLType c)
+          => String -> Expr a -> Expr b -> Expr c
+op2pre str a b = Expr t (Tree (Op2Pre, toGLSLType t, str) [toMono a, toMono b])
+  where t = tag :: c
+
+op2pre' :: forall a c
+       . (ToGLSLType a, ToGLSLType c)
+       => String -> Expr a -> Expr a -> Expr c
+op2pre' str a b = Expr t (Tree (Op2Pre, toGLSLType t, str) (fmap toMono [a, b]))
+  where t = tag :: c
+
+op2pre'' :: forall a
+       . (ToGLSLType a)
+       => String -> Expr a -> Expr a -> Expr a
+op2pre'' str a b = Expr t (Tree (Op2Pre, toGLSLType t, str) (fmap toMono [a, b]))
+  where t = tag :: a
+
+op3pre :: forall a b c d
+          . (ToGLSLType a, ToGLSLType b, ToGLSLType c, ToGLSLType d)
+          => String -> Expr a -> Expr b -> Expr c -> Expr d
+op3pre str a b c = Expr t (Tree (Op3Pre, toGLSLType t, str) [toMono a, toMono b, toMono c])
+  where t = tag :: d
+
+op3pre' :: forall a d
+          . (ToGLSLType a, ToGLSLType d)
+          => String -> Expr a -> Expr a -> Expr a -> Expr d
+op3pre' str a b c = Expr t (Tree (Op3Pre, toGLSLType t, str) (fmap toMono [a, b, c]))
+  where t = tag :: d
+
+op3pre'' :: forall a
+          . (ToGLSLType a)
+          => String -> Expr a -> Expr a -> Expr a -> Expr a
+op3pre'' str a b c = Expr t (Tree (Op3Pre, toGLSLType t, str) (fmap toMono [a, b, c]))
+  where t = tag :: a
+
+
+op4pre :: forall a b c d e
+          . (ToGLSLType a, ToGLSLType b, ToGLSLType c, ToGLSLType d, ToGLSLType e)
+          => String -> Expr a -> Expr b -> Expr c -> Expr d -> Expr e
+op4pre str a b c d = Expr t (Tree (Op4Pre, toGLSLType t, str) [toMono a, toMono b, toMono c, toMono d])
+  where t = tag :: e
+
+op4pre' :: forall a e
+          . (ToGLSLType a, ToGLSLType e)
+          => String -> Expr a -> Expr a -> Expr a -> Expr a -> Expr e
+op4pre' str a b c d = Expr t (Tree (Op4Pre, toGLSLType t, str) (fmap toMono [a, b, c, d]))
+  where t = tag :: e
+
+op4pre'' :: forall a e
+          . (ToGLSLType a, ToGLSLType e)
+          => String -> Expr a -> Expr a -> Expr a -> Expr a -> Expr e
+op4pre'' str a b c d = Expr t (Tree (Op4Pre, toGLSLType t, str) (fmap toMono [a, b, c, d]))
+  where t = tag :: e
+

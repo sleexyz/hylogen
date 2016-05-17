@@ -18,6 +18,10 @@ stability:           experimental
 library
   exposed-modules:     Hylogen
                      , Hylogen.Types
+                     , Hylogen.Vec
+                     , Hylogen.Expr
+                     , Hylogen.Booly
+                     , Hylogen.Texture
                      , Hylogen.Globals
                      , Hylogen.CSE
   build-depends:       base >=4.8 && <4.9
@@ -32,6 +36,7 @@ library
 executable hylogen
   main-is:             Main.hs
   other-extensions:    OverloadedStrings
+  other-modules:       Paths_hylogen
   build-depends:       base
                      , bytestring
                      , filepath

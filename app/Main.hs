@@ -18,12 +18,10 @@ import Network.Wai
 import Network.Wai.Handler.Warp
 import Network.HTTP.Types (status200, status404)
 
--- import System.Random
-
 main :: IO ()
 main = getArgs >>= \case
   [pathToWatch] -> main' pathToWatch
-  _ -> error "Name a file to watch!"
+  _ -> error "Error: Name a file to watch!"
 
 main' :: FilePath ->  IO ()
 main' pathToWatch = do
