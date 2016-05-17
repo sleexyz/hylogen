@@ -8,7 +8,7 @@ import Hylogen.Expr
 
 data TextureType = TextureType
 instance ToGLSLType TextureType where
-  toGLSLType _ = GLSLBool
+  toGLSLType _ = GLSLTexture
   tag = TextureType
 
 type Texture = Expr TextureType

@@ -14,16 +14,16 @@ import GHC.TypeLits
 
 
 inverseSqrt :: forall n. (Veccable n) => Vec n -> Vec n
-inverseSqrt = op1'' "inversesqrt"
+inverseSqrt = op1pre'' "inversesqrt"
 
 fract :: forall n. (Veccable n) => Vec n -> Vec n
-fract = op1'' "fract"
+fract = op1pre'' "fract"
 
 floor_:: forall n. (Veccable n) => Vec n -> Vec n
-floor_ = op1'' "fract"
+floor_ = op1pre'' "floor"
 
 ceil_ :: forall n. (Veccable n) => Vec n -> Vec n
-ceil_ = op1'' "ceil"
+ceil_ = op1pre'' "ceil"
 
 min_ :: forall n. (Veccable n) => Vec n -> Vec n -> Vec n
 min_ = op2pre'' "min"
@@ -31,8 +31,8 @@ min_ = op2pre'' "min"
 max_ :: forall n. (Veccable n) => Vec n -> Vec n -> Vec n
 max_ = op2pre'' "max"
 
-clamp :: forall n. (Veccable n) => (Vec n, Vec n) -> Vec n -> Vec n
-clamp (x, y) z = (z `min_` y) `max_` x
+clamp :: forall n. (Veccable n) => Vec n -> Vec n -> Vec n -> Vec n
+clamp x y z = (z `min_` y) `max_` x
 
 
 linexp :: (Floating a) => (a, a, a, a) -> a -> a

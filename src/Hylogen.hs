@@ -21,11 +21,8 @@ module Hylogen
 
 import           Data.Monoid
 import           Data.List
--- import           Hylogen.CSE     (contextToAssignments, getTopLevel, genContext)
 import           Hylogen.Globals
 import           Hylogen.Types
--- import           Hylogen.Types   (Vec (copy , select, toList),
---                                   Vec1 (W, X, Y, Z), Vec2, Vec3, Vec4)
 
 toGLSL' :: Vec4 -> String
 toGLSL' v = unlines [ "void main() {"
@@ -35,15 +32,4 @@ toGLSL' v = unlines [ "void main() {"
 
 
 toGLSL :: Vec4 -> String
-toGLSL = toGLSL'
--- toGLSL v = unlines [ "void main() {"
---                    , assignments
---                    , ""
---                    , "    gl_FragColor = " <> show topLevel <> ";"
---                    , "}"
---                    ]
---   where
---     assignments = mconcat . fmap ("\n    "<>) $ contextToAssignments glsl
---     glsl = genContext v
---     topLevel = getTopLevel glsl
-
+toGLSL = show . toProgram . toMono

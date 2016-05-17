@@ -16,6 +16,7 @@ module Hylogen.Vec where
 
 import GHC.TypeLits
 import Data.VectorSpace
+import Data.Proxy
 
 import Hylogen.Expr
 
@@ -70,12 +71,12 @@ instance (Veccable n) => Num (Vec n) where
   abs = op1pre "abs"
   signum = op1pre "sign"
   negate = op1 "-"
-  fromInteger x = uniform . show $ (fromInteger x :: Float)
+  fromInteger x = copy . uniform . show $ (fromInteger x :: Float)
 
 
 instance (Veccable n) => Fractional (Vec n) where
   (/) = op2' "/"
-  fromRational x = uniform . show $ (fromRational x :: Float)
+  fromRational x = copy . uniform . show $ (fromRational x :: Float)
 
 instance (Veccable n) => Floating (Vec n) where
   pi = copy $ uniform "pi"
@@ -187,102 +188,3 @@ instance {-#INCOHERENT#-} (a ~ Vec1, b ~ Vec1) => ToVec4 (a, b, Vec2) where
 instance (a ~ Vec1, b ~ Vec1, c ~ Vec1, d ~ Vec1) => ToVec4 (a, b, c, d) where
   vec4 (x, y, z, w) = Expr fv (Tree (Op4Pre, toGLSLType fv, "vec4") (fmap toMono [x, y, z, w]))
       where fv = FloatVec :: FloatVec 4
-
-
--- vu :: forall (n :: Nat)
---       . (Veccable n)
---       => String -> Vec n
--- vu = uniform
-
--- vop1 :: forall (m :: Nat) (n ::Nat)
---         . (Veccable n, Veccable m)
---         => String -> Vec m -> Vec n
--- vop1 = op1
-
--- vop1'' :: forall (n :: Nat). (Veccable n) => String -> Vec n -> Vec n
--- vop1'' = op1''
-
-
--- vop1pre :: forall (m :: Nat) (n :: Nat)
---            . (Veccable n, Veccable m)
---            => String -> Vec m -> Vec n
--- vop1pre = op1pre
-
--- vop1pre'' :: forall (n :: Nat)
---              . (Veccable n)
---              => String -> Vec n -> Vec n
--- vop1pre'' = op1pre''
-
-
-
-
-
--- vop2 :: forall (m1 :: Nat) (m2 :: Nat) (n :: Nat)
---         . (Veccable n, Veccable m1, Veccable m2)
---         => String -> Vec m1 -> Vec m2 -> Vec n
--- vop2 = op2
-
--- vop2' :: forall (m :: Nat) (n :: Nat)
---          . (Veccable n, Veccable m)
---         => String -> Vec m -> Vec m -> Vec n
--- vop2' = op2'
-
-
--- vop2'' :: forall (n :: Nat). (Veccable n)
---           => String -> Vec n -> Vec n -> Vec n
--- vop2'' = vop2''
-
-
-
--- vop2pre :: forall (m1 :: Nat) (m2 :: Nat) (n :: Nat)
---            . (Veccable n, Veccable m1, Veccable m2)
---            => String -> Vec m1 -> Vec m2 -> Vec n
--- vop2pre = op2pre
-
--- vop2pre' :: forall (m :: Nat) (n :: Nat)
---             . (Veccable n, Veccable m)
---         => String -> Vec m -> Vec m -> Vec n
--- vop2pre' = op2pre'
-
--- vop2pre'' :: forall (n :: Nat)
---              . (Veccable n)
---              => String -> Vec n -> Vec n -> Vec n
--- vop2pre'' = vop2''
-
-
-
-
-
--- vop3pre :: forall (m1 :: Nat) (m2 :: Nat) (m3 :: Nat) (n :: Nat)
---            . (Veccable n, Veccable m1, Veccable m2, Veccable m3)
---            => String -> Vec m1 -> Vec m2 -> Vec m3 -> Vec n
--- vop3pre = op3pre
-
--- vop3pre' :: forall (m :: Nat) (n :: Nat)
---             . (Veccable n, Veccable m)
---             => String -> Vec m -> Vec m -> Vec m -> Vec n
--- vop3pre' = op3pre'
-
--- vop3pre'' :: forall (n :: Nat)
---              . (Veccable n)
---              => String -> Vec n -> Vec n -> Vec n -> Vec n
--- vop3pre'' = vop3pre''
-
-
-
-
-
--- vop4pre :: forall (m1 :: Nat) (m2 :: Nat) (m3 :: Nat) (m4 :: Nat) (n :: Nat)
---            . (Veccable n, Veccable m1, Veccable m2, Veccable m3, Veccable m4)
---            => String -> Vec m1 -> Vec m2 -> Vec m3 -> Vec m4 -> Vec n
--- vop4pre = op4pre
-
--- vop4pre' :: forall (m :: Nat) (n :: Nat)
---             . (Veccable n, Veccable m)
---             => String -> Vec m -> Vec m -> Vec m -> Vec m -> Vec n
--- vop4pre' = op4pre'
-
--- vop4pre'' :: forall (n :: Nat)
---              . (Veccable n)
---              => String -> Vec n -> Vec n -> Vec n -> Vec n -> Vec n
--- vop4pre'' = vop4pre''

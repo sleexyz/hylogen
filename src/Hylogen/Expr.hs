@@ -5,22 +5,17 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE InstanceSigs #-}
+{-# LANGUAGE DeriveFunctor #-}
 
 
 module Hylogen.Expr where
 
-import Data.Hashable
-import GHC.Generics
-import GHC.TypeLits
 import Data.Reify
-import Data.VectorSpace
 
 data GLSLType = GLSLFloat
               | GLSLVec2
@@ -28,16 +23,16 @@ data GLSLType = GLSLFloat
               | GLSLVec4
               | GLSLBool
               | GLSLTexture
-              deriving (Generic, Hashable, Eq, Ord)
+              deriving (Eq, Ord)
 
-instance Show (GLSLType) where
+instance Show GLSLType where
   show x = case x of
     GLSLFloat -> "float"
     GLSLVec2 -> "vec2"
     GLSLVec3 -> "vec3"
     GLSLVec4 -> "vec4"
     GLSLBool -> "bool"
-    GLSLTexture -> undefined
+    GLSLTexture -> "sampler2D"
 
 data ExprForm = Uniform
               | Variable
@@ -49,11 +44,12 @@ data ExprForm = Uniform
               | Op4Pre
               | Select
               | Access
-                deriving (Show, Generic, Hashable)
+                deriving (Show)
 
 data Tree a  = Tree { getElem     :: a
                     , getChildren :: [Tree a]
                     }
+
 
 type ExprMono = Tree (ExprForm, GLSLType, String)
 
@@ -188,3 +184,29 @@ op4pre'' :: forall a e
 op4pre'' str a b c d = Expr t (Tree (Op4Pre, toGLSLType t, str) (fmap toMono [a, b, c, d]))
   where t = tag :: e
 
+
+
+
+data TreeF a b = TreeF { getElemF     :: a
+                       , getChildrenF   :: [b]
+                       }
+                 deriving (Functor)
+
+type ExprMonoF = TreeF (ExprForm, GLSLType, String)
+
+instance (Show a) => Show (ExprMonoF a) where
+  show (TreeF (form, _, str) xs) = case form of
+    Uniform  -> str
+    Variable -> str
+    Op1      -> mconcat ["(", str, show (xs!!0), ")"]
+    Op1Pre   -> mconcat [ str, "(", show (xs!!0), ")"]
+    Op2      -> mconcat ["(", show (xs !! 0), " ", str, " ", show (xs !! 1), ")"]
+    Op2Pre   -> mconcat [str, "(", show (xs!!0), ", ", show (xs!!1), ")"]
+    Op3Pre   -> mconcat [str, "(", show (xs!!0), ", ", show (xs!!1), ", ", show (xs!!2), ")"]
+    Op4Pre   -> mconcat [str, "(", show (xs!!0), ", ", show (xs!!1), ", ", show (xs!!2), ", ", show (xs!!3), ")"]
+    Select   -> mconcat ["( ", show (xs!!0), " ? ", show (xs!!1), " : ", show (xs!!2), ")"]
+    Access   -> mconcat [show (xs!!0), ".", str]
+
+instance MuRef ExprMono where
+  type DeRef ExprMono = ExprMonoF
+  mapDeRef f (Tree tup xs) = TreeF tup <$> traverse f xs
