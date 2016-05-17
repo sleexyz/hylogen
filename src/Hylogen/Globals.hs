@@ -13,53 +13,41 @@ import GHC.TypeLits
 
 
 
-inverseSqrt = vop1 "inversesqrt"
-fract = vop1 "fract"
-floor = vop1 "fract"
+inverseSqrt = vop1'' "inversesqrt"
+fract = vop1'' "fract"
+floor_ = vop1'' "fract"
+ceil_ = vop1'' "ceil"
+min_ = vop2pre'' "min"
+max_ = vop2pre'' "max"
+clamp x y z = (z `min_` y) `max_` x
 
 
+linexp :: (Floating a) => (a, a, a, a) -> a -> a
+linexp (a, b, c, d) x = c * ((d / c) ** ((x - a) / (b - a)))
 
--- floor_ :: (Vec a) => a -> a
--- floor_ = vuop "floor"
-
--- ceil_ :: (Vec a) => a -> a
--- ceil_ = vuop "ceil"
-
--- min_ :: (Vec a) => a -> a -> a
--- min_ = vboppre "min"
-
--- max_:: (Vec a) => a -> a -> a
--- max_ = vboppre "max"
-
--- clamp :: (Vec a) => a -> a -> a -> a
--- clamp x y z = (z `min_` y) `max_` x
+linlin :: (Floating a) => (a, a, a, a) -> a -> a
+linlin (a, b, c, d) x = c + (d - c) * ((x - a) / (b - a))
 
 
--- linexp :: (Floating a) => (a, a, a, a) -> a -> a
--- linexp (a, b, c, d) x = c * ((d / c) ** ((x - a) / (b - a)))
+time :: Vec1
+time = vu "time"
 
--- linlin :: (Floating a) => (a, a, a, a) -> a -> a
--- linlin (a, b, c, d) x = c + (d - c) * ((x - a) / (b - a))
+-- TODO: flip these definitions! Normalized means ??
+uv :: Vec2
+uv = vu "uv()"
 
+uvN :: Vec2
+uvN = vu "uvN"
 
--- time :: Vec1
--- time = V1u "time"
+resolution :: Vec2
+resolution = vu "resolution"
 
--- uv :: Vec2
--- uv = V2u "uv()"
-
--- uvN :: Vec2
--- uvN = V2u "uvN"
-
--- resolution :: Vec2
--- resolution = V2u "resolution"
-
--- mouse :: Vec2
--- mouse = V2u "mouse"
+mouse :: Vec2
+mouse = vu "mouse"
 
 
--- audio :: Vec4
--- audio = V4u "audio"
+audio :: Vec4
+audio = vu "audio"
 
 -- backBuffer :: Texture
 -- backBuffer = Tu "backBuffer"
@@ -67,8 +55,8 @@ floor = vop1 "fract"
 -- channel1 :: Texture
 -- channel1 = Tu "channel1"
 
--- mix :: Vec1 -> Vec4 -> Vec4 -> Vec4
--- mix p a b = p *^ a + (1 - p) *^ b
+mix :: Vec1 -> Vec4 -> Vec4 -> Vec4
+mix p a b = p *^ a + (1 - p) *^ b
 
 -- -- | Booly's
 

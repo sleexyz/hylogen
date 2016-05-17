@@ -52,54 +52,84 @@ vop1 :: forall (m :: Nat) (n ::Nat). (Veccable n)
 vop1 str a = Expr fv (Tree (Op1, toGLSLType fv, str) (fmap toMono [a]))
     where fv = FloatVec :: FloatVec n
 
+vop1'' :: forall (n :: Nat). (Veccable n) => String -> Vec n -> Vec n
+vop1'' = vop1
+
+
 vop1pre :: forall (m :: Nat) (n :: Nat). (Veccable n)
            => String -> Vec m -> Vec n
 vop1pre str a = Expr fv (Tree (Op1Pre, toGLSLType fv, str) (fmap toMono [a]))
     where fv = FloatVec :: FloatVec n
+
+vop1pre'' :: forall (n :: Nat). (Veccable n) => String -> Vec n -> Vec n
+vop1pre'' = vop1
+
+
+
+
 
 vop2 :: forall (m1 :: Nat) (m2 :: Nat) (n :: Nat). (Veccable n)
         => String -> Vec m1 -> Vec m2 -> Vec n
 vop2 str a b = Expr fv (Tree (Op2, toGLSLType fv, str) [toMono a, toMono b])
     where fv = FloatVec :: FloatVec n
 
--- | same input type
 vop2' :: forall (m :: Nat) (n :: Nat). (Veccable n)
         => String -> Vec m -> Vec m -> Vec n
 vop2' str a b = Expr fv (Tree (Op2, toGLSLType fv, str) (fmap toMono [a, b]))
     where fv = FloatVec :: FloatVec n
+
+
+vop2'' :: forall (n :: Nat). (Veccable n) => String -> Vec n -> Vec n -> Vec n
+vop2'' = vop2''
+
+
 
 vop2pre :: forall (m1 :: Nat) (m2 :: Nat) (n :: Nat). (Veccable n)
            => String -> Vec m1 -> Vec m2 -> Vec n
 vop2pre str a b = Expr fv (Tree (Op2Pre, toGLSLType fv, str) [toMono a, toMono b])
     where fv = FloatVec :: FloatVec n
 
--- | same input type
 vop2pre' :: forall (m :: Nat) (n :: Nat). (Veccable n)
         => String -> Vec m -> Vec m -> Vec n
 vop2pre' str a b = Expr fv (Tree (Op2Pre, toGLSLType fv, str) (fmap toMono [a, b]))
     where fv = FloatVec :: FloatVec n
+
+vop2pre'' :: forall (n :: Nat). (Veccable n) => String -> Vec n -> Vec n -> Vec n
+vop2pre'' = vop2''
+
+
+
+
 
 vop3pre :: forall (m1 :: Nat) (m2 :: Nat) (m3 :: Nat) (n :: Nat). (Veccable n)
            => String -> Vec m1 -> Vec m2 -> Vec m3 -> Vec n
 vop3pre str a b c = Expr fv (Tree (Op3Pre, toGLSLType fv, str) [toMono a, toMono b, toMono c])
     where fv = FloatVec :: FloatVec n
 
--- | same input type
 vop3pre' :: forall (m :: Nat) (n :: Nat). (Veccable n)
         => String -> Vec m -> Vec m -> Vec m -> Vec n
 vop3pre' str a b c = Expr fv (Tree (Op3Pre, toGLSLType fv, str) (fmap toMono [a, b, c]))
     where fv = FloatVec :: FloatVec n
+
+vop3pre'' :: forall (n :: Nat). (Veccable n) => String -> Vec n -> Vec n -> Vec n -> Vec n
+vop3pre'' = vop3pre''
+
+
+
+
 
 vop4pre :: forall (m1 :: Nat) (m2 :: Nat) (m3 :: Nat) (m4 :: Nat) (n :: Nat). (Veccable n)
            => String -> Vec m1 -> Vec m2 -> Vec m3 -> Vec m4 -> Vec n
 vop4pre str a b c d = Expr fv (Tree (Op4Pre, toGLSLType fv, str) [toMono a,toMono b,toMono c, toMono d])
     where fv = FloatVec :: FloatVec n
 
--- | same input type
 vop4pre' :: forall (m :: Nat) (n :: Nat). (Veccable n)
         => String -> Vec m -> Vec m -> Vec m -> Vec m -> Vec n
 vop4pre' str a b c d = Expr fv (Tree (Op3Pre, toGLSLType fv, str) (fmap toMono [a, b, c, d]))
     where fv = FloatVec :: FloatVec n
+
+vop4pre'' :: forall (n :: Nat). (Veccable n) => String -> Vec n -> Vec n -> Vec n -> Vec n -> Vec n
+vop4pre'' = vop4pre''
 
 class (ToGLSLType (FloatVec n), KnownNat n) => Veccable n where
   copy :: Vec1 -> Vec n
@@ -206,7 +236,7 @@ vec2 (x, y) = vop2pre' "vec2" x y
 class ToVec3 tuple where vec3 :: tuple -> Vec3
 
 instance (a ~ Vec m, b ~ Vec (3 - m)) => ToVec3 (a, b) where
-  vec3 (x, y) = Expr fv (Tree (Op2Pre, toGLSLType fv, "vec3") ([toMono x, toMono y]))
+  vec3 (x, y) = Expr fv (Tree (Op2Pre, toGLSLType fv, "vec3") [toMono x, toMono y])
       where fv = FloatVec :: FloatVec 3
 
 instance (a ~ Vec1, b ~ Vec1, c ~ Vec1) => ToVec3 (a, b, c) where
@@ -217,19 +247,19 @@ instance (a ~ Vec1, b ~ Vec1, c ~ Vec1) => ToVec3 (a, b, c) where
 class ToVec4 tuple where vec4 :: tuple -> Vec4
 
 instance (a ~ Vec m, b ~ Vec (4 - m)) => ToVec4 (a, b) where
-  vec4 (x, y) = Expr fv (Tree (Op2Pre, toGLSLType fv, "vec4") ([toMono x,toMono y]))
+  vec4 (x, y) = Expr fv (Tree (Op2Pre, toGLSLType fv, "vec4") [toMono x,toMono y])
       where fv = FloatVec :: FloatVec 4
 
 instance {-#INCOHERENT#-}(b ~ Vec1, c ~ Vec1) => ToVec4 (Vec2, b, c) where
-  vec4 (x, y, z) = Expr fv (Tree (Op3Pre, toGLSLType fv, "vec4") ([toMono x,toMono y,toMono z]))
+  vec4 (x, y, z) = Expr fv (Tree (Op3Pre, toGLSLType fv, "vec4") [toMono x,toMono y,toMono z])
       where fv = FloatVec :: FloatVec 4
 
 instance {-#INCOHERENT#-}(a ~ Vec1, c ~ Vec1) => ToVec4 (a, Vec2, c) where
-  vec4 (x, y, z) = Expr fv (Tree (Op3Pre, toGLSLType fv, "vec4") ([toMono x,toMono y,toMono z]))
+  vec4 (x, y, z) = Expr fv (Tree (Op3Pre, toGLSLType fv, "vec4") [toMono x,toMono y,toMono z])
       where fv = FloatVec :: FloatVec 4
 
 instance {-#INCOHERENT#-}(a ~ Vec1, b ~ Vec1) => ToVec4 (a, b, Vec2) where
-  vec4 (x, y, z) = Expr fv (Tree (Op3Pre, toGLSLType fv, "vec4") ([toMono x,toMono y,toMono z]))
+  vec4 (x, y, z) = Expr fv (Tree (Op3Pre, toGLSLType fv, "vec4") [toMono x,toMono y,toMono z])
       where fv = FloatVec :: FloatVec 4
 
 
