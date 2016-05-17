@@ -30,6 +30,15 @@ data GLSLType = GLSLFloat
               | GLSLTexture
               deriving (Generic, Hashable, Eq, Ord)
 
+instance Show (GLSLType) where
+  show x = case x of
+    GLSLFloat -> "float"
+    GLSLVec2 -> "vec2"
+    GLSLVec3 -> "vec3"
+    GLSLVec4 -> "vec4"
+    GLSLBool -> "bool"
+    GLSLTexture -> undefined
+
 data ExprForm = Uniform
               | Variable
               | Op1

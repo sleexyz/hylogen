@@ -3,7 +3,7 @@
 {-# LANGUAGE NoMonomorphismRestriction #-}
 {-# LANGUAGE LambdaCase#-}
 
-module Hylogen.CSE where
+module Hylogen.CSEOld where
 
 import           Data.IntMap.Lazy (IntMap)
 import qualified Data.IntMap      as IntMap
@@ -18,7 +18,7 @@ type Tags = ( ExprForm,               -- AST node form (eg. BinaryOp)
               GLSLType,               -- GLSL type (eg. vec3)
               String,                 -- String tag (eg. "sin")
               Hash,                   -- Hash of the node
-              [Either Expr Hash]      -- Hash of children iff they are to be variablized
+              [Either ExprMono Hash]      -- Hash of children iff they are to be variablized
             )
 type HashTree = Tree Tags
 
@@ -41,10 +41,10 @@ toHashTree  (Tree (ef, ty, str)  subtrees) = let
   parentHash :: Hash
   parentHash = hash (ef, ty, str, subHashes)
 
-  subHashes' :: [Either Expr Hash]
+  subHashes' :: [Either ExprMono Hash]
   subHashes' = zipWith fn subHashes subtrees
     where
-      fn :: Hash -> Expr -> Either Expr Hash
+      fn :: Hash -> ExprMono -> Either ExprMono Hash
       fn h expr@(Tree (ef', _, _) _)  = case ef' of
         Uniform -> Left expr
         _       -> Right h
@@ -57,8 +57,8 @@ toHashTree  (Tree (ef, ty, str)  subtrees) = let
 
 type Id = Int
 -- | Add if in first, variabalize!
-type GLSL = ( IntMap (ExprForm, GLSLType, String, [Either Expr Hash])
-            , [(ExprForm, GLSLType, String, Hash, [Either Expr Hash])]
+type GLSL = ( IntMap (ExprForm, GLSLType, String, [Either ExprMono Hash])
+            , [(ExprForm, GLSLType, String, Hash, [Either ExprMono Hash])]
             )
 
 
@@ -71,7 +71,7 @@ toContext ht = genContext' ht initialGLSL
     genContext' :: HashTree -> GLSL -> GLSL
     genContext' (Tree foo subTrees) glsl = fn foo (foldr genContext' glsl subTrees)
       where
-        fn :: (ExprForm, GLSLType, String, Hash, [Either Expr Hash]) -> GLSL -> GLSL
+        fn :: (ExprForm, GLSLType, String, Hash, [Either ExprMono Hash]) -> GLSL -> GLSL
         fn orig@(ef, ty, str, h, hs) (hashmap, output)
           = if IntMap.member h hashmap
             then ( hashmap
@@ -81,8 +81,8 @@ toContext ht = genContext' ht initialGLSL
                  , orig:output
                  )
 
-genContext :: (Expressible a) => a -> GLSL
-genContext = toExpr
+genContext :: (ToGLSLType a) => Expr a -> GLSL
+genContext = toMono
   >>> toHashTree
   >>> toContext
 
@@ -96,7 +96,7 @@ hash2Name h
 
 
 
-getTopLevel :: GLSL -> Expr
+getTopLevel :: GLSL -> ExprMono
 getTopLevel (_, output) = tagsToExpr $ head output
 
 contextToAssignments :: GLSL -> [String]
@@ -106,7 +106,7 @@ contextToAssignments (_, output) = foldl fn [] output
       Uniform -> bs
       _       -> assign tags : bs
 
-assign :: (ExprForm, GLSLType, String, Hash, [Either Expr Hash]) -> String
+assign :: (ExprForm, GLSLType, String, Hash, [Either ExprMono Hash]) -> String
 assign tags@(_, ty, _, h, _)
   = show ty <> " "
   <> hash2Name h <> " = "
@@ -115,9 +115,9 @@ assign tags@(_, ty, _, h, _)
     expr = tagsToExpr tags
 
 -- type Tags = (ExprForm, GLSLType, String, Hash, [Hash])
-tagsToExpr :: Tags -> Expr
+tagsToExpr :: Tags -> ExprMono
 tagsToExpr (ef, ty, str, _, hs) = Tree (ef, ty, str) $ fn <$> hs
   where
-    fn :: Either Expr Hash -> Expr
+    fn :: Either ExprMono Hash -> ExprMono
     fn (Left expr) = expr
     fn (Right h') = Tree (Variable, GLSLFloat, hash2Name h') []
