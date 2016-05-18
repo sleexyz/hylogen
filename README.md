@@ -1,27 +1,30 @@
 # [*H Y L O G E N*](https://hylogen.com)
 
-Hylogen is a purely functional language [embedded in Haskell](https://wiki.haskell.org/Embedded_domain_specific_language) for live-coding fragment shaders.
+Hylogen is a purely functional language [embedded in Haskell](https://wiki.haskell.org/Embedded_domain_specific_language) for live-coding fragment shaders, featuring:
+
+- a simple and pure syntax
+- standard operators (`+`, `*`, [`*^`,  `<.>`](https://hackage.haskell.org/package/vector-space))
+- compat. w/ your fav haskell goodies (higher-order functions, ADTS, swanky polymorphism).
 
 <br/>
 
-Hylogen programs are transpiled to GLSL, which can be compiled, executed, and *live-reloaded* in a WebGL rendering environment via the `hylogen` server executable.
+It comes with `hyde`, the canonical rendering environment, featuring:
+- *hot-reloading*
+- audio-reactive primitives
+- texture backbuffering
 
 <br/>
 
 
-## Features
-
-- *embedded in Haskell*; use any of your favorite tools for abstraction!
-- syntax is simple, concise and close to GLSL
-- primitives implement standard Haskell typeclasses (`Num`, `Floating`, `VectorSpace`, `InnerSpace`, etc)
-- automatic common subexpression elimination of derived GLSL code
-- packaged with an audio-responsive realtime rendering environment in the browser
-
-## Setup
+## Install
 ```
 cabal update
 cabal install hylogen
 ```
+
+This will install the hylogen libraries as well as `hyde`, the rendering environment.
+
+<br/>
 
 ## Usage
 
@@ -35,24 +38,27 @@ color = vec4 (a, a, a, 1)
     a = cos(X uvN * sin(time/ 10) * 10 + X mouse)
       + sin(Y uvN * sin(time / 10) * 10 + Y mouse)
 
-main = putStrLn $ toGLSL $ color
+main = putStrLn . toGLSL $ color
 ```
 
-#### 1. run hylogen server
+#### 1. run hyde...
 
 ```
-hylogen Main.hs
+hyde Main.hs
 ```
 
-#### 2. play!
-Visit [localhost:5678](http://localhost:5678) in your browser.
+#### 2. ... live-code!
+Go to [localhost:5678](http://localhost:5678) in your browser.
 
-Changes in `Main.hs` will now be propagated in realtime to your WebGL rendering environment!
+You will now see your changes to `Main.hs` propagate to your WebGL rendering environment!
 
-## References/Inspiration
-- [The_Force](https://github.com/shawnlawson/The_Force)
+<br/>
 
-## resources
-[hackage](https://hackage.haskell.org/package/hylogen)
+## References
+- [The_Force](https://github.com/shawnlawson/The_Force) by Shawn Lawson. Live-coding audio-reactive shaders!
+- [Type-Safe Observable Sharing](https://pdfs.semanticscholar.org/4838/bd0a91b3058b467fa31ad9e0810121b46388.pdf) by Andy Gill. [`data-reify`](https://hackage.haskell.org/package/data-reify) made compile times combinatorially faster!
 
-[examples](https://github.com/sleexyz/hylogen-yay)
+## Resources
+- [hackage](https://hackage.haskell.org/package/hylogen)
+
+- [examples](https://github.com/sleexyz/hylogen-yay)
