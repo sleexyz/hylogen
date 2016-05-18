@@ -2,13 +2,12 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE DataKinds #-}
-{-# LANGUAGE KindSignatures #-}
 
 module Hylogen.Globals where
 
 import Hylogen.Types
+import Hylogen.Expr
 import Data.VectorSpace
-import GHC.TypeLits
 
 
 
@@ -42,31 +41,6 @@ linlin :: (Floating a) => (a, a, a, a) -> a -> a
 linlin (a, b, c, d) x = c + (d - c) * ((x - a) / (b - a))
 
 
-time :: Vec1
-time = uniform "time"
-
--- TODO: flip these definitions! Normalized means ??
-uv :: Vec2
-uv = uniform "uv()"
-
-uvN :: Vec2
-uvN = uniform "uvN"
-
-resolution :: Vec2
-resolution = uniform "resolution"
-
-mouse :: Vec2
-mouse = uniform "mouse"
-
-
-audio :: Vec4
-audio = uniform "audio"
-
-backBuffer :: Texture
-backBuffer = uniform "backBuffer"
-
-channel1 :: Texture
-channel1 = uniform "channel1"
 
 mix :: Vec1 -> Vec4 -> Vec4 -> Vec4
 mix p a b = p *^ a + (1 - p) *^ b

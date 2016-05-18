@@ -3,7 +3,6 @@
 module Hylogen.Booly where
 
 import Hylogen.Expr
-import Hylogen.Vec
 
 data BoolyType = BoolyType
 instance ToGLSLType BoolyType where

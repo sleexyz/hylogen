@@ -16,7 +16,6 @@ module Hylogen.Vec where
 
 import GHC.TypeLits
 import Data.VectorSpace
-import Data.Proxy
 
 import Hylogen.Expr
 
@@ -79,7 +78,8 @@ instance (Veccable n) => Fractional (Vec n) where
   fromRational x = copy . uniform . show $ (fromRational x :: Float)
 
 instance (Veccable n) => Floating (Vec n) where
-  pi = copy $ uniform "pi"
+  -- pi = copy $ uniform "pi"
+  pi = copy $ uniform "3.141592653589793238462643383"
   exp = op1pre "exp"
   log = op1pre "log"
   sqrt = op1pre "sqrt"

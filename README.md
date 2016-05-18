@@ -8,7 +8,7 @@ Hylogen is a purely functional language [embedded in Haskell](https://wiki.haske
 
 <br/>
 
-It comes with `hyde`, the canonical rendering environment, featuring:
+It comes with `hyde`, an accompanying rendering environment featuring:
 - *hot-reloading*
 - audio-reactive primitives
 - texture backbuffering
@@ -22,7 +22,7 @@ cabal update
 cabal install hylogen
 ```
 
-This will install the hylogen libraries as well as `hyde`, the rendering environment.
+This will install the hylogen package and `hyde`, the rendering environment.
 
 <br/>
 
@@ -31,7 +31,7 @@ This will install the hylogen libraries as well as `hyde`, the rendering environ
 ```haskell
 -- ./Main.hs
 module Main where
-import Hylogen
+import Hylogen.WithHyde
 
 color = vec4 (a, a, a, 1)
   where

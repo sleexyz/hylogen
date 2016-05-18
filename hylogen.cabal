@@ -24,6 +24,7 @@ library
                      , Hylogen.Texture
                      , Hylogen.Globals
                      , Hylogen.Program
+                     , Hylogen.WithHyde
   build-depends:       base >=4.8 && <4.9
                      , vector-space
                      , data-reify
