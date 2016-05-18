@@ -1,5 +1,5 @@
 name:                hylogen
-version:             0.1.1.0
+version:             0.1.1.1
 synopsis:            an EDSL for live-coding fragment shaders
 description:         an EDSL for live-coding fragment shaders
 homepage:            https://hylogen.com

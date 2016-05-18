@@ -7,14 +7,14 @@ Hylogen is a purely functional language [embedded in Haskell](https://wiki.haske
 - standard operators (`+`, `*`, [`*^`,  `<.>`](https://hackage.haskell.org/package/vector-space))
 - compat. w/ your fav haskell goodies (higher-order functions, ADTS, swanky polymorphism).
 
-<br/>
+![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
 
 It comes with `hyde`, an accompanying rendering environment featuring:
 - *hot-reloading*
 - audio-reactive primitives
 - texture backbuffering
 
-<br/>
+![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
 
 
 ## Install
@@ -25,7 +25,7 @@ cabal install hylogen
 
 This will install the hylogen package and `hyde`, the rendering environment.
 
-<br/>
+![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
 
 ## Usage
 
@@ -53,7 +53,7 @@ Go to [localhost:5678](http://localhost:5678) in your browser.
 
 You will now see your changes to `Main.hs` propagate to your WebGL rendering environment!
 
-<br/>
+![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
 
 ## References
 - [The_Force](https://github.com/shawnlawson/The_Force) by Shawn Lawson. Live-coding audio-reactive shaders!
