@@ -188,25 +188,44 @@ op4pre'' str a b c d = Expr t (Tree (Op4Pre, toGLSLType t, str) (fmap toMono [a,
 
 
 data TreeF a b = TreeF { getElemF     :: a
-                       , getChildrenF   :: [b]
+                       , getChildrenF   :: [Maybe b]
                        }
                  deriving (Functor)
 
-type ExprMonoF = TreeF (ExprForm, GLSLType, String)
+type ExprMonoF = TreeF (ExprForm, GLSLType, String, [ExprMono])
+
+emfStringAt :: (Show a) => ExprMonoF a -> Int -> String
+emfStringAt (TreeF (_, _, _, xs) ys)  i = zipWith fn xs ys !! i
+  where
+    fn x Nothing = show x
+    fn _ (Just y)= show y
 
 instance (Show a) => Show (ExprMonoF a) where
-  show (TreeF (form, _, str) xs) = case form of
+  show expr@(TreeF (form, _, str, _) _) = case form of
     Uniform  -> str
     Variable -> str
-    Op1      -> mconcat ["(", str, show (xs!!0), ")"]
-    Op1Pre   -> mconcat [ str, "(", show (xs!!0), ")"]
-    Op2      -> mconcat ["(", show (xs !! 0), " ", str, " ", show (xs !! 1), ")"]
-    Op2Pre   -> mconcat [str, "(", show (xs!!0), ", ", show (xs!!1), ")"]
-    Op3Pre   -> mconcat [str, "(", show (xs!!0), ", ", show (xs!!1), ", ", show (xs!!2), ")"]
-    Op4Pre   -> mconcat [str, "(", show (xs!!0), ", ", show (xs!!1), ", ", show (xs!!2), ", ", show (xs!!3), ")"]
-    Select   -> mconcat ["( ", show (xs!!0), " ? ", show (xs!!1), " : ", show (xs!!2), ")"]
-    Access   -> mconcat [show (xs!!0), ".", str]
+    Op1      -> mconcat ["(", str, strAt 0, ")"]
+    Op1Pre   -> mconcat [ str, "(", strAt 0, ")"]
+    Op2      -> mconcat ["(", strAt 0, " ", str, " ", strAt 1, ")"]
+    Op2Pre   -> mconcat [str, "(", strAt 0, ", ", strAt 1, ")"]
+    Op3Pre   -> mconcat [str, "(", strAt 0, ", ", strAt 1, ", ", strAt 2, ")"]
+    Op4Pre   -> mconcat [str, "(", strAt 0, ", ", strAt 1, ", ", strAt 2, ", ", strAt 3, ")"]
+    Select   -> mconcat ["( ", strAt 0, " ? ", strAt 1, " : ", strAt 2, ")"]
+    Access   -> mconcat [strAt 0, ".", str]
+    where
+      strAt = emfStringAt expr
+
+-- instance MuRef ExprMono where
+--   type DeRef ExprMono = ExprMonoF
+--   mapDeRef f (Tree tup xs) = TreeF tup <$> traverse f xs
 
 instance MuRef ExprMono where
   type DeRef ExprMono = ExprMonoF
-  mapDeRef f (Tree tup xs) = TreeF tup <$> traverse f xs
+  mapDeRef func (Tree (form, ty, str) xs) = TreeF (form, ty, str, xs) <$> g xs
+    where
+      g (x:xs) = (:) <$> (traverse func $ shouldShare x) <*> (g $  xs)
+      g [] = pure []
+
+      shouldShare :: ExprMono -> Maybe ExprMono
+      shouldShare (Tree (Uniform, _, _) _) = Nothing
+      shouldShare expr = Just expr

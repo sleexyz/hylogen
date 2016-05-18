@@ -20,7 +20,7 @@ getExpr (NewAssign (_, expr)) = expr
 
 
 instance Show Statement where
-  show (NewAssign (i, expr@(TreeF (_, ty, _) _)))
+  show (NewAssign (i, expr@(TreeF (_, ty, _, _) _)))
     = mconcat [ show ty, " ", show . Id $ i, " = ", show . (Id<$>) $  expr, ";"]
 
 newtype Function = Function [Statement]

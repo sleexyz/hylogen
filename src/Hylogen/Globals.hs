@@ -77,23 +77,26 @@ true = uniform "true"
 false :: Booly
 false = uniform "false"
 
+bcomp :: (Veccable v) => String -> Vec v -> Vec v -> Booly
+bcomp str x y = product $ zipWith (op2' str) (toList x) (toList y)
+
 eq :: (Veccable v) => Vec v -> Vec v -> Booly
-eq = op2' "=="
+eq = bcomp "=="
 
 neq :: (Veccable v) => Vec v -> Vec v -> Booly
-neq = op2' "!="
+neq = bcomp "!="
 
 lt :: (Veccable v) => Vec v -> Vec v -> Booly
-lt = op2' "<"
+lt = bcomp "<"
 
 gt :: (Veccable v) => Vec v -> Vec v -> Booly
-gt = op2' ">"
+gt = bcomp ">"
 
 leq :: (Veccable v) => Vec v -> Vec v -> Booly
-leq = op2' "<="
+leq = bcomp "<="
 
 geq :: (Veccable v) => Vec v -> Vec v -> Booly
-geq = op2' ">="
+geq = bcomp ">="
 
 texture2D :: Texture -> Vec2 -> Vec4
 texture2D = op2pre "texture2D"
