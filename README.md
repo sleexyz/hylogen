@@ -4,7 +4,7 @@ Hylogen is a purely functional language [embedded in Haskell](https://wiki.haske
 
 - pure, type-safe syntax
 - compatability with
-  - standard typeclass operators (`+`, `*`, [`*^`,  `<.>`](https://hackage.haskell.org/package/vector-space))
+  - standard operators (`+`, `*`, [`*^`,  `<.>`](https://hackage.haskell.org/package/vector-space))
   - your fav haskell goodies (higher-order functions, ADTS, swanky polymorphism).
 
 <br/>
