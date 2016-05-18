@@ -2,9 +2,10 @@
 
 Hylogen is a purely functional language [embedded in Haskell](https://wiki.haskell.org/Embedded_domain_specific_language) for live-coding fragment shaders, featuring:
 
-- simple, type-safe syntax
-- your standard operators (`+`, `*`, [`*^`,  `<.>`](https://hackage.haskell.org/package/vector-space))
-- compatability with your fav haskell goodies (higher-order functions, ADTS, swanky polymorphism).
+- pure, simple, type-safe syntax
+- compatability with
+  - standard typeclass operators (`+`, `*`, [`*^`,  `<.>`](https://hackage.haskell.org/package/vector-space))
+  - your fav haskell goodies (higher-order functions, ADTS, swanky polymorphism).
 
 <br/>
 
