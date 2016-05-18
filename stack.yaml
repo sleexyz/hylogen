@@ -16,7 +16,7 @@ flags: {}
 # Extra package databases containing global packages
 extra-package-dbs: []
 
-nix:
-  pure: false
-  shell-file: "default.nix"
+# nix:
+#   pure: false
+#   shell-file: "default.nix"
 
