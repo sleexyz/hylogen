@@ -24,6 +24,8 @@ cabal install hylogen
 
 This will install the hylogen libraries as well as `hyde`, the rendering environment.
 
+<br/>
+
 ## Usage
 
 ```haskell
@@ -49,6 +51,8 @@ hyde Main.hs
 Go to [localhost:5678](http://localhost:5678) in your browser.
 
 You will now see your changes to `Main.hs` propagate to your WebGL rendering environment!
+
+<br/>
 
 ## References
 - [The_Force](https://github.com/shawnlawson/The_Force) by Shawn Lawson. Live-coding audio-reactive shaders!
