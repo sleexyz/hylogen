@@ -1,10 +1,15 @@
 # [*H Y L O G E N*](https://hylogen.com)
 
-Hylogen is a purely functional language [embedded in Haskell](https://wiki.haskell.org/Embedded_domain_specific_language) for live-coding fragment shaders.
+Hylogen is a purely functional language [embedded in Haskell](https://wiki.haskell.org/Embedded_domain_specific_language) for live-coding fragment shaders, featuring:
+
+- a simple and concise syntax
+- type safety
+- your standard operators (`+`, `*`, [`*^`,  `<.>`](https://hackage.haskell.org/package/vector-space))
+- compatability with your fav haskell goodies (higher-order functions, ADTS, swanky polymorphism).
 
 <br/>
 
-It comes with [`hylogen-app`](https://github.com/sleexyz/hylogen-app), the standard rendering environment featuring:
+It comes with `hyde`, the canonical rendering environment featuring:
 - hot-reloading
 - audio-reactive primitives
 - texture backbuffering
@@ -12,17 +17,13 @@ It comes with [`hylogen-app`](https://github.com/sleexyz/hylogen-app), the stand
 <br/>
 
 
-## Features
-
-- *embedded in Haskell*
-- simple and concise syntax
-- compatible w/ standard Haskell operators (`+`, `*`, `*^`,  `<.>`)
-
-## Setup
+## Install
 ```
 cabal update
 cabal install hylogen
 ```
+
+This will install the hylogen libraries as well as `hyde`, the rendering environment.
 
 ## Usage
 
@@ -39,10 +40,10 @@ color = vec4 (a, a, a, 1)
 main = putStrLn . toGLSL $ color
 ```
 
-#### 1. run hylogen-app
+#### 1. run hyde!
 
 ```
-hylogen-app Main.hs
+hyde Main.hs
 ```
 
 #### 2. play!
