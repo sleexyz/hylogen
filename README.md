@@ -1,5 +1,5 @@
 # [*H Y L O G E N*](https://hylogen.com)  
-[![Hackage Status](https://img.shields.io/hackage/v/hylogen.svg)](https://https://hackage.haskell.org/package/hylogen)
+[![Hackage Status](https://img.shields.io/hackage/v/hylogen.svg)](https://hackage.haskell.org/package/hylogen)
 
 Hylogen is a purely functional language [embedded in Haskell](https://wiki.haskell.org/Embedded_domain_specific_language) for live-coding fragment shaders, featuring:
 
