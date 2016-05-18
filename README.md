@@ -36,8 +36,8 @@ import Hylogen.WithHyde
 
 color = vec4 (a, a, a, 1)
   where
-    a = cos(X uvN * sin(time/ 10) * 10 + X mouse)
-      + sin(Y uvN * sin(time / 10) * 10 + Y mouse)
+    a = cos(uvN !X * sin(time / 10) * 10 + mouse !X)
+      + sin(uvN !Y * sin(time / 10) * 10 + mouse !Y)
 
 main = putStrLn . toGLSL $ color
 ```
