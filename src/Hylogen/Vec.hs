@@ -148,6 +148,12 @@ instance Swizzle W where
   type OutputDim W = 1
   swizzShow _ = "w"
 
+data XYZ = XYZ
+instance Swizzle XYZ where
+  type InputMin XYZ = 3
+  type OutputDim XYZ = 3
+  swizzShow _ = "xyz"
+
 -- TODO: finish swizzling!
 
 

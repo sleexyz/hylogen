@@ -10,7 +10,7 @@ let
       }:
       mkDerivation {
         pname = "hylogen";
-        version = "0.1.1.0";
+        version = "0.1.1.2";
         src = ./.;
         isLibrary = true;
         isExecutable = true;

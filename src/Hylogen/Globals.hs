@@ -42,8 +42,9 @@ linlin (a, b, c, d) x = c + (d - c) * ((x - a) / (b - a))
 
 
 
-mix :: Vec1 -> Vec4 -> Vec4 -> Vec4
-mix p a b = p *^ a + (1 - p) *^ b
+mix :: (Veccable n) => Vec1 -> Vec n -> Vec n -> Vec n
+mix p x y = op3pre "mix" x y p
+-- mix p x y = x ^* (1 - p) + y ^* p
 
 true :: Booly
 true = uniform "true"
