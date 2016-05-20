@@ -44,10 +44,10 @@ color = vec4 (a, a, a, 1)
 main = putStrLn . toGLSL $ color
 ```
 
-#### 1. run hylo...
+#### 1. run hylide...
 
 ```
-hylo Main.hs
+hylide Main.hs
 ```
 
 #### 2. ... live-code!
