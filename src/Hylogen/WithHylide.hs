@@ -1,6 +1,6 @@
-module Hylogen.WithHyde ( module Hylogen.WithHyde
-                        , module Hylogen
-                        ) where
+module Hylogen.WithHylide ( module Hylogen.WithHylide
+                          , module Hylogen
+                          ) where
 
 import           Data.Monoid
 import           Hylogen
