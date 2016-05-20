@@ -44,13 +44,13 @@ color = vec4 (a, a, a, 1)
 main = putStrLn . toGLSL $ color
 ```
 
-#### 1. run hylide...
+#### run hylide...
 
 ```
 hylide Main.hs
 ```
 
-#### 2. ... live-code!
+#### ... live-code!
 Go to [localhost:5678](http://localhost:5678) in your browser.
 
 You will now see your changes to `Main.hs` propagate to your WebGL rendering environment!
@@ -59,9 +59,11 @@ You will now see your changes to `Main.hs` propagate to your WebGL rendering env
 
 ## References
 - [The_Force](https://github.com/shawnlawson/The_Force) by Shawn Lawson. Live-coding audio-reactive shaders!
-- [Type-Safe Observable Sharing](https://pdfs.semanticscholar.org/4838/bd0a91b3058b467fa31ad9e0810121b46388.pdf) by Andy Gill. [`data-reify`](https://hackage.haskell.org/package/data-reify) made compile times combinatorially faster!
+- [data-reify](https://hackage.haskell.org/package/data-reify) by Andy Gill.  Makes compile times combinatorially faster
 
 ## Resources
+- **[examples](https://github.com/sleexyz/hylogen-yay)**
 - [hackage](https://hackage.haskell.org/package/hylogen)
+- [hylide](https://github.com/sleexyz/hylide)
 
-- [examples](https://github.com/sleexyz/hylogen-yay)
+
