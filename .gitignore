@@ -3,5 +3,7 @@ TAGS
 .stack-work/
 src/Audio.hs
 src/NonAudio.hs
+src/Corp.hs
+src/SDF.hs
 shader.glsl
 core
