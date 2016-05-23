@@ -61,27 +61,21 @@ bcomp :: (Veccable v) => String -> Vec v -> Vec v -> Booly
 bcomp str x y = product $ zipWith (op2' str) (toList x) (toList y)
 
 
-infix 4 `eq`
 eq :: (Veccable v) => Vec v -> Vec v -> Booly
 eq = bcomp "=="
 
-infix 4 `neq`
 neq :: (Veccable v) => Vec v -> Vec v -> Booly
 neq = bcomp "!="
 
-infix 4 `lt`
 lt :: (Veccable v) => Vec v -> Vec v -> Booly
 lt = bcomp "<"
 
-infix 4 `gt`
 gt :: (Veccable v) => Vec v -> Vec v -> Booly
 gt = bcomp ">"
 
-infix 4 `leq`
 leq :: (Veccable v) => Vec v -> Vec v -> Booly
 leq = bcomp "<="
 
-infix 4 `geq`
 geq :: (Veccable v) => Vec v -> Vec v -> Booly
 geq = bcomp ">="
 
