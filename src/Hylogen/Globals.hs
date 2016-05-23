@@ -10,12 +10,18 @@ import Hylogen.Expr
 
 
 
+len :: forall n. (Veccable n) => Vec n -> Vec1
+len = op1pre "length"
+
 
 inverseSqrt :: forall n. (Veccable n) => Vec n -> Vec n
 inverseSqrt = op1pre'' "inversesqrt"
 
 fract :: forall n. (Veccable n) => Vec n -> Vec n
 fract = op1pre'' "fract"
+
+mod_ :: forall n. (Veccable n) => Vec n -> Vec n -> Vec n
+mod_ = op2pre'' "mod"
 
 floor_:: forall n. (Veccable n) => Vec n -> Vec n
 floor_ = op1pre'' "floor"
