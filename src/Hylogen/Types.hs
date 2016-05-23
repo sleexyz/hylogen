@@ -4,6 +4,6 @@ module Hylogen.Types ( module Hylogen.Vec
                      ) where 
 
 import Hylogen.Vec hiding (FloatVec, swizzShow)
-import Hylogen.Booly hiding (BoolyType)
+import Hylogen.Booly hiding (BoolyType, bcomp)
 import Hylogen.Texture hiding (TextureType)
 
