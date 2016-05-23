@@ -70,9 +70,3 @@ const App = React.createClass({
 });
 
 ReactDOM.render(<App/>, document.getElementById("entry"));
-
-
-
-
-// TODO: add hylogen landing screen
-// TODO:

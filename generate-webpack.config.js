@@ -23,7 +23,6 @@ module.exports = function (entryPath, outputPath, publicPath, isProd) {
           new webpack.NoErrorsPlugin()
         ];
 
-
   return {
     output: {
       path: path.join(__dirname, outputPath),
