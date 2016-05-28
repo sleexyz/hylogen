@@ -10,7 +10,7 @@ white :: Vec3
 white = vec3 (1, 1, 1)
 
 setAlpha :: Vec1 -> Vec4 -> Vec4
-setAlpha alpha a = vec4 (a!X, a!Y, a!Z, alpha)
+setAlpha alpha v = vec4 (xyz_ v, alpha)
 
--- hsl
+-- TODO: hsl
 
