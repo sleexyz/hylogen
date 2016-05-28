@@ -9,9 +9,28 @@ import Hylogen.Types
 import Hylogen.Expr
 
 
+-- Geometric functions
 
 len :: forall n. (Veccable n) => Vec n -> Vec1
 len = op1pre "length"
+
+distance :: forall n. (Veccable n) => Vec n -> Vec n -> Vec n
+distance = op2pre'' "distance"
+
+cross :: Vec3 -> Vec3 -> Vec3
+cross = op2pre'' "cross"
+
+normalize :: forall n. (Veccable n) => Vec n -> Vec n
+normalize = op1pre'' "normalize"
+
+faceForward :: forall n. (Veccable n) => Vec n -> Vec n -> Vec n -> Vec n
+faceForward = op3pre'' "faceforward"
+
+reflect :: forall n. (Veccable n) => Vec n -> Vec n -> Vec n
+reflect = op2pre'' "reflect"
+
+refract :: forall n. (Veccable n) => Vec n -> Vec n -> Vec1 -> Vec n
+refract = op3pre "refract"
 
 
 inverseSqrt :: forall n. (Veccable n) => Vec n -> Vec n
@@ -82,8 +101,8 @@ geq = bcomp ">="
 texture2D :: Texture -> Vec2 -> Vec4
 texture2D = op2pre "texture2D"
 
-select :: forall a
+sel :: forall a
           . (ToGLSLType a)
           => Booly -> Expr a -> Expr a -> Expr a
-select a b c = Expr t (Tree (Select, toGLSLType t, "") [toMono a, toMono b, toMono c])
+sel a b c = Expr t (Tree (Select, toGLSLType t, "") [toMono a, toMono b, toMono c])
   where t = tag :: a
