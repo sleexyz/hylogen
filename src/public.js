@@ -36,7 +36,7 @@ const App = React.createClass({
         <div className="page grad"/>
         <div className="text">
           <p>
-        <i className="cool">Hylogen</i> is a domain-specific language embedded in Haskell for writing fragment shaders, designed to be ergonomic for live coding.
+        <i className="cool">Hylogen</i> is a language embedded in Haskell for live-coding WebGL fragment shaders.
         </p>
 
         <br/>

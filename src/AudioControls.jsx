@@ -153,12 +153,12 @@ export default React.createClass({
       <div className="audioControls">
         <div className="inputPicker">
           <br/>
-          soundcloud: <input type="radio"
+          sc : <input type="radio"
                  checked={this.state.state === "sc"}
                  value="sc"
                  onChange={this.onChange}/>
           <br/>
-          microphone: <input type="radio"
+          mic: <input type="radio"
                  checked={this.state.state === "usermedia"}
                  value="usermedia"
                  onChange={this.onChange}/>
