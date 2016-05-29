@@ -38,6 +38,7 @@ export default React.createClass({
     fsSource: PropTypes.string.isRequired,
     width: PropTypes.number,
     height: PropTypes.number,
+    withOSC: PropTypes.bool.isRequired,
     animation: PropTypes.bool
   },
   getDefaultProps() {
@@ -83,12 +84,17 @@ export default React.createClass({
 
     state.osc = new Float32Array(8);
 
-    // TODO: handle cleanup of callback
-    OscPort.on("message", function(msg) {
-      const addr = parseInt(msg.address.slice(7));
-      const val = msg.args[0];
-      state.osc[addr] = val;
-    });
+    if (this.props.withOSC) {
+      console.log(OscPort);
+      let instance = OscPort.getInstance();
+
+      // TODO: handle cleanup of callback
+      instance.on("message", function(msg) {
+        const addr = parseInt(msg.address.slice(7));
+        const val = msg.args[0];
+        state.osc[addr] = val;
+      });
+    }
 
 
     this.loadProgram();

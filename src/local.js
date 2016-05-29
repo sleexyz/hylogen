@@ -63,7 +63,8 @@ const App = React.createClass({
                 <AudioControls initialState="usermedia"/>
                 </div>
                 <Program startAnimating={true}
-                         fsSource={this.state.fsSource}/>
+                         fsSource={this.state.fsSource}
+                         withOSC={true}/>
               </div>
         );
     }

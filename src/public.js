@@ -56,7 +56,8 @@ const App = React.createClass({
         <div className="programContainer">
         <div className="programContainerInner">
         <Program startAnimating={true}
-      fsSource={source}/>
+                 fsSource={source}jk
+                 withOSC={false}/>
         </div>
         </div>
         <AudioControls/>
