@@ -1,17 +1,16 @@
-# [*H Y L O G E N*](https://hylogen.com)  
-[![Hackage Status](https://img.shields.io/hackage/v/hylogen.svg)](https://hackage.haskell.org/package/hylogen)
+# [*H Y L O G E N*](https://hylogen.com) [![Hackage Status](https://img.shields.io/hackage/v/hylogen.svg)](https://hackage.haskell.org/package/hylogen)
 
 ![](https://thumbs.gfycat.com/SoftAdeptAlaskajingle-size_restricted.gif)
 
 Hylogen is a purely functional language [embedded in Haskell](https://wiki.haskell.org/Embedded_domain_specific_language) for live-coding fragment shaders, featuring:
 
-- a simple and pure syntax
+- simple and pure syntax
 - standard operators (`+`, `*`, [`*^`,  `<.>`](https://hackage.haskell.org/package/vector-space))
 - compat. w/ your fav haskell goodies (higher-order functions, ADTS, swanky polymorphism).
 
 ![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
 
-It comes with `hylide`, an accompanying rendering environment featuring:
+It comes with `hylide`, a live WebGL renderer featuring:
 - *hot-reloading*
 - audio-reactive primitives
 - texture backbuffering
@@ -25,7 +24,7 @@ cabal update
 cabal install hylogen
 ```
 
-This will install the hylogen package and `hylide`, the rendering environment.
+This will install the Hylogen package and Hylide, the live renderer.
 
 ![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
 
@@ -48,7 +47,7 @@ color = vec4 (a, a, a, 1)
 main = putStrLn . toGLSL $ color
 ```
 
-Run Hylide, the Hylogen IDE:
+Run Hylide:
 
 ```
 $ hylide Main.hs
@@ -82,7 +81,7 @@ void main() {
 }
 ```
 
-Hylide recompiles and reruns `main` on file changes, sending fresh shaders to the WebGL renderer via websockets.
+Hylide will recompile and and rerun `main` on file changes, sending fresh shaders to the WebGL renderer via websockets.
 
 
 
