@@ -12,6 +12,7 @@ Hylogen is a purely functional language [embedded in Haskell](https://wiki.haske
 - simple and pure syntax
 - standard operators (`+`, `*`, [`*^`,  `<.>`](https://hackage.haskell.org/package/vector-space))
 - compat. w/ your fav haskell goodies (higher-order functions, ADTS, swanky polymorphism).
+- compiles to OpenGL ES 2.0 GLSL
 
 ![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
 
@@ -29,7 +30,7 @@ cabal update
 cabal install hylogen
 ```
 
-This will install the Hylogen package and Hylide, the live renderer.
+This will install the Hylogen package and hylide, the live renderer.
 
 ![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
 
@@ -52,7 +53,7 @@ color = vec4 (a, a, a, 1)
 main = putStrLn . toGLSL $ color
 ```
 
-Run Hylide:
+Run hylide:
 
 ```
 $ hylide Main.hs
@@ -86,7 +87,7 @@ void main() {
 }
 ```
 
-Hylide will recompile and and rerun `main` on file changes, sending fresh shaders to the WebGL renderer via websockets.
+Hylide will recompile and and rerun `main` on file changes, sending fresh shaders to the WebGL context via websockets.
 
 
 
@@ -95,7 +96,7 @@ Hylide will recompile and and rerun `main` on file changes, sending fresh shader
 
 ## References
 - [The_Force](https://github.com/shawnlawson/The_Force) by Shawn Lawson. Live-coding audio-reactive shaders!
-- [data-reify](https://hackage.haskell.org/package/data-reify) by Andy Gill, to keep compile times from exploding by preserving sharing from the GHC Heap. 
+- [data-reify](https://hackage.haskell.org/package/data-reify) by Andy Gill, to keep intermediate AST representations from exploding by preserving the GHC heap's internal sharing
 
 ## Resources
 - [demo reel](https://hylogen.com)
