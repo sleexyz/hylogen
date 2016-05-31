@@ -44,6 +44,7 @@ executable hylide
                      , process
                      , text
                      , websockets
+                     , aeson
                      , wai >=3.2 && <3.3
                      , http-types >=0.9 && <0.10
                      , warp >=3.2 && <3.3

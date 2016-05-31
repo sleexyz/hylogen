@@ -4,6 +4,7 @@
 
 import Paths_hylogen (getDataFileName)
 import Control.Concurrent
+import Data.Aeson
 import qualified Data.ByteString.Lazy.Char8 as LBS8
 
 import qualified Data.Text as T
@@ -17,6 +18,16 @@ import System.Exit (ExitCode(ExitFailure, ExitSuccess))
 import Network.Wai
 import Network.Wai.Handler.Warp
 import Network.HTTP.Types (status200, status404)
+
+data Msg = Err String
+         | Code String
+         deriving (Show)
+
+instance ToJSON Msg where
+  toJSON = \case
+    Err str -> object [ "error" .= str]
+    Code str -> object [ "code" .= str]
+
 
 main :: IO ()
 main = getArgs >>= \case
@@ -39,22 +50,22 @@ handleConnection pathToWatch mgr pending = do
    let (dirToWatch, _) = splitFileName pathToWatch
    connection <- acceptRequest pending
 
+   -- let send = sendTextData connection . T.pack
+   let send = sendTextData connection
    let update = do
-         maybeNewSource <- getNewSource pathToWatch
-         case maybeNewSource of
-           Just source -> sendTextData connection . T.pack $ source
-           Nothing -> return ()
-   update
+         msg <- getCodeOrError pathToWatch
+         send . encode $ msg
 
    let onChange e = case e of
          Modified _ _ -> update
          _ -> return ()
+   update
    _ <- watchDir mgr dirToWatch (const True) onChange
    _ <- getLine -- temp hack to keep the socket open
    return ()
 
-getNewSource :: FilePath -> IO (Maybe String)
-getNewSource pathToWatch = do
+getCodeOrError :: FilePath -> IO Msg
+getCodeOrError pathToWatch = do
    -- TODO: more robust paths!:
    -- c <- readFile pathToWatch
    let (dirToWatch, _) = splitFileName pathToWatch
@@ -63,12 +74,8 @@ getNewSource pathToWatch = do
       , pathToWatch
       ] ""
    case ec of
-     ExitSuccess -> do
-       putStrLn stdout
-       return (Just stdout)
-     ExitFailure _ -> do
-       putStrLn stderr
-       return Nothing
+     ExitSuccess   -> return (Code stdout)
+     ExitFailure _ -> return (Err stderr)
 
 serveIndex :: IO ()
 serveIndex = do
