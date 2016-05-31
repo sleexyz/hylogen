@@ -85,7 +85,6 @@ export default React.createClass({
     state.osc = new Float32Array(8);
 
     if (this.props.withOSC) {
-      console.log(OscPort);
       let instance = OscPort.getInstance();
 
       // TODO: handle cleanup of callback
