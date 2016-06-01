@@ -12,12 +12,12 @@ Hylogen is a purely functional language [embedded in Haskell](https://wiki.haske
 - simple and pure syntax
 - standard operators (`+`, `*`, [`*^`,  `<.>`](https://hackage.haskell.org/package/vector-space))
 - compat. w/ your fav haskell goodies (higher-order functions, ADTS, swanky polymorphism).
-- compiles to OpenGL ES 2.0 GLSL
+- compiles to GLSL
 
 ![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
 
-It comes with `hylide`, a live WebGL renderer featuring:
-- *hot-reloading*
+It comes with `hylide`, a live WebGL renderer with:
+- hot-reloading
 - audio-reactive primitives
 - texture backbuffering
 
