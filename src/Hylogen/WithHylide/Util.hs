@@ -19,7 +19,7 @@ setAlpha alpha v = vec4 (xyz_ v, alpha)
 -- TODO: hsl
 
 
--- | Linear to Exponential Map
+-- | Linear to exponential map
 --
 -- @
 -- linexp (a, b, c, d) a           -- == c
@@ -29,7 +29,7 @@ setAlpha alpha v = vec4 (xyz_ v, alpha)
 linexp :: (Floating a) => (a, a, a, a) -> a -> a
 linexp (a, b, c, d) x = c * ((d / c) ** ((x - a) / (b - a)))
 
--- | Linear to Linear map
+-- | Linear to linear map
 --
 -- @
 -- linexp (a, b, c, d) a           -- == c

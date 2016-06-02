@@ -12,4 +12,5 @@ instance ToGLSLType TextureType where
   toGLSLType _ = GLSLTexture
   tag = TextureType
 
+-- | Hylogen Texture type
 type Texture = Expr TextureType

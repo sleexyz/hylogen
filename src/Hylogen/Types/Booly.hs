@@ -10,6 +10,7 @@ instance ToGLSLType BoolyType where
   toGLSLType _ = GLSLBool
   tag = BoolyType
 
+-- | Hylogen Boolean type
 type Booly = Expr BoolyType
 
 -- | We use Num operators for Boolean arithmetic:

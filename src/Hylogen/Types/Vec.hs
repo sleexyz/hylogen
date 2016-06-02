@@ -23,6 +23,7 @@ import Hylogen.Expr
 -- | Floating vector singleton type tag
 data FloatVec (n :: Nat) = FloatVec
 
+-- | Hylogen floating-point Vector type
 type Vec n = Expr (FloatVec n)
 type Vec1 = Vec 1
 type Vec2 = Vec 2

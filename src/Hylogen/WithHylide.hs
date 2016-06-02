@@ -1,3 +1,8 @@
+{-|
+Exports a standard Hylogen environment with use with Hylide.
+
+-}
+
 module Hylogen.WithHylide ( module Hylogen.WithHylide.Util
                           , module Hylogen.WithHylide.Core
                           , module Hylogen
