@@ -2,10 +2,11 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances #-}
 
-module Hylogen.Texture where
+module Hylogen.Types.Texture where
 
 import Hylogen.Expr
 
+-- | Texture singleton type tag
 data TextureType = TextureType
 instance ToGLSLType TextureType where
   toGLSLType _ = GLSLTexture

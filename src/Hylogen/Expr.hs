@@ -12,11 +12,17 @@
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE DeriveFunctor #-}
 
+{- |
+Internal AST representation.
+-}
 
 module Hylogen.Expr where
 
+
 import Data.Reify
 
+
+-- | Internal type tag
 data GLSLType = GLSLFloat
               | GLSLVec2
               | GLSLVec3
@@ -34,6 +40,7 @@ instance Show GLSLType where
     GLSLBool -> "bool"
     GLSLTexture -> "sampler2D"
 
+-- | Internal form tag
 data ExprForm = Uniform
               | Variable
               | Op1
@@ -46,11 +53,14 @@ data ExprForm = Uniform
               | Access
                 deriving (Show)
 
+-- | Rose tree. Internal AST data structure
 data Tree a  = Tree { getElem     :: a
                     , getChildren :: [Tree a]
                     }
 
 
+-- | Untyped Expr representation
+-- Carries type information in type tag
 type ExprMono = Tree (ExprForm, GLSLType, String)
 
 instance Show ExprMono where
@@ -66,9 +76,11 @@ instance Show ExprMono where
     Select   -> mconcat ["( ", show (xs!!0), " ? ", show (xs!!1), " : ", show (xs!!2), ")"]
     Access   -> mconcat [show (xs!!0), ".", str]
 
--- The GLSLType needs to be manually dependent
-
--- light typed wrapper
+-- | Light type wrapper
+--
+-- Note the internal type tag is not directly dependent on the actual type!
+--
+-- We use the ToGLSLType typeclass to genenerate dependence from types to values
 data Expr ty = Expr { getTypeTag :: ty
                     , toMono ::  Tree (ExprForm, GLSLType, String)
                     }
@@ -77,51 +89,70 @@ instance ToGLSLType ty => Show (Expr ty) where
   show = show . toMono
 
 class ToGLSLType  ty where
+  -- | Gives us dependence from typed singleton tags to untyped tags
   toGLSLType :: ty -> GLSLType
+  -- | Singleton tag
   tag :: ty -- TODO: fill in!
 
+-- | Uniform expression.
 uniform :: forall a
            . ToGLSLType a
            => String -> Expr a
 uniform str = Expr t (Tree (Uniform, toGLSLType t, str) [])
   where t = tag :: a
 
+-- | Unary operator.
+-- Most generally typed.
 op1 :: forall a b
        . (ToGLSLType a, ToGLSLType b)
        => String -> Expr a -> Expr b
 op1 str a = Expr t (Tree (Op1, toGLSLType t, str) [toMono a])
   where t = tag :: b
 
+-- | Unary operator.
+-- Input and output values have the same type.
 op1'' :: forall a
        . (ToGLSLType a)
        => String -> Expr a -> Expr a
 op1'' str a = Expr t (Tree (Op1, toGLSLType t, str) [toMono a])
   where t = tag :: a
 
+-- | Unary operator.
+-- Prefix function call style.
+-- Most generally typed.
 op1pre :: forall a b
           . (ToGLSLType a, ToGLSLType b)
           => String -> Expr a -> Expr b
 op1pre str a = Expr t (Tree (Op1Pre, toGLSLType t, str) [toMono a])
   where t = tag :: b
 
+-- | Unary operator.
+-- Prefix function call style.
+-- Input and output values have the same type.
 op1pre'' :: forall a
           . (ToGLSLType a)
           => String -> Expr a -> Expr a
 op1pre'' str a = Expr t (Tree (Op1Pre, toGLSLType t, str) [toMono a])
   where t = tag :: a
 
+-- | Binary operator.
+-- Most generally typed.
 op2 :: forall a b c
        . (ToGLSLType a, ToGLSLType b, ToGLSLType c)
        => String -> Expr a -> Expr b -> Expr c
 op2 str a b = Expr t (Tree (Op2, toGLSLType t, str) [toMono a, toMono b])
   where t = tag :: c
 
+-- | Binary operator.
+-- Arguments have the same type.
 op2' :: forall a c
        . (ToGLSLType a, ToGLSLType c)
        => String -> Expr a -> Expr a -> Expr c
 op2' str a b = Expr t (Tree (Op2, toGLSLType t, str) (fmap toMono [a, b]))
   where t = tag :: c
 
+-- | Binary operator.
+-- Input and output values have the same type.
 op2'' :: forall a
        . (ToGLSLType a)
        => String -> Expr a -> Expr a -> Expr a
@@ -129,36 +160,54 @@ op2'' str a b = Expr t (Tree (Op2, toGLSLType t, str) (fmap toMono [a, b]))
   where t = tag :: a
 
 
+-- | Binary operator.
+-- Prefix function call style.
+-- Most generally typed.
 op2pre :: forall a b c
           . (ToGLSLType a, ToGLSLType b, ToGLSLType c)
           => String -> Expr a -> Expr b -> Expr c
 op2pre str a b = Expr t (Tree (Op2Pre, toGLSLType t, str) [toMono a, toMono b])
   where t = tag :: c
 
+-- | Binary operator.
+-- Prefix function call style.
+-- Arguments have the same type.
 op2pre' :: forall a c
        . (ToGLSLType a, ToGLSLType c)
        => String -> Expr a -> Expr a -> Expr c
 op2pre' str a b = Expr t (Tree (Op2Pre, toGLSLType t, str) (fmap toMono [a, b]))
   where t = tag :: c
 
+-- | Binary operator.
+-- Prefix function call style.
+-- Input and output values have the same type.
 op2pre'' :: forall a
        . (ToGLSLType a)
        => String -> Expr a -> Expr a -> Expr a
 op2pre'' str a b = Expr t (Tree (Op2Pre, toGLSLType t, str) (fmap toMono [a, b]))
   where t = tag :: a
 
+-- | Ternary operator.
+-- Prefix function call style.
+-- Most generally typed.
 op3pre :: forall a b c d
           . (ToGLSLType a, ToGLSLType b, ToGLSLType c, ToGLSLType d)
           => String -> Expr a -> Expr b -> Expr c -> Expr d
 op3pre str a b c = Expr t (Tree (Op3Pre, toGLSLType t, str) [toMono a, toMono b, toMono c])
   where t = tag :: d
 
+-- | Ternary operator.
+-- Prefix function call style.
+-- Arguments have the same type.
 op3pre' :: forall a d
           . (ToGLSLType a, ToGLSLType d)
           => String -> Expr a -> Expr a -> Expr a -> Expr d
 op3pre' str a b c = Expr t (Tree (Op3Pre, toGLSLType t, str) (fmap toMono [a, b, c]))
   where t = tag :: d
 
+-- | Ternary operator.
+-- Prefix function call style.
+-- Input and output values have the same type.
 op3pre'' :: forall a
           . (ToGLSLType a)
           => String -> Expr a -> Expr a -> Expr a -> Expr a
@@ -166,18 +215,27 @@ op3pre'' str a b c = Expr t (Tree (Op3Pre, toGLSLType t, str) (fmap toMono [a, b
   where t = tag :: a
 
 
+-- | Quaternary operator.
+-- Prefix function call style.
+-- Most generally typed.
 op4pre :: forall a b c d e
           . (ToGLSLType a, ToGLSLType b, ToGLSLType c, ToGLSLType d, ToGLSLType e)
           => String -> Expr a -> Expr b -> Expr c -> Expr d -> Expr e
 op4pre str a b c d = Expr t (Tree (Op4Pre, toGLSLType t, str) [toMono a, toMono b, toMono c, toMono d])
   where t = tag :: e
 
+-- | Quaternary operator.
+-- Prefix function call style.
+-- Arguments have the same type.
 op4pre' :: forall a e
           . (ToGLSLType a, ToGLSLType e)
           => String -> Expr a -> Expr a -> Expr a -> Expr a -> Expr e
 op4pre' str a b c d = Expr t (Tree (Op4Pre, toGLSLType t, str) (fmap toMono [a, b, c, d]))
   where t = tag :: e
 
+-- | Quaternary operator.
+-- Prefix function call style.
+-- Input and output values have the same type.
 op4pre'' :: forall a e
           . (ToGLSLType a, ToGLSLType e)
           => String -> Expr a -> Expr a -> Expr a -> Expr a -> Expr e
@@ -187,13 +245,22 @@ op4pre'' str a b c d = Expr t (Tree (Op4Pre, toGLSLType t, str) (fmap toMono [a,
 
 
 
+-- | Open tree type, to be used for explicit recursion with data-reify for preserving sharing.
+--
+-- Note the second argument of the constructor is a list of Maybe b's.
+-- We use Maybe's to determine whether or not a child expression gets inlined.
 data TreeF a b = TreeF { getElemF     :: a
                        , getChildrenF   :: [Maybe b]
                        }
                  deriving (Functor)
 
+-- | Open untyped expression representation, to be used for explicit recursion with data-reify for preserving sharing.
+--
+-- Note the presence of a list of closed ExprMono's in the tuple.
+-- We use this list to recover unshared child expressions when they need to be inlined.
 type ExprMonoF = TreeF (ExprForm, GLSLType, String, [ExprMono])
 
+-- | Returns the string representation of the nth child of an open untyped expression, accounting for inlining
 emfStringAt :: (Show a) => ExprMonoF a -> Int -> String
 emfStringAt (TreeF (_, _, _, xs) ys)  i = zipWith fn xs ys !! i
   where
@@ -215,10 +282,7 @@ instance (Show a) => Show (ExprMonoF a) where
     where
       strAt = emfStringAt expr
 
--- instance MuRef ExprMono where
---   type DeRef ExprMono = ExprMonoF
---   mapDeRef f (Tree tup xs) = TreeF tup <$> traverse f xs
-
+-- | Currently only inlines uniforms.
 instance MuRef ExprMono where
   type DeRef ExprMono = ExprMonoF
   mapDeRef func (Tree (form, ty, str) xs) = TreeF (form, ty, str, xs) <$> g xs

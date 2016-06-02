@@ -1,9 +1,10 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances #-}
-module Hylogen.Booly where
+module Hylogen.Types.Booly where
 
 import Hylogen.Expr
 
+-- | Booly singleton type tag
 data BoolyType = BoolyType
 instance ToGLSLType BoolyType where
   toGLSLType _ = GLSLBool
@@ -11,8 +12,11 @@ instance ToGLSLType BoolyType where
 
 type Booly = Expr BoolyType
 
+-- | We use Num operators for Boolean arithmetic:
 instance Num Booly where
+  -- | Or
   (+) = op2 "||"
+  -- | And
   (*) = op2 "&&"
   negate = op1 "!"
   abs = id

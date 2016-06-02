@@ -1,9 +1,9 @@
-module Hylogen.Types ( module Hylogen.Vec
-                     , module Hylogen.Booly
-                     , module Hylogen.Texture
+module Hylogen.Types ( module Hylogen.Types.Vec
+                     , module Hylogen.Types.Booly
+                     , module Hylogen.Types.Texture
                      ) where
 
-import Hylogen.Vec hiding (FloatVec, mkSwizz)
-import Hylogen.Booly hiding (BoolyType)
-import Hylogen.Texture hiding (TextureType)
+import Hylogen.Types.Vec hiding (FloatVec, mkSwizz)
+import Hylogen.Types.Booly hiding (BoolyType)
+import Hylogen.Types.Texture hiding (TextureType)
 

@@ -1,10 +1,6 @@
 dist/
 TAGS
 .stack-work/
-src/Audio.hs
-src/NonAudio.hs
-src/Corp.hs
-src/SDF.hs
-src/Cool.hs
+src/*.hs
 shader.glsl
 core

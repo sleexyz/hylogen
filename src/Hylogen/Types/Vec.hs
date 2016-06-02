@@ -12,7 +12,7 @@
 {-# LANGUAGE InstanceSigs #-}
 
 
-module Hylogen.Vec where
+module Hylogen.Types.Vec where
 
 import GHC.TypeLits
 import Data.VectorSpace
@@ -20,6 +20,7 @@ import Data.VectorSpace
 import Hylogen.Expr
 
 
+-- | Floating vector singleton type tag
 data FloatVec (n :: Nat) = FloatVec
 
 type Vec n = Expr (FloatVec n)
@@ -43,8 +44,11 @@ instance ToGLSLType (FloatVec 4) where
 
 
 
+-- | A Nat is veccable if it can be the dimension of a GLSL vector
 class (ToGLSLType (FloatVec n), KnownNat n) => Veccable n where
+  -- | Creates a Vec n from a Vec1
   copy :: Vec1 -> Vec n
+  -- | Transforms a Vec n into a list of Vec1's
   toList :: Vec n -> [Vec1]
 
 
@@ -115,11 +119,14 @@ instance Veccable n => InnerSpace (Vec n) where
   
 
 
+-- | Exposed constructor for making vec2's
 vec2 :: (Vec1, Vec1) -> Vec2
 vec2 (x, y) = op2pre' "vec2" x y
 
 
-class ToVec3 tuple where vec3 :: tuple -> Vec3
+class ToVec3 tuple where
+  -- | Exposed constructor for making vec3's
+  vec3 :: tuple -> Vec3
 
 instance (a ~ Vec m, b ~ Vec (3 - m)) => ToVec3 (a, b) where
   vec3 (x, y) = Expr fv (Tree (Op2Pre, toGLSLType fv, "vec3") [toMono x, toMono y])
@@ -130,7 +137,9 @@ instance (a ~ Vec1, b ~ Vec1, c ~ Vec1) => ToVec3 (a, b, c) where
       where fv = FloatVec :: FloatVec 3
 
 
-class ToVec4 tuple where vec4 :: tuple -> Vec4
+class ToVec4 tuple where
+  -- | Exposed constructor for making vec4's
+  vec4 :: tuple -> Vec4
 
 instance (a ~ Vec m, b ~ Vec (4 - m)) => ToVec4 (a, b) where
   vec4 (x, y) = Expr fv (Tree (Op2Pre, toGLSLType fv, "vec4") [toMono x,toMono y])
@@ -154,9 +163,9 @@ instance (a ~ Vec1, b ~ Vec1, c ~ Vec1, d ~ Vec1) => ToVec4 (a, b, c, d) where
       where fv = FloatVec :: FloatVec 4
 
 
--- Swizzling!
 type (>=) x y = (x + 1 <=? y) ~ 'False
 
+-- | Makes swizzle functions. Uses GenSwizz.hs to generate the following 340 swizzle expressions.
 mkSwizz :: forall n m. (Veccable n, Veccable m) => String -> Vec n -> Vec m
 mkSwizz str v = Expr fv (Tree (Access, toGLSLType fv, str) [toMono v])
   where
