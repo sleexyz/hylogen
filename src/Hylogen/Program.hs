@@ -10,6 +10,7 @@ import Data.Monoid
 import System.IO.Unsafe
 
 import Hylogen.Expr
+import Hylogen.Types.Vec (Vec4)
 
 newtype Id = Id Int
 instance Show Id where
@@ -45,7 +46,14 @@ instance Show Function where
 
 
 -- | Returns a program given an expression in closed untyped form
-toProgram :: ExprMono -> Function
-toProgram v = unsafePerformIO $ do
+monoToProgram :: ExprMono -> Function
+monoToProgram v = unsafePerformIO $ do
   Graph nodes _ <- reifyGraph v
   return . Function $ NewAssign <$> nodes
+
+-- | A GLSL program. Currently synonym for Function.
+type Program = Function
+
+-- | Helper function from a Vec4 to A GLSL Program, with sharing.
+toProgram :: Vec4 -> Program
+toProgram = monoToProgram . toMono

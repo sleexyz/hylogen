@@ -35,11 +35,11 @@ This will install the Hylogen package and hylide, the live renderer.
 ![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
 
 ## Usage
-Here's a simple Hylogen program, saved as `Main.hs`:
+Here's a simple Hylogen program, saved as `Example.hs`:
 
 ```haskell
 
-module Main where
+module Example where
 import Hylogen.WithHylide
 
 color :: Vec4
@@ -50,7 +50,9 @@ color = vec4 (a, a, a, 1)
     a = sum [ cos (x_ uvN * f time + x_ mouse )
             , sin (y_ uvN * f time + y_ mouse )
             ]
-main = putStrLn . toGLSL $ color
+
+output :: Program
+output = toProgram color
 ```
 
 Run hylide:
@@ -87,7 +89,7 @@ void main() {
 }
 ```
 
-Hylide will recompile and and rerun `main` on file changes, sending fresh shaders to the WebGL context via websockets.
+Hylide will recompile on file changes, sending fresh shaders to the WebGL context via websockets.
 
 
 

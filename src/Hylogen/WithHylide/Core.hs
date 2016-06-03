@@ -3,20 +3,15 @@ module Hylogen.WithHylide.Core where
 import           Data.Monoid
 import           Hylogen
 import           Hylogen.Expr
-import           Hylogen.Program  (toProgram)
 
 
--- | Writes GLSL, without sharing
-toGLSL' :: Vec4 -> String
-toGLSL' v = unlines [ "void main() {"
-                    , "    gl_FragColor = " <> show v <> ";"
-                    , "}"
-                    ]
+-- Writes GLSL, without sharing
+-- toGLSL' :: Vec4 -> String
+-- toGLSL' v = unlines [ "void main() {"
+--                     , "    gl_FragColor = " <> show v <> ";"
+--                     , "}"
+--                     ]
 
-
--- | Writes GLSL, with sharing
-toGLSL :: Vec4 -> String
-toGLSL = show . toProgram . toMono
 
 
 -- | Pixel coordinates

@@ -1,5 +1,5 @@
 name:                hylogen
-version:             0.1.2.3
+version:             0.1.3.0
 synopsis:            an EDSL for live-coding fragment shaders
 description:         an EDSL for live-coding fragment shaders
 homepage:            https://github.com/sleexyz/hylogen
@@ -27,7 +27,7 @@ library
                      , Hylogen.WithHylide
                      , Hylogen.WithHylide.Core
                      , Hylogen.WithHylide.Util
-  build-depends:       base >=4.8 && <4.9
+  build-depends:       base
                      , vector-space
                      , data-reify
   hs-source-dirs:      src
@@ -45,6 +45,7 @@ executable hylide
                      , text
                      , websockets
                      , aeson
+                     , hint
                      , wai >=3.2 && <3.3
                      , http-types >=0.9 && <0.10
                      , warp >=3.2 && <3.3
