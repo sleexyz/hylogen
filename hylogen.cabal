@@ -27,7 +27,7 @@ library
                      , Hylogen.WithHylide
                      , Hylogen.WithHylide.Core
                      , Hylogen.WithHylide.Util
-  build-depends:       base
+  build-depends:       base >= 4.8 && <=4.9
                      , vector-space
                      , data-reify
   hs-source-dirs:      src
