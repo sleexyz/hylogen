@@ -1,11 +1,14 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
 
 
 import Paths_hylogen (getDataFileName)
 import Control.Concurrent
 import Control.Monad
 import Data.Aeson
+import GHC.Generics
 import qualified Data.ByteString.Lazy.Char8 as LBS8
 
 import qualified Data.Text as T
@@ -26,12 +29,7 @@ import qualified Control.Exception as E
 
 data Msg = Err String
          | Code String
-         deriving (Show)
-
-instance ToJSON Msg where
-  toJSON = \case
-    Err str -> object [ "error" .= str]
-    Code str -> object [ "code" .= str]
+         deriving (Show, Generic, ToJSON, FromJSON)
 
 main :: IO ()
 main = do
@@ -45,11 +43,8 @@ main' pathToWatch = do
   tid2 <- forkIO $ serveGLSL pathToWatch
   putStrLn "Press enter to exit."
   void getLine
-  -- let fn = do
-  --       killThread tid1
-  --       killThread tid2
-  --       die "diee"
-  -- installHandler keyboardSignal (Catch fn) Nothing
+  killThread tid1
+  killThread tid2
 
 
 

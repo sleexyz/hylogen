@@ -1,19 +1,19 @@
-{ mkDerivation, base, bytestring, filepath, fsnotify
-    , http-types, process, stdenv, text, vector-space
-    , wai, wai-app-static, warp, websockets
-    }:
-    mkDerivation {
-      pname = "hylogen";
-      version = "0.1.0.9";
-      src = ./.;
-      isLibrary = true;
-      isExecutable = true;
-      libraryHaskellDepends = [ base vector-space ];
-      executableHaskellDepends = [
-        base bytestring filepath fsnotify http-types process
-        text wai wai-app-static warp websockets
-      ];
-      homepage = "https://github.com/sleexyz/hylogen";
-      description = "an EDSL for live-coding fragment shaders";
-      license = stdenv.lib.licenses.mit;
-    }
+  { mkDerivation, aeson, base, bytestring, data-reify, filepath
+      , fsnotify, hint, http-types, process, stdenv, text, vector-space
+      , wai, warp, websockets
+      }:
+      mkDerivation {
+        pname = "hylogen";
+        version = "0.1.3.1";
+        src = ./.;
+        isLibrary = true;
+        isExecutable = true;
+        libraryHaskellDepends = [ base data-reify vector-space ];
+        executableHaskellDepends = [
+          aeson base bytestring filepath fsnotify hint http-types process
+          text wai warp websockets
+        ];
+        homepage = "https://github.com/sleexyz/hylogen";
+        description = "an EDSL for live-coding fragment shaders";
+        license = stdenv.lib.licenses.mit;
+      }
