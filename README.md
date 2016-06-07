@@ -109,3 +109,7 @@ Hylide will recompile on file changes, sending fresh shaders to the WebGL contex
 - [hylide](https://github.com/sleexyz/hylide)
 
 
+![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
+
+
+conceived of at the [recurse center](https://www.recurse.com/) :)
