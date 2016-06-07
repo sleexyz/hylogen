@@ -60,7 +60,7 @@ output = toProgram color
 Run hylide:
 
 ```
-$ hylide Main.hs
+$ hylide Example.hs
 ```
 
 Now go to [localhost:5678](http://localhost:5678) in your browser. You'll see a live rendering of the generated GLSL:
