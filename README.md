@@ -1,4 +1,6 @@
 # [*H Y L O G E N*](https://hylogen.com) 
+
+[![Join the chat at https://gitter.im/sleexyz/hylogen](https://badges.gitter.im/sleexyz/hylogen.svg)](https://gitter.im/sleexyz/hylogen?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Hackage Status](https://img.shields.io/hackage/v/hylogen.svg)](https://hackage.haskell.org/package/hylogen)
 
 ![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
