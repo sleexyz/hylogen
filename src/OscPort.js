@@ -1,4 +1,4 @@
-require("expose?osc!osc/dist/osc-browser.min.js");
+import osc from "osc";
 
 export default new function() {
   this.singleton = undefined;

@@ -44,6 +44,9 @@ module.exports = function (entryPath, outputPath, publicPath, isProd) {
     resolve: {
       extensions: ["", ".js", ".jsx"]
     },
+    externals: {
+      osc: "osc"
+    },
     entry: entry,
     plugins: plugins,
     devtool: isProd ? null : "cheap-module-eval-source-map"

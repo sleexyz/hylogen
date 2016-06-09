@@ -26,7 +26,7 @@ function runServer(entryPath, outputPath, publicPath, portNum) {
 
   app.use(hot(compiler));
 
-  // app.use(express.static(outputPath));
+  app.use(express.static(outputPath));
   app.get("/", function(req, res) {
     res.sendFile(path.join(__dirname, outputPath + "/index.html"));
   });
