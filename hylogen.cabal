@@ -12,7 +12,6 @@ extra-source-files:  README.md
 cabal-version:       >=1.10
 stability:           experimental
 
-
 library
   exposed-modules:     Hylogen
                      , Hylogen.Types
@@ -22,9 +21,6 @@ library
                      , Hylogen.Expr
                      , Hylogen.Globals
                      , Hylogen.Program
-                     , Hylogen.WithHylide
-                     , Hylogen.WithHylide.Core
-                     , Hylogen.WithHylide.Util
   build-depends:       base >= 4.8 && < 5
                      , vector-space
                      , data-reify
