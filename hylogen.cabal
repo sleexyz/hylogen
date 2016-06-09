@@ -1,5 +1,5 @@
 name:                hylogen
-version:             0.1.3.2
+version:             0.1.4.0
 synopsis:            an EDSL for live-coding fragment shaders
 description:         an EDSL for live-coding fragment shaders
 homepage:            https://github.com/sleexyz/hylogen
@@ -9,8 +9,6 @@ maintainer:          freshdried@gmail.com
 category:            Graphics
 build-type:          Simple
 extra-source-files:  README.md
-data-files:          web/index.html
-                   , web/bundle.js
 cabal-version:       >=1.10
 stability:           experimental
 
@@ -31,23 +29,4 @@ library
                      , vector-space
                      , data-reify
   hs-source-dirs:      src
-  default-language:    Haskell2010
-  
-executable hylide
-  main-is:             Main.hs
-  other-extensions:    OverloadedStrings
-  other-modules:       Paths_hylogen
-  build-depends:       base
-                     , bytestring
-                     , filepath
-                     , fsnotify
-                     , process
-                     , text
-                     , websockets
-                     , aeson
-                     , hint
-                     , wai >=3.2 && <3.3
-                     , http-types >=0.9 && <0.10
-                     , warp >=3.2 && <3.3
-  hs-source-dirs:      app
   default-language:    Haskell2010
