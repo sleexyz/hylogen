@@ -43,17 +43,17 @@ const App = React.createClass({
 
     wsConn.onmessage = (m) => {
       const obj =  JSON.parse(m.data);
-      if (obj.code !== undefined) {
+      if (obj.tag === "Code") {
         this.setState({
-          fsSource: obj.code,
+          fsSource: obj.contents,
           error: false,
           errorText: ""
         });
-      } else if (obj.error !== undefined) {
-        console.error(obj.error);
+      } else if (obj.tag === "Err") {
+        console.error(obj.contents);
         this.setState({
           error: true,
-          errorText: obj.error,
+          errorText: obj.contents,
         });
       } else {
         console.error("unexpected error!");
