@@ -1,4 +1,4 @@
-# [*H Y L O G E N*](https://hylogen.com) 
+# *H Y L O G E N*
 
 [![Hackage Status](https://img.shields.io/hackage/v/hylogen.svg)](https://hackage.haskell.org/package/hylogen)
 [![Join the chat at https://gitter.im/sleexyz/hylogen](https://badges.gitter.im/sleexyz/hylogen.svg)](https://gitter.im/sleexyz/hylogen?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
@@ -7,18 +7,19 @@
 
 ![](https://thumbs.gfycat.com/SoftAdeptAlaskajingle-size_restricted.gif)
 
+[demo reel](https://hylogen.com)
+
 ![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
 
-Hylogen is a purely functional language [embedded in Haskell](https://wiki.haskell.org/Embedded_domain_specific_language) for live-coding fragment shaders, featuring:
+Hylogen is a purely functional shader language [embedded in Haskell](https://wiki.haskell.org/Embedded_domain_specific_language) that compiles to GLSL, featuring:
 
-- simple and pure syntax
+- simple syntax
 - standard operators (`+`, `*`, [`*^`,  `<.>`](https://hackage.haskell.org/package/vector-space))
-- compat. w/ your fav haskell goodies (higher-order functions, ADTS, swanky polymorphism).
-- compiles to GLSL
+- compat. w/ your fav haskell goodies (higher-order functions, type inference, swanky polymorphism).
 
 ![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
 
-It comes with `hylide`, a live WebGL renderer with:
+The quickest way to get started with Hylogen is with [`hylide`](https://github.com/sleexyz/hylide), a livecoding WebGL renderer with:
 - hot-reloading
 - audio-reactive primitives
 - texture backbuffering
@@ -29,10 +30,10 @@ It comes with `hylide`, a live WebGL renderer with:
 ## Install
 ```
 cabal update
-cabal install hylogen
+cabal install hylogen hylide
 ```
 
-This will install the Hylogen package and hylide, the live renderer.
+This will install Hylogen and Hylide.
 
 ![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
 
@@ -44,6 +45,9 @@ Here's a simple Hylogen program, saved as `Example.hs`:
 module Example where
 import Hylogen.WithHylide
 
+output :: Program
+output = toProgram color
+
 color :: Vec4
 color = vec4 (a, a, a, 1)
   where
@@ -52,9 +56,6 @@ color = vec4 (a, a, a, 1)
     a = sum [ cos (x_ uvN * f time + x_ mouse )
             , sin (y_ uvN * f time + y_ mouse )
             ]
-
-output :: Program
-output = toProgram color
 ```
 
 Run hylide:
