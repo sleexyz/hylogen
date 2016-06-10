@@ -1,7 +1,7 @@
 name:                hylide
 version:             0.1.4.0
-synopsis:            Livecoding WebGL renderer for Hylogen
-description:         Livecoding WebGL renderer for Hylogen
+synopsis:            WebGL renderer for livecoding shaders with Hylogen
+description:         WebGL renderer for livecoding shaders with Hylogen
 homepage:            https://github.com/sleexyz/hylide
 author:              Sean Lee
 license:             MIT
