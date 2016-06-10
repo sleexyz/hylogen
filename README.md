@@ -3,7 +3,7 @@
 
 ![](https://thumbs.gfycat.com/SoftAdeptAlaskajingle-size_restricted.gif)
 
-Hylogen is a purely functional shader language embedded in Haskell that compiles to GLSL. It functions as a powerful alternative to GLSL by leveraging many features of Haskell, including:
+Hylogen is a purely functional shader language embedded in Haskell that compiles to GLSL. It functions as a powerful alternative to raw GLSL by leveraging many features of Haskell, including:
 
 **Type inference** - Write concise code by using Haskell's type inference
 
