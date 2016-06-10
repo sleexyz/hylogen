@@ -1,14 +1,9 @@
-user-message: ! 'Warning (added by new or init): Some packages were found to be incompatible
-  with the resolver and have been left commented out in the packages section.
-
-  You can suppress this message by removing it from stack.yaml
-
-'
-
 resolver: lts-6.2
 
-packages: []
-extra-deps: []
+packages:
+  - '.'
+extra-deps:
+  - hylogen-0.1.4.0
 flags: {}
 
 extra-package-dbs: []
