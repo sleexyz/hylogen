@@ -1,6 +1,6 @@
 # *H Y L I D E*
 
-Livecoding WebGL rendering environment for shaders written in [Hylogen](https://github.com/sleexyz/hylogen).
+WebGL rendering environment for livecoding shaders with [Hylogen](https://github.com/sleexyz/hylogen).
 
 ![](https://thumbs.gfycat.com/SoftAdeptAlaskajingle-size_restricted.gif)
 
