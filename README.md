@@ -5,15 +5,15 @@
 
 Hylogen is a purely functional shader language embedded in Haskell that compiles to GLSL. It functions as a powerful alternative to GLSL by leveraging many features of Haskell, including:
 
-**Type inference** - Write more concise code by allowing Haskell to infer the types of your expressions.
+**Type inference** - Write concise code by using Haskell's type inference
 
 - GLSL:      `vec4 foo = vec4(3.0);`
 - Hylogen:   `foo = 3`
 
 
-**Higher-order functions** - Use your standard Haskell goodies: `map`, `foldl`/`foldr`, `$`, `.`,[ `&`](https://hackage.haskell.org/package/base-4.9.0.0/docs/Data-Function.html#v:-38-), etc, or write your own!
+**Higher-order functions** - Use your standard Haskell goodies: `map`, `foldl`/`foldr`, `$`, `.`,[ `&`](https://hackage.haskell.org/package/base-4.9.0.0/docs/Data-Function.html#v:-38-), etc.
 
-**Modules** - Split up complex shaders into multiple files. Write your own high level libraries and `import` them as modules.
+**Modules** - Split up complex shaders into multiple modules. Write libraries or import others'.
 
 ![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
 
