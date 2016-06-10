@@ -1,44 +1,51 @@
-# *H Y L O G E N*
+# *H Y L O G E N*  [![Hackage Status](https://img.shields.io/hackage/v/hylogen.svg)](https://hackage.haskell.org/package/hylogen) [![Join the chat at https://gitter.im/sleexyz/hylogen](https://badges.gitter.im/sleexyz/hylogen.svg)](https://gitter.im/sleexyz/hylogen?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-[![Hackage Status](https://img.shields.io/hackage/v/hylogen.svg)](https://hackage.haskell.org/package/hylogen)
-[![Join the chat at https://gitter.im/sleexyz/hylogen](https://badges.gitter.im/sleexyz/hylogen.svg)](https://gitter.im/sleexyz/hylogen?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
-![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
 
 ![](https://thumbs.gfycat.com/SoftAdeptAlaskajingle-size_restricted.gif)
 
-[demo reel](https://hylogen.com)
+Hylogen is a purely functional shader language embedded in Haskell that compiles to GLSL. It functions as a powerful alternative to GLSL by leveraging many features of Haskell, including:
+
+**Type inference** - Write more concise code by allowing Haskell to infer the types of your expressions.
+
+- GLSL:      `vec4 foo = vec4(3.0);`
+- Hylogen:   `foo = 3`
+
+
+**Higher-order functions** - Use your standard Haskell goodies: `map`, `foldl`/`foldr`, `$`, `.`,[ `&`](https://hackage.haskell.org/package/base-4.9.0.0/docs/Data-Function.html#v:-38-), etc, or write your own!
+
+**Modules** - Split up complex shaders into multiple files. Write your own high level libraries and `import` them as modules.
 
 ![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
 
-Hylogen is a purely functional shader language [embedded in Haskell](https://wiki.haskell.org/Embedded_domain_specific_language) that compiles to GLSL, featuring:
-
-- simple syntax
-- standard operators (`+`, `*`, [`*^`,  `<.>`](https://hackage.haskell.org/package/vector-space))
-- compat. w/ your fav haskell goodies (higher-order functions, type inference, swanky polymorphism).
+[**Hylide**](https://github.com/sleexyz/hylide) is a WebGL renderer designed for livecoding shaders with Hylogen, featuring hot-reloading, audio-reactivity and texture backbuffering. However, Hylogen is a general purpose shader language; it can be used anywhere GLSL is used.
 
 ![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
 
-The quickest way to get started with Hylogen is with [`hylide`](https://github.com/sleexyz/hylide), a livecoding WebGL renderer with:
-- hot-reloading
-- audio-reactive primitives
-- texture backbuffering
+---
+![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
+
+
+[**Demo Reel**](https://hylogen.com)
+
+[Changelog](https://github.com/sleexyz/hylogen/CHANGELOG.md) - **NEW:** Hylogen/Hylide split in Hylogen 0.1.4
+
+Hylogen is in alpha! Feature requests, questions, and discussion welcome on [github issues](https://github.com/sleexyz/hylogen/issues)
 
 ![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
+
+---
+![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
+
 
 
 ## Install
-```
-cabal update
-cabal install hylogen hylide
-```
-
-This will install Hylogen and Hylide.
+1. Install the [Haskell Platform](https://www.haskell.org/platform/)
+2. `cabal update && cabal install hylogen hylide`
 
 ![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
 
-## Usage
-Here's a simple Hylogen program, saved as `Example.hs`:
+## Example
+Here's a simple Hylogen shader to be used with Hylide, saved as `Example.hs`:
 
 ```haskell
 
@@ -58,13 +65,13 @@ color = vec4 (a, a, a, 1)
             ]
 ```
 
-Run hylide:
+Run Hylide:
 
 ```
 $ hylide Example.hs
 ```
 
-Now go to [localhost:5678](http://localhost:5678) in your browser. You'll see a live rendering of the generated GLSL:
+Now go to [localhost:5678](http://localhost:5678) in your browser. You'll see a live rendering of the corresponding generated GLSL:
 
 ```GLSL
 void main() {
@@ -92,7 +99,7 @@ void main() {
 }
 ```
 
-Hylide will recompile on file changes, sending fresh shaders to the WebGL context via websockets.
+Hylide will recompile on changes to the Haskell source, sending generated GLSL to the WebGL client via websockets.
 
 
 
@@ -100,17 +107,17 @@ Hylide will recompile on file changes, sending fresh shaders to the WebGL contex
 ![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
 
 ## References
-- [The_Force](https://github.com/shawnlawson/The_Force) by Shawn Lawson. Live-coding audio-reactive shaders!
+- [The_Force](https://github.com/shawnlawson/The_Force) by Shawn Lawson. Initial inspiration for Hylogen/Hylide. Live-coding of audio-reactive shaders!
 - [data-reify](https://hackage.haskell.org/package/data-reify) by Andy Gill, to keep intermediate AST representations from exploding by preserving the GHC heap's internal sharing
 
-## Resources
-- [demo reel](https://hylogen.com)
-- [examples](https://github.com/sleexyz/hylogen-yay)
-- [hackage](https://hackage.haskell.org/package/hylogen)
-- [hylide](https://github.com/sleexyz/hylide)
+## Links
+- [Demo reel](https://hylogen.com)
+- [Examples](https://github.com/sleexyz/hylogen-yay)
+- [Hackage](https://hackage.haskell.org/package/hylogen)
+- [Hylide](https://github.com/sleexyz/hylide)
 
 
 ![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
 
 
-conceived of at the [recurse center](https://www.recurse.com/) :)
+Conceived of at the [Recurse Center](https://www.recurse.com/) :)

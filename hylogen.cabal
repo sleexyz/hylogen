@@ -1,7 +1,7 @@
 name:                hylogen
-version:             0.1.4.0
-synopsis:            an EDSL for live-coding fragment shaders
-description:         an EDSL for live-coding fragment shaders
+version:             0.1.4.1
+synopsis:            Purely functional GLSL embedded in Haskell
+description:         Purely functional GLSL embedded in Haskell
 homepage:            https://github.com/sleexyz/hylogen
 author:              Sean Lee
 license:             MIT
