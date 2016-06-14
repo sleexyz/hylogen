@@ -14,6 +14,8 @@
 
 {- |
 Internal AST representation.
+
+TODO: Use Overloaded record fields!
 -}
 
 module Hylogen.Expr where
@@ -62,6 +64,9 @@ data Tree a  = Tree { getElem     :: a
 -- | Untyped Expr representation
 -- Carries type information in type tag
 type ExprMono = Tree (ExprForm, GLSLType, String)
+
+getTypeTagMono :: ExprMono -> GLSLType
+getTypeTagMono (Tree (_, ty, _) _) = ty
 
 instance Show ExprMono where
   show (Tree (form, _, str) xs) = case form of
@@ -259,6 +264,10 @@ data TreeF a b = TreeF { getElemF     :: a
 -- Note the presence of a list of closed ExprMono's in the tuple.
 -- We use this list to recover unshared child expressions when they need to be inlined.
 type ExprMonoF = TreeF (ExprForm, GLSLType, String, [ExprMono])
+
+-- | Returns the type tag of a ExprMonoF
+getTypeTagMonoF :: ExprMonoF a -> GLSLType
+getTypeTagMonoF (TreeF (_, ty, _, _) _) = ty
 
 -- | Returns the string representation of the nth child of an open untyped expression, accounting for inlining
 emfStringAt :: (Show a) => ExprMonoF a -> Int -> String

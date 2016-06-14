@@ -4,14 +4,15 @@ let
 
   inherit (nixpkgs) pkgs;
 
-  f = { mkDerivation, base, data-reify, stdenv, vector-space }:
+  f = { mkDerivation, base, data-reify, mtl, stdenv, vector-space
+      }:
       mkDerivation {
         pname = "hylogen";
-        version = "0.1.4.0";
+        version = "0.1.4.1";
         src = ./.;
-        libraryHaskellDepends = [ base data-reify vector-space ];
+        libraryHaskellDepends = [ base data-reify mtl vector-space ];
         homepage = "https://github.com/sleexyz/hylogen";
-        description = "an EDSL for live-coding fragment shaders";
+        description = "Purely functional GLSL embedded in Haskell";
         license = stdenv.lib.licenses.mit;
       };
 
