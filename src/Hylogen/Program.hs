@@ -9,7 +9,7 @@ import Data.Reify
 import Data.Monoid
 import System.IO.Unsafe
 
-import Hylogen.Expr
+import Hylogen.AST.Expr
 import Hylogen.Types.Vec (Vec4)
 
 newtype Id = Id Int

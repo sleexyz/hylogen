@@ -2,7 +2,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 module Hylogen.Types.Booly where
 
-import Hylogen.Expr
+import Hylogen.AST.Expr
 
 -- | Booly singleton type tag
 data BoolyType = BoolyType

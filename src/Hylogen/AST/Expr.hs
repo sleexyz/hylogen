@@ -11,6 +11,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE LambdaCase #-}
 
 {- |
 Internal AST representation.
@@ -18,13 +19,33 @@ Internal AST representation.
 TODO: Use Overloaded record fields!
 -}
 
-module Hylogen.Expr where
+module Hylogen.AST.Expr where
 
 
 import Data.Reify
+import Unsafe.Coerce
 
 
--- | Internal type tag
+-- | Rose tree. Internal AST data structure
+data Tree a  = Tree { getElem     :: a
+                    , getChildren :: [Tree a]
+                    }
+
+-- data Foo a where
+--   FooFloat :: Foo Float
+
+
+-- class UnFoo a where
+--   unFoo :: Foo a -> Expr a
+
+-- -- unFoo :: (ToGLSLType a) => String -> Foo a -> Expr a
+
+-- -- unFoo str _ = uniform str
+
+-- toUniformExpr :: (ToGLSLType a) => String -> GLSLType -> Expr a
+-- toUniformExpr str GLSLFloat = unFoo str FooFloat
+
+-- | Internal type representation.
 data GLSLType = GLSLFloat
               | GLSLVec2
               | GLSLVec3
@@ -42,6 +63,9 @@ instance Show GLSLType where
     GLSLBool -> "bool"
     GLSLTexture -> "sampler2D"
 
+-- | Make an Expr from a dynamic
+-- toUniformExpr :: (ToGLSLType a) => GLSLType -> String -> Expr a
+
 -- | Internal form tag
 data ExprForm = Uniform
               | Variable
@@ -55,10 +79,6 @@ data ExprForm = Uniform
               | Access
                 deriving (Show)
 
--- | Rose tree. Internal AST data structure
-data Tree a  = Tree { getElem     :: a
-                    , getChildren :: [Tree a]
-                    }
 
 
 -- | Untyped Expr representation
@@ -67,6 +87,9 @@ type ExprMono = Tree (ExprForm, GLSLType, String)
 
 getTypeTagMono :: ExprMono -> GLSLType
 getTypeTagMono (Tree (_, ty, _) _) = ty
+
+getStringMono :: ExprMono -> String
+getStringMono (Tree (_, _, str) _) = str
 
 instance Show ExprMono where
   show (Tree (form, _, str) xs) = case form of

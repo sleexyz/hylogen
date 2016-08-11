@@ -6,7 +6,7 @@
 module Hylogen.Globals where
 
 import Hylogen.Types
-import Hylogen.Expr
+import Hylogen.AST.Expr
 
 
 -- | Length of a vector
@@ -127,14 +127,23 @@ geq = bcomp ">="
 texture2D :: Texture -> Vec2 -> Vec4
 texture2D = op2pre "texture2D"
 
--- | Selection function
+-- Selection function
 --
 -- @ sel bool x y @
 -- is akin to
 --
 -- @ bool ? x : y @ in C-like languages
-sel :: forall a
-          . (ToGLSLType a)
-          => Booly -> Expr a -> Expr a -> Expr a
-sel a b c = Expr t (Tree (Select, toGLSLType t, "") [toMono a, toMono b, toMono c])
+-- sel :: forall a
+--        . (ToGLSLType a)
+--        => Booly -> Expr a -> Expr a -> Expr a
+-- sel a b c = Expr t (Tree (Select, toGLSLType t, "") [toMono a, toMono b, toMono c])
+--   where t = tag :: a
+
+-- | Selection function
+--
+-- @ someBooly ? (vec2 (1, 2), (vec2 (2, 1)) @
+(?) :: forall a
+       . (ToGLSLType a)
+       => Booly -> (Expr a, Expr a) -> Expr a
+a ? (b, c) = Expr t (Tree (Select, toGLSLType t, "") [toMono a, toMono b, toMono c])
   where t = tag :: a

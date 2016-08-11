@@ -17,7 +17,7 @@ module Hylogen.Types.Vec where
 import GHC.TypeLits
 import Data.VectorSpace
 
-import Hylogen.Expr
+import Hylogen.AST.Expr
 
 
 -- | Floating vector singleton type tag

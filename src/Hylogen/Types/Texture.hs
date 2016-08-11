@@ -4,7 +4,7 @@
 
 module Hylogen.Types.Texture where
 
-import Hylogen.Expr
+import Hylogen.AST.Expr
 
 -- | Texture singleton type tag
 data TextureType = TextureType
