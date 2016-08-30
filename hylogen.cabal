@@ -20,7 +20,7 @@ library
                      , Hylogen.Types.Texture
                      , Hylogen.AST.Expr
                      , Hylogen.AST.Stmt
-                     , Hylogen.Monad
+                   --   , Hylogen.Monad
                      , Hylogen.Globals
                      , Hylogen.Program
   build-depends:       base >= 4.8 && < 5

@@ -7,12 +7,14 @@ import Hylogen.Types.Booly
 import Data.Reify
 import Data.Monoid
 
--- encode indentation level
-newtype CodeBlock =  CodeBlock [Stmt]
+newtype CodeBlock =  CodeBlock [(Int, Stmt)]
   deriving (Monoid)
 
 instance Show CodeBlock where
-  show (CodeBlock xs) = unlines $ show <$> xs
+  show (CodeBlock xs) =
+    unlines $ (\(n, statement) -> indent n ++ show statement) <$> xs
+    where
+      indent n = mconcat $ replicate (n*2) " "
 
 data Stmt = Assign Id ExprMono
           | IfThenElse ExprMono ExprMono ExprMono

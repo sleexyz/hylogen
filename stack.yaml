@@ -1,7 +1,4 @@
 flags: {}
-nix:
-  pure: false
-  shell-file: default.nix
 extra-package-dbs: []
 packages:
 - '.'
@@ -11,4 +8,5 @@ extra-deps:
 - NumInstances-1.4
 - data-reify-0.6.1
 - vector-space-0.10.3
+- ghc-paths-0.1.0.9
 resolver: ghc-8.0.1

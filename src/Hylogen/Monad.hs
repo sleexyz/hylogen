@@ -5,6 +5,7 @@
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module Hylogen.Monad where
 
@@ -12,18 +13,15 @@ import qualified Control.Monad.State.Lazy as M
 import qualified Control.Monad.Writer.Lazy as M
 import qualified Control.Monad.Identity as M
 
-import Hylogen
-import Hylogen.Types.Vec (FloatVec)
+import Hylogen.Types.Vec
 import qualified Hylogen.AST.Expr as AST
 import qualified Hylogen.AST.Stmt as AST
 
--- import qualified Hylogen.Program as AST -- DEPRECATE
-
 class Definable a where
-  define :: a -> Hylogen' ctx ()
+  define :: a -> _Hylogen ctx ()
 
 
-instance Definable (Hylogen' ctx ()) where
+instance Definable (_Hylogen ctx ()) where
   define = undefined
 
 instance (AST.ToGLSLType a, Definable b) => Definable (a -> b) where
@@ -40,71 +38,91 @@ type family AllowBreak x where
 
 data Context i o = Ctx Effects [i] o
 
-newtype Hylogen' (ctx :: Context * *) a
-  = Hylogen' {unHylogen' :: M.WriterT AST.CodeBlock (M.StateT AST.Id M.Identity) a}
-  deriving (Functor, Applicative, Monad, M.MonadState AST.Id, M.MonadWriter AST.CodeBlock)
+
+data State = State { indentation :: Int
+                   , idNumber :: AST.Id
+                   }
+
+_defaultState :: State
+_defaultState = State { indentation = 0
+                      , idNumber = 0
+                      }
 
 
-instance (Show a) => Show (Hylogen' ctx a) where
+newtype HylogenInternal (ctx :: Context * *) a
+  = HylogenInternal {unHylogenInternal :: M.WriterT AST.CodeBlock (M.StateT State M.Identity) a}
+  deriving (Functor, Applicative, Monad, M.MonadState State, M.MonadWriter AST.CodeBlock)
+
+
+instance (Show a) => Show (HylogenInternal ctx a) where
   show = show . runHylogen
 
 
-type Hylogen i o = Hylogen' (Ctx (Eff NoBreak) i  o)
+type Hylogen i o = HylogenInternal (Ctx (Eff NoBreak) i  o)
 
 type Main = Hylogen '[] Vec4 Vec4
 
 
 
+_emit :: AST.Stmt -> HylogenInternal ctx ()
+_emit statement = do
+  State{..} <- M.get
+  M.tell $ AST.CodeBlock [(indentation, statement)]
+
+_freshVar :: (AST.ToGLSLType a) => a -> HylogenInternal ctx (AST.Expr a)
+_freshVar x = do
+  s@State {..} <- M.get
+  M.put $! s {idNumber=idNumber + 1}
+  return . AST.uniform . show $ idNumber
+
+_indentIn :: HylogenInternal ctx ()
+_indentIn = M.modify (\s@State{..} -> s {indentation=indentation + 1})
+
+_indentOut :: HylogenInternal ctx ()
+_indentOut = M.modify (\s@State{..} -> s {indentation=indentation - 1})
 
 
--- | Writes a statement to the context
-emit :: AST.Stmt -> Hylogen' ctx ()
-emit = M.tell . AST.CodeBlock . return
-
-freshVar :: (AST.ToGLSLType a) => a -> Hylogen' ctx (AST.Expr a)
-freshVar x = do
-  s <- M.get
-  M.put $! s + 1
-  return . AST.uniform . show $ s
-
--- public
-assign :: (AST.ToGLSLType a) => AST.Expr a -> Hylogen' ctx (AST.Expr a)
+assign :: (AST.ToGLSLType a) => AST.Expr a -> HylogenInternal ctx (AST.Expr a)
 assign expr = do
   let ty = AST.getTypeTag expr
-  s <- M.get
-  emit (AST.Assign s (AST.toMono expr))
-  freshVar ty
+  State {..} <- M.get
+  _emit $ AST.Assign idNumber (AST.toMono expr)
+  _freshVar ty
 
--- public
-comment :: String -> Hylogen' ctx ()
-comment str = emit (AST.Comment str)
-
--- instance IsString (Hylogen)
+comment :: String -> HylogenInternal ctx ()
+comment = _emit . AST.Comment
 
 
--- TODO: allow break
-
-for :: Int -> (Vec1 -> Hylogen' (AllowBreak ctx) ()) -> Hylogen' ctx ()
+for :: Int -> (Vec1 -> HylogenInternal (AllowBreak ctx) ()) -> HylogenInternal ctx ()
 for i fn = do
-  itercount <- freshVar (FloatVec :: FloatVec 1)
-  emit (AST.ForBegin i (AST.getStringMono . AST.toMono $ itercount))
-  Hylogen' . unHylogen' $ fn itercount
-  emit AST.ForEnd
+  _branch $ do
+    itercount <- _freshVar (FloatVec :: FloatVec 1)
+    _emit (AST.ForBegin i (AST.getStringMono . AST.toMono $ itercount))
+    _indentIn
+    fn itercount
+  _emit AST.ForEnd
   return ()
 
--- public
-returnWith :: AST.Expr o -> Hylogen' (Ctx eff i (AST.Expr o)) ()
-returnWith = emit . AST.Return  . AST.toMono 
+returnWith :: AST.Expr o -> HylogenInternal (Ctx eff i (AST.Expr o)) ()
+returnWith = _emit . AST.Return  . AST.toMono
 
--- public
-breakFor :: Hylogen' (Ctx (Eff YesBreak) i o) ()
-breakFor = emit AST.Break
+breakFor :: HylogenInternal (Ctx (Eff YesBreak) i o) ()
+breakFor = _emit AST.Break
 
-runHylogen :: Hylogen' ctx a -> AST.CodeBlock
-runHylogen h = snd . fst . M.runIdentity $ M.runStateT (M.runWriterT . unHylogen' $ h) 0
+runHylogen :: HylogenInternal ctx a -> AST.CodeBlock
+runHylogen = _runHylogen' _defaultState
 
-test0 :: Main
-test0 = do
+_runHylogen' :: State -> HylogenInternal ctx a -> AST.CodeBlock
+_runHylogen' state h = snd . fst . M.runIdentity $ M.runStateT (M.runWriterT . unHylogenInternal $ h) state
+
+
+_branch :: HylogenInternal ctx' a -> HylogenInternal ctx ()
+_branch toBranch = do
+  s <- M.get
+  M.tell $ _runHylogen' s toBranch
+
+_test0 :: Main
+_test0 = do
   x <- assign $ vec4 (sin 1, 2, 2, 3)
   x <- assign $ x + vec4 (x_ x, 1, 1, 1)
   x <- assign $ x + vec4 (x_ x, 1, 1, 1)
@@ -112,8 +130,9 @@ test0 = do
   x <- assign $ x + vec4 (x_ x, 1, 1, 1)
   pure x
 
-test1 :: Main
-test1 = do
+
+_test1 :: Main
+_test1 = do
   for 10 (\i -> do
              x <- assign $ vec4 (i, 1, 1, 1)
              x <- assign $ vec4 (i, 1, 1, 1)
@@ -127,11 +146,11 @@ test1 = do
          )
   return 1
 
-test2 :: Main
-test2 = do
+_test2 :: Main
+_test2 = do
   comment "lol"
-  _ <- test0
-  _ <- test1
+  _ <- _test0
+  _ <- _test1
   comment "lol"
   return 1
 
