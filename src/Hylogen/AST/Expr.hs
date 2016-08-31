@@ -23,7 +23,6 @@ module Hylogen.AST.Expr where
 
 
 import Data.Reify
-import Unsafe.Coerce
 
 
 -- | Rose tree. Internal AST data structure
@@ -69,6 +68,7 @@ instance Show GLSLType where
 -- | Internal form tag
 data ExprForm = Uniform
               | Variable
+              | FunApp
               | Op1
               | Op1Pre
               | Op2
@@ -95,6 +95,7 @@ instance Show ExprMono where
   show (Tree (form, _, str) xs) = case form of
     Uniform  -> str
     Variable -> str
+    FunApp   -> str ++ "()"
     Op1      -> mconcat ["(", str, show (xs!!0), ")"]
     Op1Pre   -> mconcat [ str, "(", show (xs!!0), ")"]
     Op2      -> mconcat ["(", show (xs !! 0), " ", str, " ", show (xs !! 1), ")"]
@@ -121,6 +122,15 @@ class ToGLSLType  ty where
   toGLSLType :: ty -> GLSLType
   -- | Singleton tag
   tag :: ty -- TODO: fill in!
+
+-- TODO: make variadic
+-- | Function Application.
+funApp :: forall a
+           . ToGLSLType a
+           => String -> Expr a
+funApp str = Expr t (Tree (FunApp, toGLSLType t, str) [])
+  where t = tag :: a
+
 
 -- | Variable expression.
 variable :: forall a

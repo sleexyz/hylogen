@@ -35,11 +35,13 @@ class Definable a where
 
 instance (AST.ToGLSLType a) => Definable (AST.Expr a) where
   define x = do
-    let (p, cb)= _runHylogen x
-    M.tell (p  <> AST.Program [AST.Function cb], AST.CodeBlock [])
+    let (program, codeblock)= _runHylogen x
+    M.tell ( program  <> AST.Program [AST.Function codeblock]
+           , AST.CodeBlock []
+           )
+    return $ AST.funApp "hello"
 
-    -- TODO: return function call
-    x
+    -- TODO: return actual function call
 
 -- instance (AST.ToGLSLType a, Definable b) => Definable (a -> b) where
 --   define = undefined
@@ -56,13 +58,15 @@ type family AllowBreak x where
 data Context = Ctx Effects
 
 
-data State = State { indentation :: Int
-                   , idNumber :: AST.Id
+data State = State { _indent :: Int
+                   , _id :: AST.Id
+                   , _fid :: AST.FunctionId
                    }
 
 _defaultState :: State
-_defaultState = State { indentation = 0
-                      , idNumber = 0
+_defaultState = State { _indent = 0
+                      , _id = 0
+                      , _fid = 0
                       }
 
 
@@ -85,20 +89,27 @@ type Hylogen = HylogenInternal (Ctx (Eff NoBreak))
 _emit :: AST.Statement -> HylogenInternal ctx ()
 _emit statement = do
   State{..} <- M.get
-  M.tell $ (mempty , AST.CodeBlock [(indentation, statement)])
+  M.tell $ (mempty , AST.CodeBlock [(_indent , statement)])
 
 _freshVar :: (AST.ToGLSLType a) => a -> HylogenInternal ctx (AST.Expr a)
 _freshVar x = do
   s@State {..} <- M.get
-  M.put $! s {idNumber=idNumber + 1}
-  let var = AST.variable $ show idNumber
+  M.put $! s {_id=_id + 1}
+  let var = AST.variable $ show _id
+  return var
+
+_freshFuncRef:: (AST.ToGLSLType a) => a -> HylogenInternal ctx (AST.Expr a)
+_freshFuncRef x = do
+  s@State {..} <- M.get
+  M.put $! s {_fid=_fid+ 1}
+  let var = AST.funApp $ show _fid
   return var
 
 _indentIn :: HylogenInternal ctx ()
-_indentIn = M.modify (\s@State{..} -> s {indentation=indentation + 1})
+_indentIn = M.modify (\s@State{..} -> s {_indent=_indent+ 1})
 
 _indentOut :: HylogenInternal ctx ()
-_indentOut = M.modify (\s@State{..} -> s {indentation=indentation - 1})
+_indentOut = M.modify (\s@State{..} -> s {_indent=_indent- 1})
 
 data Ref a = Ref AST.Id (AST.Expr a)
 deref :: (AST.ToGLSLType a) => Ref a -> AST.Expr a
@@ -109,10 +120,10 @@ instance (AST.ToGLSLType a) => Show (Ref a) where
 
 ref :: (AST.ToGLSLType a) => AST.Expr a -> HylogenInternal ctx (Ref a)
 ref expr = do
-  let ty = AST.getTypeTag expr
   State {..} <- M.get
-  _emit $ AST.NewRef idNumber (AST.toMono expr)
-  return $ Ref idNumber (AST.variable (show idNumber))
+  _freshVar (AST.getTypeTag expr)
+  _emit $ AST.NewRef _id (AST.toMono expr)
+  return $ Ref _id (AST.variable (show _id))
 
 mut :: (AST.ToGLSLType a) => Ref a -> AST.Expr a -> HylogenInternal ctx ()
 mut (Ref idNumber _) expr = do
@@ -168,10 +179,12 @@ instance Show Main where
 
 test = Main $ do
 
-  define $ do
+  y <- define $ do
     x <- ref (100 :: Vec1)
     return (deref x) :: Hylogen Vec1
+  x <- ref $ y
+  x <- ref $ y
 
-  x <- ref (0 :: Vec1)
+  z <- ref (0 :: Vec1)
   return 10
 

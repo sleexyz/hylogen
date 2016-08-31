@@ -4,7 +4,6 @@ module Hylogen.AST.Statement where
 
 import Hylogen.AST.Expr
 import Hylogen.Types.Booly
-import Data.Reify
 import Data.Monoid
 
 newtype CodeBlock =  CodeBlock [(Int, Statement)]
