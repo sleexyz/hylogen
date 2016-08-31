@@ -122,6 +122,13 @@ class ToGLSLType  ty where
   -- | Singleton tag
   tag :: ty -- TODO: fill in!
 
+-- | Variable expression.
+variable :: forall a
+           . ToGLSLType a
+           => String -> Expr a
+variable str = Expr t (Tree (Variable, toGLSLType t, str) [])
+  where t = tag :: a
+
 -- | Uniform expression.
 uniform :: forall a
            . ToGLSLType a

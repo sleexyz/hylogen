@@ -1,13 +1,13 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE GADTs #-}
-module Hylogen.AST.Stmt where
+module Hylogen.AST.Statement where
 
 import Hylogen.AST.Expr
 import Hylogen.Types.Booly
 import Data.Reify
 import Data.Monoid
 
-newtype CodeBlock =  CodeBlock [(Int, Stmt)]
+newtype CodeBlock =  CodeBlock [(Int, Statement)]
   deriving (Monoid)
 
 instance Show CodeBlock where
@@ -16,13 +16,15 @@ instance Show CodeBlock where
     where
       indent n = mconcat $ replicate (n*2) " "
 
-data Stmt = Assign Id ExprMono
+data Statement = NewRef Id ExprMono
+          | Mutate Id ExprMono
           | IfThenElse ExprMono ExprMono ExprMono
           | ForBegin Int String
           | ForEnd
           | Return ExprMono
           | Break
           | Comment String
+
 
 newtype Id = Id Int
   deriving (Num)
@@ -31,14 +33,19 @@ newtype Id = Id Int
 instance Show Id where
   show (Id x) = "_" <> show x
 
-instance Show Stmt where
-  show (Assign i expr) = mconcat [ show . getTypeTagMono $ expr
-                                    , " "
-                                    , show i
-                                    , " = "
-                                    , show expr
-                                    , ";"
-                                    ]
+instance Show Statement where
+  show (Mutate i expr) = mconcat [ show i
+                                 , " = "
+                                 , show expr
+                                 , ";"
+                                 ]
+  show (NewRef i expr) = mconcat [ show . getTypeTagMono $ expr
+                                 , " "
+                                 , show i
+                                 , " = "
+                                 , show expr
+                                 , ";"
+                                 ]
   show (Comment str) = "// " <> str
   show (ForBegin i str ) = mconcat [ "for (int "
                                   , str
@@ -49,5 +56,3 @@ instance Show Stmt where
   show (ForEnd) = "}"
   show (Return expr) = "return " <> show expr <> ";"
   show (Break) = "break;"
-
-
