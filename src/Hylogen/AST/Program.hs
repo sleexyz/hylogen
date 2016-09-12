@@ -17,5 +17,3 @@ newtype Program = Program [Function]
 
 newtype Function = Function CodeBlock
   deriving (Monoid, Show)
-
-

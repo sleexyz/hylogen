@@ -41,7 +41,7 @@ instance (AST.ToGLSLType a) => Definable (AST.Expr a) where
            )
     return $ AST.funApp "hello"
 
-    -- TODO: return actual function call
+      -- TODO: return actual function call
 
 -- instance (AST.ToGLSLType a, Definable b) => Definable (a -> b) where
 --   define = undefined
@@ -182,6 +182,7 @@ test = Main $ do
   y <- define $ do
     x <- ref (100 :: Vec1)
     return (deref x) :: Hylogen Vec1
+
   x <- ref $ y
   x <- ref $ y
 
