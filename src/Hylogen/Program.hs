@@ -35,11 +35,12 @@ instance Show Statement where
 -- TODO: deprecate
 newtype Function = Function [Statement]
 instance Show Function where
-  show (Function xs) = unlines [ "void main() {"
-                              , assignments
-                              , "    gl_FragColor = _1;"
-                              , "}"
-                              ]
+  show (Function xs) = unlines
+    [ "void main() {"
+    , assignments
+    , "    gl_FragColor = _1;"
+    , "}"
+    ]
     where
       assignments = mconcat $  (<> "\n") . ("    "<>) . show <$> reverse xs
 

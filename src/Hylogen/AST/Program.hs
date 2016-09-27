@@ -9,11 +9,15 @@ newtype FunctionId = FunctionId Int
   deriving Num
 
 instance Show FunctionId where
-  show x = "__" ++ show x
+  show (FunctionId x) = "__" ++ show x
 
 newtype Program = Program [Function]
   deriving (Monoid, Show)
 
-
-newtype Function = Function CodeBlock
-  deriving (Monoid, Show)
+data Function = Function
+  { _name :: String
+  , _inputs :: [GLSLType]
+  , _output :: GLSLType
+  , _code :: CodeBlock
+  }
+  deriving (Show)
