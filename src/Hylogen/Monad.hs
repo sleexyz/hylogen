@@ -44,16 +44,26 @@ define hyFun = do
   s@State {_fid} <- M.get
   M.put $! s {_fid=_fid + 1}
 
-  let (inputs, output) = buildGLSLFunction hyFun
-      state = defaultState -- fixme: number after args
-      -- I need to eta-abstract!
-      (out, (program, codeblock)) = runHylogenWithState state hyFun
+  let initializeState :: [GLSLType] -> State
+      initializeState inputs = defaultState {_id = Id $ length inputs}
+
+      (inputTypes, outputType) = buildGLSLFunction hyFun
+      incomingState = initializeState inputTypes
+
+      inputs :: [ExprMono]
+      inputs = map _ inputTypes
+
+      fed = _ inputs hyFun
+
+      ((out, (program, codeblock)), outState) = runHylogenWithState incomingState fed
+
       glslFunction = Function
         { _name = (show _fid)
-        , _inputs = inputs
-        , _output = output
+        , _inputs = inputTypes
+        , _output = outputType
         , _code = codeblock
         }
+
   M.tell ( program  <> Program [glslFunction]
          , CodeBlock []
          )
@@ -79,10 +89,6 @@ instance (ToGLSLType a, Definable b) => Definable (Expr a -> b) where
 
   buildFun name args _ =
     \a -> buildFun name (_mono a : args) (Proxy :: Proxy b)
-
-
-
-
 
 data Effects = Eff CanBreak
 data CanBreak = YesBreak | NoBreak
@@ -113,14 +119,10 @@ newtype HylogenInternal (ctx :: Context) a
   = HylogenInternal { unHylogenInternal :: M.WriterT Output (M.StateT State M.Identity) a}
   deriving (Functor, Applicative, Monad, M.MonadState State, M.MonadWriter Output)
 
-
 instance (ToGLSLType a) => Show (HylogenInternal ctx (Expr a)) where
-  show = show . runHylogenDefault . returnLast
-
+  show = show . snd . fst . runHylogenDefault . returnLast
 
 type Hylogen = HylogenInternal (Ctx (Eff NoBreak))
-
-
 
 
 emit :: Statement -> HylogenInternal ctx ()
@@ -184,18 +186,17 @@ breakFor = emit Break
 
 
 -- | Runs the state monad with the default state
-runHylogenDefault :: HylogenInternal ctx a -> (a, Output)
+runHylogenDefault :: HylogenInternal ctx a -> ((a, Output), State)
 runHylogenDefault = runHylogenWithState defaultState
 
 -- | Given a state, runs the state monad
-runHylogenWithState :: State -> HylogenInternal ctx a -> (a, Output)
-runHylogenWithState state h = fst . M.runIdentity $ M.runStateT (M.runWriterT . unHylogenInternal $ h) state
-
+runHylogenWithState :: State -> HylogenInternal ctx a -> ((a, Output), State)
+runHylogenWithState state h = M.runIdentity $ M.runStateT (M.runWriterT . unHylogenInternal $ h) state
 
 branch_ :: HylogenInternal ctx' a -> HylogenInternal ctx ()
 branch_ toBranch = do
   s <- M.get
-  M.tell . snd $ runHylogenWithState s toBranch
+  M.tell . snd . fst $ runHylogenWithState s toBranch
 
 
 newtype Main = Main (Hylogen Vec4)
@@ -208,8 +209,7 @@ instance Show Main where
     , "}"
     ]
     where
-      (program, codeblock) = runHylogenDefault hylo
-
+      ((program, codeblock), _) = runHylogenDefault hylo
 
 test = Main $ do
   y <- ref (100 :: Vec2)
