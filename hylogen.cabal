@@ -24,9 +24,9 @@ library
                      , Hylogen.Globals
                      , Hylogen.Program
   build-depends:       base >= 4.8 && < 5
-                     , vector-space
                      , data-reify
-                     , mtl
                      , hspec
+                     , mtl
+                     , vector-space
   hs-source-dirs:      src
   default-language:    Haskell2010

@@ -10,6 +10,9 @@
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE ConstrainedClassMethods #-}
 
 module Hylogen.Monad (
   Hylogen,
@@ -37,58 +40,86 @@ import Data.Proxy
 import Test.Hspec
 
 -- | Define a function.
--- This writes a GLSL function (via eta-abstraction)
+-- This emits a GLSL function definition (via eta-abstraction)
 -- and constructs a function to be used in Hylogen
 define :: (Definable a) => Hylogen a -> Hylogen a
 define hyFun = do
   s@State {_fid} <- M.get
   M.put $! s {_fid=_fid + 1}
-
-  let initializeState :: [GLSLType] -> State
-      initializeState inputs = defaultState {_id = Id $ length inputs}
-
-      (inputTypes, outputType) = buildGLSLFunction hyFun
-      incomingState = initializeState inputTypes
-
-      inputs :: [ExprMono]
-      inputs = map _ inputTypes
-
-      fed = _ inputs hyFun
-
-      ((out, (program, codeblock)), outState) = runHylogenWithState incomingState fed
-
-      glslFunction = Function
-        { _name = (show _fid)
-        , _inputs = inputTypes
-        , _output = outputType
-        , _code = codeblock
-        }
-
-  M.tell ( program  <> Program [glslFunction]
+  let (program, glslFunction) = makeGLSLFunction hyFun _fid
+  M.tell ( program  <> Program [TLFunction glslFunction]
          , CodeBlock []
          )
-  return $ buildFun (show _fid) [] (Proxy :: Proxy a)
+  return $ buildHyFunOut (show _fid) [] (Proxy :: Proxy a)
+
+makeGLSLFunction :: forall a. (Definable a) => Hylogen a -> FunctionId -> (Program, Function)
+makeGLSLFunction hyFun fid =
+  let
+    inputTypes :: [GLSLType]
+    outputType :: GLSLType
+    (inputTypes, outputType) = buildGLSLFunction hyFun
+
+    inputs :: [ExprMono]
+    inputs = zipWith f inputTypes [0..]
+      where
+        f ty i = Tree (FunApp, ty, show (Id i)) []
+
+    hyFunApplied :: Hylogen (DefineOutput a)
+    hyFunApplied = applyHyFunIn hyFun inputs
+
+    hyFunReturned :: Hylogen ()
+    hyFunReturned = returnLast hyFunApplied
 
 
-class Definable a where
+    initializeState :: [GLSLType] -> State
+    initializeState inputs = defaultState {_id = Id $ length inputs}
+
+    outState :: State
+    out :: ()
+    program :: Program
+    codeblock :: CodeBlock
+    ((out, (program, codeblock)), outState) =
+      runHylogenWithState (initializeState inputTypes) hyFunReturned
+  in
+    ( program
+    , Function
+      { _name = (show fid)
+      , _inputs = inputTypes
+      , _output = outputType
+      , _code = codeblock
+      }
+    )
+
+
+class (IsExpr (DefineOutput a)) => Definable a where
+  type DefineOutput a
   buildGLSLFunction :: Hylogen a -> ([GLSLType], GLSLType)
-  buildFun :: String -> [ExprMono]-> Proxy a -> a
+  applyHyFunIn :: Hylogen a -> [ExprMono] -> Hylogen (DefineOutput a)
+  buildHyFunOut :: String -> [ExprMono]-> Proxy a -> a
 
 instance (ToGLSLType a) => Definable (Expr a) where
+  type DefineOutput (Expr a) = Expr a
   buildGLSLFunction _ = ([], toGLSLType (tag :: a))
-  buildFun name args _ =
+  applyHyFunIn hyFun = \case
+    _:_ -> error "unexpected"
+    [] -> hyFun
+  buildHyFunOut name args _ =
     Expr t (Tree (FunApp, toGLSLType t, name) args)
     where
       t = tag :: a
 
 instance (ToGLSLType a, Definable b) => Definable (Expr a -> b) where
+  type DefineOutput (Expr a -> b) = DefineOutput b
   buildGLSLFunction f = (t:inputs, output)
     where
       t = toGLSLType (tag :: a)
       (inputs, output) = buildGLSLFunction (f <*> undefined)
-
-  buildFun name args _ =
-    \a -> buildFun name (_mono a : args) (Proxy :: Proxy b)
+  applyHyFunIn hyFun = \case
+    [] -> error "unexpected"
+    x:xs ->
+      applyHyFunIn (hyFun <*> return (Expr (tag :: a) x)) xs
+  buildHyFunOut name args _ = \a ->
+    buildHyFunOut name (_mono a : args) (Proxy :: Proxy b)
 
 data Effects = Eff CanBreak
 data CanBreak = YesBreak | NoBreak
@@ -175,10 +206,10 @@ for i fn = do
   emit ForEnd
   return ()
 
-ret :: ToGLSLType o => Expr o -> HylogenInternal ctx ()
+ret :: IsExpr a => a -> HylogenInternal ctx ()
 ret = emit . Return  . toMono
 
-returnLast :: ToGLSLType o => HylogenInternal ctx (Expr o) -> HylogenInternal ctx ()
+returnLast :: IsExpr a => HylogenInternal ctx a -> HylogenInternal ctx ()
 returnLast =  (>>=ret)
 
 breakFor :: HylogenInternal (Ctx (Eff YesBreak)) ()
