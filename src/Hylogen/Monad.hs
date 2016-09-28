@@ -45,11 +45,12 @@ import Test.Hspec
 define :: (Definable a) => Hylogen a -> Hylogen a
 define hyFun = do
   s@State {_fid} <- M.get
-  M.put $! s {_fid=_fid + 1}
+  M.put $! s { _fid=_fid + 1}
   let (program, glslFunction) = makeGLSLFunction hyFun _fid
-  M.tell ( program  <> Program [TLFunction glslFunction]
-         , CodeBlock []
-         )
+  M.tell $
+    Emitted
+    (program  <> Program [TLFunction glslFunction])
+    (CodeBlock [])
   return $ buildHyFunOut (show _fid) [] (Proxy :: Proxy a)
 
 makeGLSLFunction :: forall a. (Definable a) => Hylogen a -> FunctionId -> (Program, Function)
@@ -62,7 +63,7 @@ makeGLSLFunction hyFun fid =
     inputs :: [ExprMono]
     inputs = zipWith f inputTypes [0..]
       where
-        f ty i = Tree (FunApp, ty, show (Id i)) []
+        f ty i = Tree (Variable, ty, show (Id i)) []
 
     hyFunApplied :: Hylogen (DefineOutput a)
     hyFunApplied = applyHyFunIn hyFun inputs
@@ -72,19 +73,22 @@ makeGLSLFunction hyFun fid =
 
 
     initializeState :: [GLSLType] -> State
-    initializeState inputs = defaultState {_id = Id $ length inputs}
+    initializeState inputs = defaultState
+      { _id = Id $ length inputs
+      , _indent = 1
+      }
 
     outState :: State
     out :: ()
     program :: Program
     codeblock :: CodeBlock
-    ((out, (program, codeblock)), outState) =
-      runHylogenWithState (initializeState inputTypes) hyFunReturned
+    ((out, Emitted program codeblock), outState) =
+      runHylogen hyFunReturned (initializeState inputTypes)
   in
     ( program
     , Function
       { _name = (show fid)
-      , _inputs = inputTypes
+      , _inputs = inputs
       , _output = outputType
       , _code = codeblock
       }
@@ -144,14 +148,25 @@ defaultState = State
   }
 
 
-type Output = (Program, CodeBlock)
+data Emitted = Emitted
+  { _emittedProgram :: Program
+  , _emittedCodeBlock :: CodeBlock
+  }
+instance Monoid Emitted where
+  mempty = Emitted mempty mempty
+  mappend (Emitted p c) (Emitted p' c') =
+    Emitted (mappend p p') (mappend c c')
 
 newtype HylogenInternal (ctx :: Context) a
-  = HylogenInternal { unHylogenInternal :: M.WriterT Output (M.StateT State M.Identity) a}
-  deriving (Functor, Applicative, Monad, M.MonadState State, M.MonadWriter Output)
+  = HylogenInternal { unHylogenInternal :: M.WriterT Emitted (M.StateT State M.Identity) a}
+  deriving (Functor, Applicative, Monad, M.MonadState State, M.MonadWriter Emitted)
 
 instance (ToGLSLType a) => Show (HylogenInternal ctx (Expr a)) where
-  show = show . snd . fst . runHylogenDefault . returnLast
+  show hylo = show program
+    where
+      state = defaultState
+      (((), Emitted program codeblock), _) =
+        runHylogen (returnLast hylo) state
 
 type Hylogen = HylogenInternal (Ctx (Eff NoBreak))
 
@@ -159,7 +174,7 @@ type Hylogen = HylogenInternal (Ctx (Eff NoBreak))
 emit :: Statement -> HylogenInternal ctx ()
 emit statement = do
   State{..} <- M.get
-  M.tell $ (mempty , CodeBlock [(_indent , statement)])
+  M.tell $ Emitted mempty (CodeBlock [(_indent , statement)])
 
 freshVar :: (ToGLSLType a) => a -> HylogenInternal ctx (Expr a)
 freshVar x = do
@@ -216,18 +231,14 @@ breakFor :: HylogenInternal (Ctx (Eff YesBreak)) ()
 breakFor = emit Break
 
 
--- | Runs the state monad with the default state
-runHylogenDefault :: HylogenInternal ctx a -> ((a, Output), State)
-runHylogenDefault = runHylogenWithState defaultState
-
 -- | Given a state, runs the state monad
-runHylogenWithState :: State -> HylogenInternal ctx a -> ((a, Output), State)
-runHylogenWithState state h = M.runIdentity $ M.runStateT (M.runWriterT . unHylogenInternal $ h) state
+runHylogen :: HylogenInternal ctx a -> State -> ((a, Emitted), State)
+runHylogen h state = M.runIdentity $ M.runStateT (M.runWriterT . unHylogenInternal $ h) state
 
 branch_ :: HylogenInternal ctx' a -> HylogenInternal ctx ()
 branch_ toBranch = do
   s <- M.get
-  M.tell . snd . fst $ runHylogenWithState s toBranch
+  M.tell . snd . fst $ runHylogen toBranch s
 
 
 newtype Main = Main (Hylogen Vec4)
@@ -235,12 +246,16 @@ newtype Main = Main (Hylogen Vec4)
 instance Show Main where
   show (Main hylo) = unlines
     [ show program
-    , "void main() {"
+    , ""
+    , "void main()"
+    , "{"
     , show codeblock
+    , "  gl_FragColor = _0;" -- fixme: this doesn't work
     , "}"
     ]
     where
-      ((program, codeblock), _) = runHylogenDefault hylo
+      state = defaultState {_indent = 1 }
+      ((a, Emitted program codeblock), _) = runHylogen hylo state
 
 test = Main $ do
   y <- ref (100 :: Vec2)
@@ -254,10 +269,23 @@ test = Main $ do
   return 10
 
 
+-- fixme: define should work on klieslis arrows, not mapped arrows
 spec  = do
-  describe "works" $ do
+  describe "ref/deref" $ do
     it "works" $ do
-      print $ do
-        fun <- define (return (2 :: Vec2))
-        x <- ref $fun + fun
+      pending
+  describe "define" $ do
+    it "works for nullary functions" $ do
+      print $ Main $ do
+        fun <- define $ do
+          return (2 :: Vec4)
+        return fun
+
+    it "works for unary functions" $ do
+      print $ Main $ do
+        fun <- define $ do
+          return ((\x -> vec4(-x, x + x)) :: Vec2 -> Vec4)
+        x <- ref (fun 1)
         return (deref x)
+    it "works for nested defines" $ do
+      pending

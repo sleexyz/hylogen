@@ -5,13 +5,17 @@ module Hylogen.AST.Statement where
 import Hylogen.AST.Expr
 import Hylogen.Types.Booly
 import Data.Monoid
+import Data.List
+import Data.Function
 
 newtype CodeBlock =  CodeBlock [(Int, Statement)]
   deriving (Monoid)
 
 instance Show CodeBlock where
   show (CodeBlock xs) =
-    unlines $ (\(n, statement) -> indent n ++ show statement) <$> xs
+    ((\(n, statement) -> indent n ++ show statement) <$> xs)
+    & intersperse "\n"
+    & mconcat
     where
       indent n = mconcat $ replicate (n*2) " "
 
