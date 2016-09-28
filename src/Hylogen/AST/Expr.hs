@@ -11,18 +11,25 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE LambdaCase #-}
 
 {- |
 Internal AST representation.
+
+TODO: Use Overloaded record fields!
 -}
 
-module Hylogen.Expr where
-
+module Hylogen.AST.Expr where
 
 import Data.Reify
+import Data.List
 
+-- | Rose tree. Internal AST data structure
+data Tree a  = Tree { getElem     :: a
+                    , getChildren :: [Tree a]
+                    }
 
--- | Internal type tag
+-- | Internal type representation.
 data GLSLType = GLSLFloat
               | GLSLVec2
               | GLSLVec3
@@ -41,32 +48,35 @@ instance Show GLSLType where
     GLSLTexture -> "sampler2D"
 
 -- | Internal form tag
-data ExprForm = Uniform
-              | Variable
-              | Op1
-              | Op1Pre
-              | Op2
-              | Op2Pre
-              | Op3Pre
-              | Op4Pre
-              | Select
-              | Access
-                deriving (Show)
-
--- | Rose tree. Internal AST data structure
-data Tree a  = Tree { getElem     :: a
-                    , getChildren :: [Tree a]
-                    }
-
+data ExprForm =
+  Uniform
+  | Variable
+  | FunApp
+  | Op1
+  | Op1Pre
+  | Op2
+  | Op2Pre
+  | Op3Pre
+  | Op4Pre
+  | Select
+  | Access
+  deriving (Show)
 
 -- | Untyped Expr representation
 -- Carries type information in type tag
 type ExprMono = Tree (ExprForm, GLSLType, String)
 
+getTypeTagMono :: ExprMono -> GLSLType
+getTypeTagMono (Tree (_, ty, _) _) = ty
+
+getStringMono :: ExprMono -> String
+getStringMono (Tree (_, _, str) _) = str
+
 instance Show ExprMono where
   show (Tree (form, _, str) xs) = case form of
     Uniform  -> str
     Variable -> str
+    FunApp   -> str ++ "(" ++ (mconcat $ intersperse  ", " (show <$> xs)) ++ ")"
     Op1      -> mconcat ["(", str, show (xs!!0), ")"]
     Op1Pre   -> mconcat [ str, "(", show (xs!!0), ")"]
     Op2      -> mconcat ["(", show (xs !! 0), " ", str, " ", show (xs !! 1), ")"]
@@ -77,22 +87,34 @@ instance Show ExprMono where
     Access   -> mconcat [show (xs!!0), ".", str]
 
 -- | Light type wrapper
---
 -- Note the internal type tag is not directly dependent on the actual type!
---
 -- We use the ToGLSLType typeclass to genenerate dependence from types to values
-data Expr ty = Expr { getTypeTag :: ty
-                    , toMono ::  Tree (ExprForm, GLSLType, String)
-                    }
+data Expr ty = Expr
+  { _tag :: ty
+  , _mono::  Tree (ExprForm, GLSLType, String)
+  }
 
 instance ToGLSLType ty => Show (Expr ty) where
-  show = show . toMono
+  show = show . _mono
 
 class ToGLSLType  ty where
   -- | Gives us dependence from typed singleton tags to untyped tags
   toGLSLType :: ty -> GLSLType
   -- | Singleton tag
   tag :: ty -- TODO: fill in!
+
+class IsExpr a where
+  toMono :: a -> ExprMono
+
+instance ToGLSLType a => IsExpr (Expr a) where
+  toMono = _mono
+
+-- | Variable expression.
+variable :: forall a
+           . ToGLSLType a
+           => String -> Expr a
+variable str = Expr t (Tree (Variable, toGLSLType t, str) [])
+  where t = tag :: a
 
 -- | Uniform expression.
 uniform :: forall a
@@ -106,7 +128,7 @@ uniform str = Expr t (Tree (Uniform, toGLSLType t, str) [])
 op1 :: forall a b
        . (ToGLSLType a, ToGLSLType b)
        => String -> Expr a -> Expr b
-op1 str a = Expr t (Tree (Op1, toGLSLType t, str) [toMono a])
+op1 str a = Expr t (Tree (Op1, toGLSLType t, str) [_mono a])
   where t = tag :: b
 
 -- | Unary operator.
@@ -114,7 +136,7 @@ op1 str a = Expr t (Tree (Op1, toGLSLType t, str) [toMono a])
 op1'' :: forall a
        . (ToGLSLType a)
        => String -> Expr a -> Expr a
-op1'' str a = Expr t (Tree (Op1, toGLSLType t, str) [toMono a])
+op1'' str a = Expr t (Tree (Op1, toGLSLType t, str) [_mono a])
   where t = tag :: a
 
 -- | Unary operator.
@@ -123,7 +145,7 @@ op1'' str a = Expr t (Tree (Op1, toGLSLType t, str) [toMono a])
 op1pre :: forall a b
           . (ToGLSLType a, ToGLSLType b)
           => String -> Expr a -> Expr b
-op1pre str a = Expr t (Tree (Op1Pre, toGLSLType t, str) [toMono a])
+op1pre str a = Expr t (Tree (Op1Pre, toGLSLType t, str) [_mono a])
   where t = tag :: b
 
 -- | Unary operator.
@@ -132,7 +154,7 @@ op1pre str a = Expr t (Tree (Op1Pre, toGLSLType t, str) [toMono a])
 op1pre'' :: forall a
           . (ToGLSLType a)
           => String -> Expr a -> Expr a
-op1pre'' str a = Expr t (Tree (Op1Pre, toGLSLType t, str) [toMono a])
+op1pre'' str a = Expr t (Tree (Op1Pre, toGLSLType t, str) [_mono a])
   where t = tag :: a
 
 -- | Binary operator.
@@ -140,7 +162,7 @@ op1pre'' str a = Expr t (Tree (Op1Pre, toGLSLType t, str) [toMono a])
 op2 :: forall a b c
        . (ToGLSLType a, ToGLSLType b, ToGLSLType c)
        => String -> Expr a -> Expr b -> Expr c
-op2 str a b = Expr t (Tree (Op2, toGLSLType t, str) [toMono a, toMono b])
+op2 str a b = Expr t (Tree (Op2, toGLSLType t, str) [_mono a, _mono b])
   where t = tag :: c
 
 -- | Binary operator.
@@ -148,7 +170,7 @@ op2 str a b = Expr t (Tree (Op2, toGLSLType t, str) [toMono a, toMono b])
 op2' :: forall a c
        . (ToGLSLType a, ToGLSLType c)
        => String -> Expr a -> Expr a -> Expr c
-op2' str a b = Expr t (Tree (Op2, toGLSLType t, str) (fmap toMono [a, b]))
+op2' str a b = Expr t (Tree (Op2, toGLSLType t, str) (fmap _mono [a, b]))
   where t = tag :: c
 
 -- | Binary operator.
@@ -156,7 +178,7 @@ op2' str a b = Expr t (Tree (Op2, toGLSLType t, str) (fmap toMono [a, b]))
 op2'' :: forall a
        . (ToGLSLType a)
        => String -> Expr a -> Expr a -> Expr a
-op2'' str a b = Expr t (Tree (Op2, toGLSLType t, str) (fmap toMono [a, b]))
+op2'' str a b = Expr t (Tree (Op2, toGLSLType t, str) (fmap _mono [a, b]))
   where t = tag :: a
 
 
@@ -166,7 +188,7 @@ op2'' str a b = Expr t (Tree (Op2, toGLSLType t, str) (fmap toMono [a, b]))
 op2pre :: forall a b c
           . (ToGLSLType a, ToGLSLType b, ToGLSLType c)
           => String -> Expr a -> Expr b -> Expr c
-op2pre str a b = Expr t (Tree (Op2Pre, toGLSLType t, str) [toMono a, toMono b])
+op2pre str a b = Expr t (Tree (Op2Pre, toGLSLType t, str) [_mono a, _mono b])
   where t = tag :: c
 
 -- | Binary operator.
@@ -175,7 +197,7 @@ op2pre str a b = Expr t (Tree (Op2Pre, toGLSLType t, str) [toMono a, toMono b])
 op2pre' :: forall a c
        . (ToGLSLType a, ToGLSLType c)
        => String -> Expr a -> Expr a -> Expr c
-op2pre' str a b = Expr t (Tree (Op2Pre, toGLSLType t, str) (fmap toMono [a, b]))
+op2pre' str a b = Expr t (Tree (Op2Pre, toGLSLType t, str) (fmap _mono [a, b]))
   where t = tag :: c
 
 -- | Binary operator.
@@ -184,7 +206,7 @@ op2pre' str a b = Expr t (Tree (Op2Pre, toGLSLType t, str) (fmap toMono [a, b]))
 op2pre'' :: forall a
        . (ToGLSLType a)
        => String -> Expr a -> Expr a -> Expr a
-op2pre'' str a b = Expr t (Tree (Op2Pre, toGLSLType t, str) (fmap toMono [a, b]))
+op2pre'' str a b = Expr t (Tree (Op2Pre, toGLSLType t, str) (fmap _mono [a, b]))
   where t = tag :: a
 
 -- | Ternary operator.
@@ -193,7 +215,7 @@ op2pre'' str a b = Expr t (Tree (Op2Pre, toGLSLType t, str) (fmap toMono [a, b])
 op3pre :: forall a b c d
           . (ToGLSLType a, ToGLSLType b, ToGLSLType c, ToGLSLType d)
           => String -> Expr a -> Expr b -> Expr c -> Expr d
-op3pre str a b c = Expr t (Tree (Op3Pre, toGLSLType t, str) [toMono a, toMono b, toMono c])
+op3pre str a b c = Expr t (Tree (Op3Pre, toGLSLType t, str) [_mono a, _mono b, _mono c])
   where t = tag :: d
 
 -- | Ternary operator.
@@ -202,7 +224,7 @@ op3pre str a b c = Expr t (Tree (Op3Pre, toGLSLType t, str) [toMono a, toMono b,
 op3pre' :: forall a d
           . (ToGLSLType a, ToGLSLType d)
           => String -> Expr a -> Expr a -> Expr a -> Expr d
-op3pre' str a b c = Expr t (Tree (Op3Pre, toGLSLType t, str) (fmap toMono [a, b, c]))
+op3pre' str a b c = Expr t (Tree (Op3Pre, toGLSLType t, str) (fmap _mono [a, b, c]))
   where t = tag :: d
 
 -- | Ternary operator.
@@ -211,7 +233,7 @@ op3pre' str a b c = Expr t (Tree (Op3Pre, toGLSLType t, str) (fmap toMono [a, b,
 op3pre'' :: forall a
           . (ToGLSLType a)
           => String -> Expr a -> Expr a -> Expr a -> Expr a
-op3pre'' str a b c = Expr t (Tree (Op3Pre, toGLSLType t, str) (fmap toMono [a, b, c]))
+op3pre'' str a b c = Expr t (Tree (Op3Pre, toGLSLType t, str) (fmap _mono [a, b, c]))
   where t = tag :: a
 
 
@@ -221,7 +243,7 @@ op3pre'' str a b c = Expr t (Tree (Op3Pre, toGLSLType t, str) (fmap toMono [a, b
 op4pre :: forall a b c d e
           . (ToGLSLType a, ToGLSLType b, ToGLSLType c, ToGLSLType d, ToGLSLType e)
           => String -> Expr a -> Expr b -> Expr c -> Expr d -> Expr e
-op4pre str a b c d = Expr t (Tree (Op4Pre, toGLSLType t, str) [toMono a, toMono b, toMono c, toMono d])
+op4pre str a b c d = Expr t (Tree (Op4Pre, toGLSLType t, str) [_mono a, _mono b, _mono c, _mono d])
   where t = tag :: e
 
 -- | Quaternary operator.
@@ -230,7 +252,7 @@ op4pre str a b c d = Expr t (Tree (Op4Pre, toGLSLType t, str) [toMono a, toMono 
 op4pre' :: forall a e
           . (ToGLSLType a, ToGLSLType e)
           => String -> Expr a -> Expr a -> Expr a -> Expr a -> Expr e
-op4pre' str a b c d = Expr t (Tree (Op4Pre, toGLSLType t, str) (fmap toMono [a, b, c, d]))
+op4pre' str a b c d = Expr t (Tree (Op4Pre, toGLSLType t, str) (fmap _mono [a, b, c, d]))
   where t = tag :: e
 
 -- | Quaternary operator.
@@ -239,11 +261,8 @@ op4pre' str a b c d = Expr t (Tree (Op4Pre, toGLSLType t, str) (fmap toMono [a, 
 op4pre'' :: forall a e
           . (ToGLSLType a, ToGLSLType e)
           => String -> Expr a -> Expr a -> Expr a -> Expr a -> Expr e
-op4pre'' str a b c d = Expr t (Tree (Op4Pre, toGLSLType t, str) (fmap toMono [a, b, c, d]))
+op4pre'' str a b c d = Expr t (Tree (Op4Pre, toGLSLType t, str) (fmap _mono [a, b, c, d]))
   where t = tag :: e
-
-
-
 
 -- | Open tree type, to be used for explicit recursion with data-reify for preserving sharing.
 --
@@ -259,6 +278,10 @@ data TreeF a b = TreeF { getElemF     :: a
 -- Note the presence of a list of closed ExprMono's in the tuple.
 -- We use this list to recover unshared child expressions when they need to be inlined.
 type ExprMonoF = TreeF (ExprForm, GLSLType, String, [ExprMono])
+
+-- | Returns the type tag of a ExprMonoF
+getTagMonoF :: ExprMonoF a -> GLSLType
+getTagMonoF (TreeF (_, ty, _, _) _) = ty
 
 -- | Returns the string representation of the nth child of an open untyped expression, accounting for inlining
 emfStringAt :: (Show a) => ExprMonoF a -> Int -> String
