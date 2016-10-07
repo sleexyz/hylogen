@@ -1,3 +1,4 @@
+-- | Primitives for use in Hylide
 module Hylogen.WithHylide.Core where
 
 import           Data.Monoid

@@ -1,12 +1,8 @@
+
 module Hylogen.WithHylide.Util where
 
 import Hylogen
-
-black :: Vec3
-black = vec3 (0, 0, 0)
-
-white :: Vec3
-white = vec3 (1, 1, 1)
+import Hylogen.Expr
 
 -- | Given an alpha value, sets it for the alpha channel for a given color
 --
@@ -38,3 +34,9 @@ linexp (a, b, c, d) x = c * ((d / c) ** ((x - a) / (b - a)))
 -- @
 linlin :: (Floating a) => (a, a, a, a) -> a -> a
 linlin (a, b, c, d) x = c + (d - c) * ((x - a) / (b - a))
+
+hsv2rgb :: Vec4 -> Vec4
+hsv2rgb v = vec4(op1pre "hsv2rgb" (xyz_ v) :: Vec3, w_ v :: Vec1)
+
+rgb2hsv :: Vec4 -> Vec4
+rgb2hsv v = vec4 (op1pre "rgb2hsv" (xyz_ v) :: Vec3, w_ v :: Vec1)
