@@ -7,7 +7,7 @@ module.exports = function (entryPath, outputPath, publicPath, isProd) {
           entryPath,
         ]
         : [
-          "webpack-hot-middleware/client",
+          "webpack-hot-middleware/client?reload=true",
           entryPath
         ];
 

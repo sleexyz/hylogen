@@ -2,11 +2,11 @@ import React, {PropTypes} from "react";
 import ReactDOM from "react-dom";
 import Audio from "./Audio";
 import OscPort from "./OscPort";
-
+import BeatMatcher from "./BeatMatcher";
 
 const vsSource = ` attribute vec3 aPosition;
 varying vec2 uvN;
-void main() 
+void main()
 {
   gl_Position = vec4(aPosition, 1.0);
   uvN = aPosition.xy;
@@ -14,6 +14,7 @@ void main()
 
 const fsHeader = `precision mediump float;
 const float pi = 3.141592653589793238462643383;
+uniform float osc0;
 uniform float osc1;
 uniform float osc2;
 uniform float osc3;
@@ -22,14 +23,22 @@ uniform float osc5;
 uniform float osc6;
 uniform float osc7;
 uniform float osc8;
+uniform float osc9;
+uniform float osc10;
+uniform float osc11;
+uniform float osc12;
+uniform float osc13;
+uniform float osc14;
+uniform float osc15;
 uniform float time;
+uniform float beat;
 uniform vec2 mouse;
 uniform vec2 resolution;
 uniform vec4 audio;
 uniform sampler2D backBuffer;
 uniform sampler2D channel1;
 varying vec2 uvN;
-vec2 uv() 
+vec2 uv()
 {
   return 0.5 * uvN  + 0.5;
 }
@@ -72,25 +81,25 @@ export default React.createClass({
     let canvas = this.canvas;
     let gl = this.gl = canvas.getContext("webgl");
 
-    let state = this.state_ = {};
-    state.animationFrameRequest = null;
-    state.bit = 0;
-    state.fb = [null, null];
-    state.time0 = new Date() / 1000;
-    state.audioCallback = null;
-
+    const state = this.state_ = {
+      animationFrameRequest: null,
+      bit: 0,
+      fb: [null, null],
+      time0: new Date() / 1000,
+      audioCallback: null,
+      beatMatcher: new BeatMatcher()
+    };
 
     function setMouse (event) {
       var r = event.target.getBoundingClientRect();
       state.mouse.x = (event.clientX - r.left) / (r.right - r.left) * 2 -1;
       state.mouse.y = (event.clientY - r.bottom) / (r.top - r.bottom) * 2 - 1;
     };
+    canvas.onmousemove = setMouse;
+    canvas.onclick = () => state.beatMatcher.emitBeat();
     /* canvas.onmousedown = (event) => setMouse(event, 1); */
     /* canvas.onmouseup = (event) => setMouse(event, 0); */
-
-    canvas.onmousemove = setMouse;
     state.mouse = {x: 0, y: 0};
-
 
     state.audio = {low: 0.0, mid: 0.0, upper: 0.0, high: 0.0};
 
@@ -101,19 +110,18 @@ export default React.createClass({
       state.audio.high = bands.high;
     });
 
-    state.osc = new Float32Array(8);
+    state.osc = new Float32Array(16);
 
     if (this.props.withOSC) {
       let instance = OscPort.getInstance();
 
       // TODO: handle cleanup of callback
       instance.on("message", function(msg) {
-        const addr = parseInt(msg.address.slice(7));
+        const addr = parseInt(msg.address.slice(1));
         const val = msg.args[0];
         state.osc[addr] = val;
       });
     }
-
 
     this.loadProgram();
   },
@@ -127,8 +135,6 @@ export default React.createClass({
     // throws Error on compilation error
 
     function compileShader (gl, source, shaderType) {
-      // assert(shaderType === gl.FRAGMENT_SHADER || shaderType === g.VERTEXT_SHADER);
-
       let shader = gl.createShader(shaderType);
 
       gl.shaderSource(shader, source);
@@ -143,8 +149,6 @@ export default React.createClass({
 
       return shader;
     };
-
-
 
     let vs = compileShader(gl, this.props.vsSource, gl.VERTEX_SHADER);
     let fs = compileShader(gl, fsHeader + "\n" + this.props.fsSource, gl.FRAGMENT_SHADER);
@@ -165,7 +169,6 @@ export default React.createClass({
     // Create a square as a strip of two triangles.
     gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([ -1,1,0, 1,1,0, -1,-1,0, 1,-1,0 ]), gl.STATIC_DRAW);
-
 
     // Assign attribute aPosition to each of the square's vertices.
     gl.aPosition = gl.getAttribLocation(program, "aPosition");
@@ -219,19 +222,14 @@ export default React.createClass({
     img.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFQAAABpAgMAAADZ4ewhAAAADFBMVEVlLWcjHyD///9aukdNbQb8AAAAAXRSTlMAQObYZgAAAAFiS0dEAIgFHUgAAAAJcEhZcwAACxMAAAsTAQCanBgAAAAHdElNRQfgBBsTBjDG601/AAAAbUlEQVRIx2MIxQYYBoVo2Cp0MHXQiC5FcWvUIBJd//9q6P+/ofFAapCJDt4wWxpa/x/s3v//B53o4A2zwSo6WEuNQVvSQgEad1CIMmK41mFwiILprFXgRAilYOE78KKgnLBqJYwKHUSigzMHAADhlJM2vqJTOQAAAABJRU5ErkJggg==";
     createTexture(img);
 
-
-
     // remember the address within the fragment shader of each of my uniforms variables
-    gl.osc1 = gl.getUniformLocation(program, "osc1");
-    gl.osc2 = gl.getUniformLocation(program, "osc2");
-    gl.osc3 = gl.getUniformLocation(program, "osc3");
-    gl.osc4 = gl.getUniformLocation(program, "osc4");
-    gl.osc5 = gl.getUniformLocation(program, "osc5");
-    gl.osc6 = gl.getUniformLocation(program, "osc6");
-    gl.osc7 = gl.getUniformLocation(program, "osc7");
-    gl.osc8 = gl.getUniformLocation(program, "osc8");
+    gl.osc = [];
+    for (let i = 0; i < 16; i++) {
+      gl.osc[i] = gl.getUniformLocation(program, "osc" + i);
+    }
 
     gl.time = gl.getUniformLocation(program, "time");
+    gl.beat = gl.getUniformLocation(program, "beat");
     gl.mouse = gl.getUniformLocation(program, "mouse");
     gl.audio = gl.getUniformLocation(program, "audio");
     gl.resolution = gl.getUniformLocation(program, "resolution");
@@ -239,13 +237,11 @@ export default React.createClass({
 
     gl.channel1= gl.getUniformLocation(program, "channel1");
 
-
     this.draw();
 
     if (this.props.animation) {
       if (state.animationFrameRequest === null) {
         //INVARIANT: afr is non-null if we are animating.
-
         state.animationFrameRequest = requestAnimationFrame(this.animate);
       }
     }
@@ -254,16 +250,13 @@ export default React.createClass({
     let gl = this.gl;
     let state = this.state_;
 
-    gl.uniform1f(gl.osc1, state.osc[0]);
-    gl.uniform1f(gl.osc2, state.osc[1]);
-    gl.uniform1f(gl.osc3, state.osc[2]);
-    gl.uniform1f(gl.osc4, state.osc[3]);
-    gl.uniform1f(gl.osc5, state.osc[4]);
-    gl.uniform1f(gl.osc6, state.osc[5]);
-    gl.uniform1f(gl.osc7, state.osc[6]);
-    gl.uniform1f(gl.osc8, state.osc[7]);
+    for (let i = 0; i < 16; i++) {
+      gl.uniform1f(gl.osc[i], state.osc[i]);
+    }
 
     gl.uniform1f(gl.time, (new Date().getTime() / 1000 - state.time0));
+    gl.uniform1f(gl.beat, state.beatMatcher.getPhase(60));
+
     gl.uniform2f(gl.mouse, state.mouse.x, state.mouse.y);
     gl.uniform2f(gl.resolution, this.props.width, this.props.height);
     gl.uniform4f(gl.audio, state.audio.low, state.audio.mid, state.audio.upper, state.audio.high);
@@ -307,7 +300,6 @@ export default React.createClass({
     Audio.removeCallback(this.state_.audioCallback);
   },
   render() {
-
     return (
       <canvas ref={(ref) => this.canvas = ref}
               className={"program"}
@@ -316,5 +308,3 @@ export default React.createClass({
     );
   }
 });
-
-// TODO: fix animation stop

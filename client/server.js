@@ -41,8 +41,8 @@ function runServer(entryPath, outputPath, publicPath, portNum) {
 
 function runOSC(udpPortNum, wsPortNum) {
   const udpPort = new osc.UDPPort({
-    // localAddress: "0.0.0.0",
-    localAddress: "127.0.0.1",
+    localAddress: "0.0.0.0",
+    // localAddress: "127.0.0.1",
     localPort: udpPortNum
   });
 

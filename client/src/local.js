@@ -10,6 +10,7 @@ void main() {
   gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
 }
 `;
+window.source = initialFsSource;
 
 const App = React.createClass({
   getInitialState: function() {
@@ -44,6 +45,7 @@ const App = React.createClass({
     wsConn.onmessage = (m) => {
       const obj =  JSON.parse(m.data);
       if (obj.tag === "Code") {
+        window.source = obj.contents;
         this.setState({
           fsSource: obj.contents,
           error: false,
