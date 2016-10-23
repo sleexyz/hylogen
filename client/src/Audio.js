@@ -97,7 +97,7 @@ export default {
       || navigator.mozGetUserMedia
       || navigator.msGetUserMedia;
 
-    navigator.getUserMedia({audio: true, video: {width : 600, height: 600}}, function(stream) {
+    navigator.getUserMedia({audio: true, video: {width : 1280, height: 720}}, function(stream) {
 
       video.src = window.URL.createObjectURL(stream);
       video.onloadedmetadata = function(e) {
