@@ -37,6 +37,7 @@ uniform vec2 resolution;
 uniform vec4 audio;
 uniform sampler2D backBuffer;
 uniform sampler2D channel1;
+uniform sampler2D channel2;
 varying vec2 uvN;
 vec2 uv()
 {
@@ -87,7 +88,9 @@ export default React.createClass({
       fb: [null, null],
       time0: new Date() / 1000,
       audioCallback: null,
-      beatMatcher: new BeatMatcher()
+      beatMatcher: new BeatMatcher(),
+      textures: [],
+      videoTexture: null
     };
 
     function setMouse (event) {
@@ -204,19 +207,25 @@ export default React.createClass({
     state.fb[0] = createTarget();
     state.fb[1] = createTarget();
 
-    state.textures = [];
+    //fixme: clean up
     function createTexture(image) {
       var texture = gl.createTexture();
       gl.bindTexture(gl.TEXTURE_2D, texture);
-
       gl.texParameteri( gl.TEXTURE_2D,  gl.TEXTURE_WRAP_S,  gl.CLAMP_TO_EDGE);
       gl.texParameteri( gl.TEXTURE_2D,  gl.TEXTURE_WRAP_T,  gl.CLAMP_TO_EDGE);
       gl.texParameteri( gl.TEXTURE_2D,  gl.TEXTURE_MIN_FILTER,  gl.NEAREST);
       gl.texParameteri( gl.TEXTURE_2D,  gl.TEXTURE_MAG_FILTER,  gl.NEAREST);
-
       gl.texImage2D( gl.TEXTURE_2D, 0,  gl.RGBA,  gl.RGBA,  gl.UNSIGNED_BYTE, image);
       state.textures.push(texture);
     }
+
+    state.videoTexture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, state.videoTexture);
+    gl.texParameteri( gl.TEXTURE_2D,  gl.TEXTURE_WRAP_S,  gl.CLAMP_TO_EDGE);
+    gl.texParameteri( gl.TEXTURE_2D,  gl.TEXTURE_WRAP_T,  gl.CLAMP_TO_EDGE);
+    gl.texParameteri( gl.TEXTURE_2D,  gl.TEXTURE_MIN_FILTER,  gl.NEAREST);
+    gl.texParameteri( gl.TEXTURE_2D,  gl.TEXTURE_MAG_FILTER,  gl.NEAREST);
+
 
     let img = new Image();
     img.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFQAAABpAgMAAADZ4ewhAAAADFBMVEVlLWcjHyD///9aukdNbQb8AAAAAXRSTlMAQObYZgAAAAFiS0dEAIgFHUgAAAAJcEhZcwAACxMAAAsTAQCanBgAAAAHdElNRQfgBBsTBjDG601/AAAAbUlEQVRIx2MIxQYYBoVo2Cp0MHXQiC5FcWvUIBJd//9q6P+/ofFAapCJDt4wWxpa/x/s3v//B53o4A2zwSo6WEuNQVvSQgEad1CIMmK41mFwiILprFXgRAilYOE78KKgnLBqJYwKHUSigzMHAADhlJM2vqJTOQAAAABJRU5ErkJggg==";
@@ -235,7 +244,8 @@ export default React.createClass({
     gl.resolution = gl.getUniformLocation(program, "resolution");
     gl.backBuffer = gl.getUniformLocation(program, "backBuffer");
 
-    gl.channel1= gl.getUniformLocation(program, "channel1");
+    gl.channel1 = gl.getUniformLocation(program, "channel1");
+    gl.channel2 = gl.getUniformLocation(program, "channel2");
 
     this.draw();
 
@@ -250,6 +260,14 @@ export default React.createClass({
     let gl = this.gl;
     let state = this.state_;
 
+    function updateTexture(videoTexture, videoElement) {
+      gl.bindTexture(gl.TEXTURE_2D, videoTexture);
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
+            gl.UNSIGNED_BYTE, videoElement);
+    }
+    updateTexture(state.videoTexture, Audio.video)
+
     for (let i = 0; i < 16; i++) {
       gl.uniform1f(gl.osc[i], state.osc[i]);
     }
@@ -261,11 +279,13 @@ export default React.createClass({
     gl.uniform2f(gl.resolution, this.props.width, this.props.height);
     gl.uniform4f(gl.audio, state.audio.low, state.audio.mid, state.audio.upper, state.audio.high);
 
-    for (let i = 1; i < state.textures.length + 1;i ++) {
-      gl.uniform1i(gl.channel1, i);
-      gl.activeTexture(gl.TEXTURE0 + i);
-      gl.bindTexture(gl.TEXTURE_2D, state.textures[i - 1]);
-    }
+    gl.uniform1i(gl.channel1, 1);
+    gl.activeTexture(gl.TEXTURE0 + 1);
+    gl.bindTexture(gl.TEXTURE_2D, state.textures[0]);
+
+    gl.uniform1i(gl.channel2, 2);
+    gl.activeTexture(gl.TEXTURE0 + 2);
+    gl.bindTexture(gl.TEXTURE_2D, state.videoTexture);
 
     gl.uniform1i(gl.backBuffer, 0); // Do I need to check for null?
     gl.activeTexture(gl.TEXTURE0);

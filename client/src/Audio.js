@@ -23,7 +23,15 @@ let cleanup = function() {
   // console.log("Nothing to clean up!");
 };
 
-function onAccept () {
+const video = document.createElement("video");
+// video.src = "./Firefox.ogv";
+// video.preload = true;
+// video.loop = true;
+
+window.video = video;
+
+
+function onAcceptAudio () {
   source.connect(analyser);
 
   function toAudio() {
@@ -89,9 +97,17 @@ export default {
       || navigator.mozGetUserMedia
       || navigator.msGetUserMedia;
 
-    navigator.getUserMedia({audio: true}, function(stream) {
+    navigator.getUserMedia({audio: true, video: {width : 600, height: 600}}, function(stream) {
+
+      video.src = window.URL.createObjectURL(stream);
+      video.onloadedmetadata = function(e) {
+        console.log('playing video!!');
+        video.play();
+      };
+      // video.play();
+
       source = audioCtx.createMediaStreamSource(stream);
-      onAccept();
+      onAcceptAudio();
     }, (e) => {console.error(e);});
     cleanup = function() {
       keepPlaying = false;
@@ -120,7 +136,7 @@ export default {
 
     source = audioCtx.createMediaElementSource(scPlayer.audio);
     source.connect(audioCtx.destination);
-    onAccept();
+    onAcceptAudio();
 
     cleanup = function() {
       keepPlaying = false;
@@ -137,7 +153,8 @@ export default {
   },
   removeCallback: function(i) {
     callbacks[i] = null;
-  }
+  },
+  video: video
 };
 
 

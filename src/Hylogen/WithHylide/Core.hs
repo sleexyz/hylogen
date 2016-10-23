@@ -62,6 +62,9 @@ backBuffer = uniform "backBuffer"
 channel1 :: Texture
 channel1 = uniform "channel1"
 
+channel2 :: Texture
+channel2 = uniform "channel2"
+
 
 osc0 :: Vec1
 osc0 = uniform "osc0"
