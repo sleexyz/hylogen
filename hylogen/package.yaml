@@ -1,0 +1,18 @@
+name: hylogen
+version: 0.2.0.0
+synopsis: GLSL embedded in Haskell
+description: GLSL embedded in Haskell
+homepage: https://github.com/sleexyz/hylogen
+author: Sean Lee
+license: MIT
+license: LICENSE
+maintainer: freshdried@gmail.com
+category: Graphics
+
+dependencies:
+  - base >=4.8 && < 5
+  - vector-space
+  - data-reify
+
+library:
+  source-dirs: src

@@ -4,3 +4,4 @@ TAGS
 src/*.hs
 shader.glsl
 core
+**/*.cabal

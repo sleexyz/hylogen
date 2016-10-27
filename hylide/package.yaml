@@ -1,0 +1,50 @@
+name: hylide
+version: '0.2.0.0'
+synopsis: WebGL renderer for livecoding shaders with Hylogen
+description: WebGL renderer for livecoding shaders with Hylogen
+category: Graphics
+author: Sean Lee
+maintainer: freshdried@gmail.com
+license: MIT
+homepage: https://github.com/sleexyz/hylide
+stability: experimental
+extra-source-files:
+  - README.md
+
+data-files:
+  - client/dist-local/index.html
+  - client/dist-local/bundle.js
+
+dependencies:
+  - hylogen == 0.2.*
+
+library:
+  source-dirs: src
+  exposed-modules:
+    - Hylogen.WithHylide
+    - Hylogen.WithHylide.Core
+    - Hylogen.WithHylide.Util
+  dependencies:
+    - base >=4.8 && <5
+    - vector-space
+
+executables:
+  hylide:
+    main: Main.hs
+    source-dirs: app
+    other-extensions:
+      - OverloadedStrings
+    dependencies:
+      - base
+      - bytestring
+      - filepath
+      - fsnotify
+      - process
+      - text
+      - websockets
+      - aeson
+      - hint
+      - hylide
+      - wai
+      - http-types
+      - warp
