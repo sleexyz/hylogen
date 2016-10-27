@@ -1,5 +1,5 @@
 build:
-	(cd client; npm run build)
+	(cd client; yarn; yarn build)
 	stack build
 
 install:
