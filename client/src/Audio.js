@@ -19,16 +19,12 @@ let scPlayer = null;
 let keepPlaying = true;
 let mode = null;
 
-let cleanup = function() {
-  // console.log("Nothing to clean up!");
-};
+let cleanup = function() {};
 
 const video = document.createElement("video");
-// video.src = "./Firefox.ogv";
-// video.preload = true;
-// video.loop = true;
-
 window.video = video;
+video.muted = true;
+video.playing = false;
 
 
 function onAcceptAudio () {
@@ -101,10 +97,9 @@ export default {
 
       video.src = window.URL.createObjectURL(stream);
       video.onloadedmetadata = function(e) {
-        console.log('playing video!!');
         video.play();
+        video.playing = true;
       };
-      // video.play();
 
       source = audioCtx.createMediaStreamSource(stream);
       onAcceptAudio();
@@ -156,6 +151,3 @@ export default {
   },
   video: video
 };
-
-
-

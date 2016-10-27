@@ -219,17 +219,21 @@ export default React.createClass({
       state.textures.push(texture);
     }
 
+
+    let img = new Image();
+    img.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFQAAABpAgMAAADZ4ewhAAAADFBMVEVlLWcjHyD///9aukdNbQb8AAAAAXRSTlMAQObYZgAAAAFiS0dEAIgFHUgAAAAJcEhZcwAACxMAAAsTAQCanBgAAAAHdElNRQfgBBsTBjDG601/AAAAbUlEQVRIx2MIxQYYBoVo2Cp0MHXQiC5FcWvUIBJd//9q6P+/ofFAapCJDt4wWxpa/x/s3v//B53o4A2zwSo6WEuNQVvSQgEad1CIMmK41mFwiILprFXgRAilYOE78KKgnLBqJYwKHUSigzMHAADhlJM2vqJTOQAAAABJRU5ErkJggg==";
+    createTexture(img);
+
+    let black = new Image()
+    black.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=";
+
     state.videoTexture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, state.videoTexture);
     gl.texParameteri( gl.TEXTURE_2D,  gl.TEXTURE_WRAP_S,  gl.CLAMP_TO_EDGE);
     gl.texParameteri( gl.TEXTURE_2D,  gl.TEXTURE_WRAP_T,  gl.CLAMP_TO_EDGE);
     gl.texParameteri( gl.TEXTURE_2D,  gl.TEXTURE_MIN_FILTER,  gl.NEAREST);
     gl.texParameteri( gl.TEXTURE_2D,  gl.TEXTURE_MAG_FILTER,  gl.NEAREST);
-
-
-    let img = new Image();
-    img.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFQAAABpAgMAAADZ4ewhAAAADFBMVEVlLWcjHyD///9aukdNbQb8AAAAAXRSTlMAQObYZgAAAAFiS0dEAIgFHUgAAAAJcEhZcwAACxMAAAsTAQCanBgAAAAHdElNRQfgBBsTBjDG601/AAAAbUlEQVRIx2MIxQYYBoVo2Cp0MHXQiC5FcWvUIBJd//9q6P+/ofFAapCJDt4wWxpa/x/s3v//B53o4A2zwSo6WEuNQVvSQgEad1CIMmK41mFwiILprFXgRAilYOE78KKgnLBqJYwKHUSigzMHAADhlJM2vqJTOQAAAABJRU5ErkJggg==";
-    createTexture(img);
+    gl.texImage2D( gl.TEXTURE_2D, 0,  gl.RGBA,  gl.RGBA,  gl.UNSIGNED_BYTE, black);
 
     // remember the address within the fragment shader of each of my uniforms variables
     gl.osc = [];
@@ -266,7 +270,9 @@ export default React.createClass({
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
             gl.UNSIGNED_BYTE, videoElement);
     }
-    updateTexture(state.videoTexture, Audio.video)
+    if (Audio.video.playing) {
+      updateTexture(state.videoTexture, Audio.video)
+    }
 
     for (let i = 0; i < 16; i++) {
       gl.uniform1f(gl.osc[i], state.osc[i]);

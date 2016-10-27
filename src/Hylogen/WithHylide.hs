@@ -1,8 +1,4 @@
-{-|
-Exports a standard Hylogen environment with use with Hylide.
-
--}
-
+-- | Exports a standard Hylogen environment with use with Hylide.
 module Hylogen.WithHylide ( module Hylogen.WithHylide.Util
                           , module Hylogen.WithHylide.Core
                           , module Hylogen
@@ -16,9 +12,3 @@ import           Hylogen
 
 import           Data.Function
 import           Data.VectorSpace
-
--- | Analog of @<$>@, but for @&@
-infixl 5 <&>
-(<&>) :: (Functor f) => f a -> (a -> b) -> f b
-(<&>) = flip fmap
-

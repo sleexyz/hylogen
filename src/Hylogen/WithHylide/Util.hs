@@ -1,4 +1,3 @@
-
 module Hylogen.WithHylide.Util where
 
 import Hylogen
@@ -11,9 +10,6 @@ import Hylogen.Expr
 -- @
 setAlpha :: Vec1 -> Vec4 -> Vec4
 setAlpha alpha v = vec4 (xyz_ v, alpha)
-
--- TODO: hsl
-
 
 -- | Linear to exponential map
 --
