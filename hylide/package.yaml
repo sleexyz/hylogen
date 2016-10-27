@@ -1,12 +1,12 @@
 name: hylide
-version: '0.2.0.0'
-synopsis: WebGL renderer for livecoding shaders with Hylogen
-description: WebGL renderer for livecoding shaders with Hylogen
+version: '0.1.5.0'
+synopsis: WebGL live-coding environment for writing shaders with Hylogen
+description: WebGL live-coding environment for writing shaders with Hylogen
 category: Graphics
 author: Sean Lee
 maintainer: freshdried@gmail.com
 license: MIT
-homepage: https://github.com/sleexyz/hylide
+homepage: https://github.com/sleexyz/hylogen
 stability: experimental
 extra-source-files:
   - README.md
@@ -16,7 +16,7 @@ data-files:
   - client/dist-local/bundle.js
 
 dependencies:
-  - hylogen == 0.2.*
+  - hylogen == 0.1.5.*
 
 library:
   source-dirs: src

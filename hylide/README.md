@@ -1,13 +1,12 @@
-# *H Y L I D E* [![Hackage Status](https://img.shields.io/hackage/v/hylide.svg)](https://hackage.haskell.org/package/hylide) [![Join the chat at https://gitter.im/sleexyz/hylogen](https://badges.gitter.im/sleexyz/hylogen.svg)](https://gitter.im/sleexyz/hylogen?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+<p align="center">
+  <img src="https://thumbs.gfycat.com/SoftAdeptAlaskajingle-size_restricted.gif"></img>
+</p>
 
-WebGL rendering environment for livecoding shaders with [Hylogen](https://github.com/sleexyz/hylogen).
+![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
 
-![](https://thumbs.gfycat.com/SoftAdeptAlaskajingle-size_restricted.gif)
+<h1 align="center"><i>H Y L I D E</i></h1>
+<p align="center">A live coding enviroment for writing shaders with Hylogen.</p>
 
+![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
 
-## Install
-```
-cabal update && cabal install hylogen hylide
-```
-## Usage
-[See Hylogen README](https://github.com/sleexyz/hylogen)
+![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)

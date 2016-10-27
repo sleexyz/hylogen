@@ -1,5 +1,5 @@
 name: hylogen
-version: 0.2.0.0
+version: 0.1.5.0
 synopsis: GLSL embedded in Haskell
 description: GLSL embedded in Haskell
 homepage: https://github.com/sleexyz/hylogen
@@ -8,6 +8,8 @@ license: MIT
 license: LICENSE
 maintainer: freshdried@gmail.com
 category: Graphics
+extra-source-files:
+  - ../README.md
 
 dependencies:
   - base >=4.8 && < 5
