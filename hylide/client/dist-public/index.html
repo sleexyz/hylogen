@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>HYLOGEN - a Haskell EDSL for live-coding fragment shaders</title>
+    <style>
+     html, body {
+         width: 100%;
+         height: 100%;
+         margin: 0;
+         padding: 0;
+         overflow-x: hidden;
+         font-family: "Lucida Sans Typewriter", "Lucida Sans", "Andale Mono", AndaleMono, monospace;
+         font-size: 12px;
+     }
+     #entry {
+         position: relative;
+     }
+     .programContainer {
+         position: fixed;
+         top: 0;
+         left: 0;
+         height: 100vh;
+         overflow:hidden;
+         display: flex;
+         justify-content: center;
+         align-items: center;
+         z-index: -1;
+     }
+     #back {
+         position: fixed;
+         left: 0;
+     }
+     .inputPicker {
+         color: rgba(255, 255, 255, 0.5);
+         width:20vw;
+         margin: 1em;
+     }
+     .audioControls {
+         position: fixed;
+         display: flex;
+         bottom: 0;
+         left: 0;
+         z-index: 10;
+         color: rgba(255, 255, 255, 0.7);
+         background: linear-gradient(to bottom, rgba(0, 0, 0, 0),rgba(0, 0, 0, 0.8));
+         width: 100vw;
+         padding-top: 1em;
+         height: auto;
+         pointer-events: all;
+         /* mix-blend-mode: screen; */
+     }
+     input {
+         font-family: inherit;
+         background: rgba(255, 255, 255, 0.1);
+         padding: 0 0.5em;
+         border: none;
+         border-radius: 0.25em;
+         color: rgba(255, 255, 255, 0.5);
+     }
+     input:hover {
+         background: rgba(255, 255, 255, 0.3);
+     }
+     input[type="radio"] {
+         opacity: 0.5;
+     }
+     button {
+         border-radius: 0.25em;
+         font-family: inherit;
+         background: none;
+         border: none;
+         margin-right: 1em;
+         color: rgba(255, 255, 255, 0.7);
+         background: rgba(255, 136, 238, 0.3);
+     }
+     button:hover {
+         background: rgba(255, 136, 238, 0.7);
+     }
+     .scPlayer {
+         width: 60vw;
+         margin: 1em;
+     }
+     .row {
+         display: flex;
+         margin-top: 0.5em;
+         justify-content: center;
+         align-items: center;
+     }
+     .programContainerInner {
+         display: flex;
+         justify-content: center;
+         align-items: center;
+         z-index: -1;
+     }
+     .program {
+         width: 100vmax;
+         height: 100vmax;
+     }
+
+     #banner {
+         position: absolute;
+         background: none;
+         pointer-events: none;
+         width: 100%;
+         height: 100vh;
+         color: white;
+         display: flex;
+         justify-content: center;
+         align-items: center;
+         margin: 0;
+         padding: 0;
+         pointer-events: none;
+         z-index: 0;
+     }
+     .chooserNextButton {
+         position: fixed;
+         z-index: 20;
+         bottom: 2em;
+         right: 0;
+         color: rgba(255, 255, 255, 0.7);
+     }
+
+     #title {
+         text-transform: uppercase;
+         font-style: italic;
+         font-weight: bold;
+         font-size: 15vw;
+         letter-spacing: 0.1em;
+         text-shadow: 0 0 0.2em white;
+         color: white;
+         font-family: arial;
+     }
+     .text {
+         width: 100%;
+         height: auto;
+         padding: 5vw;
+         font-size: 30px;
+         word-wrap: normal;
+         color: black;
+         /* text-transform: uppercase; */
+         color: #333333;
+         line-height: 1.5em;
+         background: rgba(255, 255, 255, 0.9);
+         letter-spacing: 0.01em;
+     }
+     .sb-soundplayer-progress-container {
+         border-radius: 0.25em;
+         background-color: rgba(255, 255, 255, 0.2);
+         width: 100%;
+         height: 10px;
+         overflow: hidden;
+         cursor: pointer;
+     }
+
+     .sb-soundplayer-progress-inner {
+         background-color: #ff88ee;
+         height: 100%;
+         -webkit-transition: width .2s ease-in;
+                 transition: width .2s ease-in;
+     }
+
+     .text p, .text ul {
+         width: 80vw;
+     }
+     .text li {
+         margin-bottom: 1em;
+     }
+     .cool {
+         color: #888888;
+     }
+     .right {
+         text-align: right;
+         width: 100%;
+     }
+     a {
+         text-decoration: none;
+         color: inherit;
+         color: #888888;
+     }
+     .page {
+         width: 100%;
+         height: 50vh;
+         margin: 0;
+         display: flex;
+         justify-content: center;
+         align-items: center;
+         background: white;
+     }
+     .trans {
+         pointer-events: none;
+         background: none;
+     }
+     .grad {
+         background: linear-gradient(to bottom, rgba(0, 0, 0, 0),rgba(255, 255, 255, 0.9));
+     }
+     .gradRev {
+         background: linear-gradient(to top, rgba(0, 0, 0, 0),rgba(255, 255, 255, 0.9));
+     }
+    </style>
+    <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-76725311-1', 'auto');
+  ga('send', 'pageview');
+    </script>
+  </head>
+  <body>
+    <div id="entry"></div>
+    <script type="text/javascript">
+      osc = null;
+    </script>
+    <script src="./bundle.js"></script>
+
+  </body>
+</html>
