@@ -41,7 +41,6 @@ main' :: FilePath ->  IO ()
 main' pathToWatch = do
   tid1 <- forkIO serveIndex
   tid2 <- forkIO $ serveGLSL pathToWatch
-  putStrLn "Press enter to exit."
   putStrLn $ "Serving on port " ++ show port ++ ". Press enter to exit."
   void getLine
   killThread tid1
