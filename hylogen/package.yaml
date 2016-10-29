@@ -8,7 +8,7 @@ license: MIT
 maintainer: freshdried@gmail.com
 category: Graphics
 extra-source-files:
-  - ../README.md
+  - README.md
 
 dependencies:
   - base >=4.8 && < 5

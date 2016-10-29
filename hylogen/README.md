@@ -3,10 +3,8 @@
 </p>
 
 ![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
-
-<h1 align="center"><i>H Y L I D E</i></h1>
-<p align="center">A live coding enviroment for writing shaders with Hylogen.</p>
-
+<h1 align="center"><i>H Y L O G E N</i></h1>
+<p align="center">An embedding of GLSL in Haskell.</p>
 ![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
 
 ---

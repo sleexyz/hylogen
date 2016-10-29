@@ -10,7 +10,7 @@ category:       Graphics
 homepage:       https://github.com/sleexyz/hylogen
 author:         Sean Lee
 maintainer:     freshdried@gmail.com
-license:        LICENSE
+license:        MIT
 build-type:     Simple
 cabal-version:  >= 1.10
 
