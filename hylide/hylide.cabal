@@ -6,7 +6,7 @@ name:                hylide
 version:             0.1.5.0
 synopsis:            WebGL live-coding environment for writing shaders with Hylogen
 description:         WebGL live-coding environment for writing shaders with Hylogen
-homepage:            https://github.com/sleexyz/hylide
+homepage:            https://github.com/sleexyz/hylogen
 author:              Sean Lee
 license:             MIT
 maintainer:          freshdried@gmail.com
