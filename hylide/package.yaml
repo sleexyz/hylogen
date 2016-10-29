@@ -16,7 +16,7 @@ data-files:
   - client/dist-local/bundle.js
 
 dependencies:
-  - hylogen == 0.1.5.*
+  - hylogen == 0.2.*
 
 library:
   source-dirs: src
