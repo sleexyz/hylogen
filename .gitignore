@@ -5,3 +5,5 @@ src/*.hs
 shader.glsl
 core
 **/*.cabal
+**/src/highlight.js
+**/src/style.css

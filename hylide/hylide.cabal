@@ -3,7 +3,7 @@
 -- see: https://github.com/sol/hpack
 
 name:                hylide
-version:             0.1.5.0
+version:             0.1.5.1
 synopsis:            WebGL live-coding environment for writing shaders with Hylogen
 description:         WebGL live-coding environment for writing shaders with Hylogen
 homepage:            https://github.com/sleexyz/hylogen

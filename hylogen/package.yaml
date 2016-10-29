@@ -1,5 +1,5 @@
 name: hylogen
-version: 0.1.5.1
+version: 0.2.0.0
 synopsis: GLSL embedded in Haskell
 description: GLSL embedded in Haskell
 homepage: https://github.com/sleexyz/hylogen
