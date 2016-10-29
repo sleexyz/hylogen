@@ -1,1 +1,0 @@
-stack upload . && genhaddock sleexyz

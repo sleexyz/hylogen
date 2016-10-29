@@ -1,39 +1,32 @@
-# *H Y L O G E N*  [![Hackage Status](https://img.shields.io/hackage/v/hylogen.svg)](https://hackage.haskell.org/package/hylogen) [![Join the chat at https://gitter.im/sleexyz/hylogen](https://badges.gitter.im/sleexyz/hylogen.svg)](https://gitter.im/sleexyz/hylogen?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
-
-![](https://thumbs.gfycat.com/SoftAdeptAlaskajingle-size_restricted.gif)
-
-Hylogen is a purely functional shader language embedded in Haskell that compiles to GLSL. It functions as a powerful alternative to raw GLSL by leveraging many features of Haskell, including:
-
-**Type inference** - Write concise code by using Haskell's type inference
-
-- GLSL:      `vec4 foo = vec4(3.0);`
-- Hylogen:   `foo = 3`
-
-
-**Higher-order functions** - Use your standard Haskell goodies: `map`, `foldl`/`foldr`, `$`, `.`,[ `&`](https://hackage.haskell.org/package/base-4.9.0.0/docs/Data-Function.html#v:-38-), etc.
-
-**Modules** - Split up complex shaders into multiple modules. Write libraries or import others'.
+<p align="center">
+  <img src="https://thumbs.gfycat.com/SoftAdeptAlaskajingle-size_restricted.gif"></img>
+</p>
 
 ![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
+<h1 align="center"><i>H Y L O G E N</i></h1>
+<p align="center">An embedding of GLSL in Haskell.</p>
+![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
 
-[**Hylide**](https://github.com/sleexyz/hylide) is a WebGL renderer designed for livecoding shaders with Hylogen, featuring hot-reloading, audio-reactivity and texture backbuffering. However, Hylogen is a general purpose shader language; it can be used anywhere GLSL is used.
+![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
+<h1 align="center"><i>H Y L I D E</i></h1>
+<p align="center">A live coding environment for writing shaders with Hylogen.</p>
+![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
 
 ![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
 
 ---
+
 ![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
 
+* **Demo Reel:** [hylogen.com](https://hylogen.com)
+* **Hylogen** -  [![Hackage Status](https://img.shields.io/hackage/v/hylogen.svg)](https://hackage.haskell.org/package/hylogen)
+* **Hylide** -  [![Hackage Status](https://img.shields.io/hackage/v/hylide.svg)](https://hackage.haskell.org/package/hylide)
 
-[**Demo Reel**](https://hylogen.com)
-
-[Changelog](https://github.com/sleexyz/hylogen/CHANGELOG.md) - **NEW:** Hylogen/Hylide split in Hylogen 0.1.4
-
-Hylogen is in alpha! Feature requests, questions, and discussion welcome on [github issues](https://github.com/sleexyz/hylogen/issues)
 
 ![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
 
 ---
+
 ![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
 
 
@@ -99,7 +92,7 @@ void main() {
 }
 ```
 
-Hylide will recompile on changes to the Haskell source, sending generated GLSL to the WebGL client via websockets.
+Hylide will recompile on changes to the Haskell source, sending generated GLSL to the WebGL client over websockets.
 
 
 
@@ -107,15 +100,8 @@ Hylide will recompile on changes to the Haskell source, sending generated GLSL t
 ![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
 
 ## References
-- [The_Force](https://github.com/shawnlawson/The_Force) by Shawn Lawson. Initial inspiration for Hylogen/Hylide. Live-coding of audio-reactive shaders!
-- [data-reify](https://hackage.haskell.org/package/data-reify) by Andy Gill, to keep intermediate AST representations from exploding by preserving the GHC heap's internal sharing
-
-## Links
-- [Demo reel](https://hylogen.com)
-- [Examples](https://github.com/sleexyz/hylogen-yay)
-- [Hackage](https://hackage.haskell.org/package/hylogen)
-- [Hylide](https://github.com/sleexyz/hylide)
-
+- [The_Force](https://github.com/shawnlawson/The_Force) by Shawn Lawson. This was the initial inspiration for Hylide.
+- [data-reify](https://hackage.haskell.org/package/data-reify) for type-safe observable sharing.
 
 ![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
 
