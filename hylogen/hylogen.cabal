@@ -15,7 +15,7 @@ build-type:     Simple
 cabal-version:  >= 1.10
 
 extra-source-files:
-    ../README.md
+    README.md
 
 library
   hs-source-dirs:
