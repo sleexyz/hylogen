@@ -38,7 +38,9 @@
 ![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
 
 ## Example
-Here's a simple Hylogen shader to be used with Hylide, saved as `Example.hs`:
+
+Here's a simple Hylogen shader to be used with Hylide, saved as `Example.hs`
+(available in the `examples/` directory):
 
 ```haskell
 
@@ -61,7 +63,7 @@ color = vec4 (a, a, a, 1)
 Run Hylide:
 
 ```
-$ hylide Example.hs
+$ stack exec hylide Example.hs
 ```
 
 Now go to [localhost:5678](http://localhost:5678) in your browser. You'll see a live rendering of the corresponding generated GLSL:
