@@ -5,11 +5,14 @@
 ![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
 <h1 align="center"><i>H Y L O G E N</i></h1>
 <p align="center">An embedding of GLSL in Haskell.</p>
+
 ![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
 
 ![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
+
 <h1 align="center"><i>H Y L I D E</i></h1>
 <p align="center">A live coding environment for writing shaders with Hylogen.</p>
+
 ![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
 
 ![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
@@ -32,8 +35,16 @@
 
 
 ## Install
+
+Using the [Haskell Platform](https://www.haskell.org/platform/):
+
 1. Install the [Haskell Platform](https://www.haskell.org/platform/)
 2. `cabal update && cabal install hylogen hylide`
+
+Alternatively, [stack](https://docs.haskellstack.org/en/stable/README/) can be used to build and install:
+
+1. Install [stack](https://docs.haskellstack.org/en/stable/README/)
+2. `stack install`
 
 ![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
 
@@ -63,8 +74,15 @@ color = vec4 (a, a, a, 1)
 Run Hylide:
 
 ```
+$ hylide Example.hs
+```
+
+If Hylide was built with stack, hylide needs to be run using `stack exec` (otherwise the Hylide modules will fail to load):
+
+```
 $ stack exec hylide Example.hs
 ```
+
 
 Now go to [localhost:5678](http://localhost:5678) in your browser. You'll see a live rendering of the corresponding generated GLSL:
 
