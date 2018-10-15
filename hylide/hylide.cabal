@@ -1,9 +1,11 @@
--- This file has been generated from package.yaml by hpack version 0.14.1.
+-- This file has been generated from package.yaml by hpack version 0.28.2.
 --
 -- see: https://github.com/sol/hpack
+--
+-- hash: 58d30bd6de0f0b86ca3f2ec9a01d76814fa651db7a5ac6bc52c8c7e05e7becf7
 
 name:                hylide
-version:             0.1.5.0
+version:             0.1.5.1
 synopsis:            WebGL live-coding environment for writing shaders with Hylogen
 description:         WebGL live-coding environment for writing shaders with Hylogen
 homepage:            https://github.com/sleexyz/hylogen
@@ -14,10 +16,8 @@ category:            Graphics
 build-type:          Simple
 cabal-version:       >= 1.10
 stability:           experimental
-
 extra-source-files:
     README.md
-
 data-files:
     client/dist-local/bundle.js
     client/dist-local/index.html
@@ -30,8 +30,8 @@ library
   other-modules:
       Paths_hylide
   build-depends:
-      hylogen == 0.1.5.*
-    , base >=4.8 && <5
+      base >=4.8 && <5
+    , hylogen ==0.1.5.*
     , vector-space
   hs-source-dirs:
       src
@@ -39,22 +39,24 @@ library
 
 executable hylide
   main-is: Main.hs
+  other-modules:
+      Paths_hylide
   other-extensions: OverloadedStrings
   build-depends:
-      hylogen == 0.1.5.*
+      aeson
     , base
     , bytestring
     , filepath
     , fsnotify
+    , hint
+    , http-types
+    , hylide
+    , hylogen ==0.1.5.*
     , process
     , text
-    , websockets
-    , aeson
-    , hint
-    , hylide
     , wai
-    , http-types
     , warp
+    , websockets
   hs-source-dirs:
       app
   default-language: Haskell2010

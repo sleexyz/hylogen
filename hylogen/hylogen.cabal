@@ -1,9 +1,11 @@
--- This file has been generated from package.yaml by hpack version 0.14.1.
+-- This file has been generated from package.yaml by hpack version 0.28.2.
 --
 -- see: https://github.com/sol/hpack
+--
+-- hash: c73e67718fed614dd2b7acdcc59eae74f0e61bdb48343249f4c53ca2e50bb720
 
 name:           hylogen
-version:        0.1.5.0
+version:        0.1.5.1
 synopsis:       GLSL embedded in Haskell
 description:    GLSL embedded in Haskell
 category:       Graphics
@@ -13,7 +15,6 @@ maintainer:     freshdried@gmail.com
 license:        MIT
 build-type:     Simple
 cabal-version:  >= 1.10
-
 extra-source-files:
     README.md
 
@@ -21,9 +22,9 @@ library
   hs-source-dirs:
       src
   build-depends:
-      base >=4.8 && < 5
-    , vector-space
+      base >=4.8 && <5
     , data-reify
+    , vector-space
   exposed-modules:
       Hylogen
       Hylogen.Expr
@@ -33,4 +34,6 @@ library
       Hylogen.Types.Booly
       Hylogen.Types.Texture
       Hylogen.Types.Vec
+  other-modules:
+      Paths_hylogen
   default-language: Haskell2010
