@@ -32,15 +32,21 @@
 
 ## Install
 
-Using the [Haskell Platform](https://www.haskell.org/platform/):
+Build from source, using [Stack](https://docs.haskellstack.org/en/stable/README/):
+
+1. Install [stack](https://docs.haskellstack.org/en/stable/README/)
+2. `git clone https://github.com/sleexyz/hylogen.git`
+3. `cd hylogen`
+4. `stack build`
+
+
+This is the recommended method of using Hylogen, because using Stack you can share your projects and be confident that others will be using the same version of Hylogen as you. To install it to your system so it can be used anywhere, not just inside the `hylogen` folder, use `stack install` instead of `stack build`.
+
+Hylogen can also be installed to your system using the [Haskell Platform](https://www.haskell.org/platform/):
 
 1. Install the [Haskell Platform](https://www.haskell.org/platform/)
 2. `cabal update && cabal install hylogen hylide`
 
-Alternatively, [stack](https://docs.haskellstack.org/en/stable/README/) can be used to build and install:
-
-1. Install [stack](https://docs.haskellstack.org/en/stable/README/)
-2. `stack install`
 
 ![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
 
@@ -70,14 +76,17 @@ color = vec4 (a, a, a, 1)
 Run Hylide:
 
 ```
+$ stack exec hylide Example.hs
+```
+
+If Hylide was installed using the haskell platform, you can omit `stack exec`:
+
+```
 $ hylide Example.hs
 ```
 
-If Hylide was built with stack, hylide needs to be run using `stack exec` (otherwise the Hylide modules will fail to load):
 
-```
-$ stack exec hylide Example.hs
-```
+
 
 
 Now go to [localhost:5678](http://localhost:5678) in your browser. You'll see a live rendering of the corresponding generated GLSL:
