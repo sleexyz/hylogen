@@ -68,7 +68,7 @@ handleConnection pathToWatch mgr pending = do
 
    let onChange e = do
          case e of
-           Modified _ _ -> update
+           Modified _ _ _ -> update
            _ -> return ()
    update
    _ <- watchDir mgr dirToWatch (const True) onChange
