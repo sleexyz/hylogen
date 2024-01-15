@@ -19,6 +19,7 @@ const SC = React.createClass({
     /* console.log(localStorage.getItem("scurl")); */
     let defaulturl = localStorage.getItem("scurl")
                   || "https://soundcloud.com/tennysonmusic/xyz"
+                  || "https://soundcloud.com/wearesilkenwood/klypht-spiraling-chasm"
                   || "https://soundcloud.com/tennysonmusic/angus-julia-stone-for-you"
                   || "https://soundcloud.com/herzeloyde/deception"
                   || "https://soundcloud.com/aslamin/strannoe-chuvstvo";
@@ -35,15 +36,13 @@ const SC = React.createClass({
         await Audio.initializeAudioSoundCloud(this.state.url, this.props.initPlaying);
         Audio.scPlayer.play();
         // Hack to get around some weirdness with the soundcloud player:
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 2000));
         Audio.scPlayer.pause();
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 2000));
         this.setState({ loading: false });
     }
-    console.log("playing");
     this.startUpdating();
     Audio.scPlayer.play();
-    console.log(Audio.scPlayer);
   },
   stopPlaying() {
     /* console.log("clearing ", this.intervalId); */
@@ -151,7 +150,7 @@ export default React.createClass({
   onChange(e) {
     this.setState({
       state: e.currentTarget.value,
-      initPlaying: true
+      initPlaying: false
     });
   },
   render() {
@@ -163,7 +162,8 @@ export default React.createClass({
 
     return (
       <div className="audioControls">
-        <div className="inputPicker">
+        <div className="inputPicker"></div>
+        {/* <div className="inputPicker">
           <br/>
           sc : <input type="radio"
                  checked={this.state.state === "sc"}
@@ -174,7 +174,7 @@ export default React.createClass({
                  checked={this.state.state === "usermedia"}
                  value="usermedia"
                  onChange={this.onChange}/>
-        </div>
+        </div> */}
         {component}
       </div>
     );
