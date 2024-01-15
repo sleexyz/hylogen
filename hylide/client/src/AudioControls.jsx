@@ -38,11 +38,10 @@ const SC = React.createClass({
     this.scPlayer.pause();
   },
   componentWillMount() {
-    /* console.log(this.props.initPlaying); */
-    Audio.initializeAudioSoundCloud(this.state.url, this.props.initPlaying);
-    /* console.log(this.state.url);
-       console.log(Audio.scPlayer); */
-    this.scPlayer = Audio.scPlayer;
+    (async () => {
+      await Audio.initializeAudioSoundCloud(this.state.url, this.props.initPlaying);
+      this.scPlayer = Audio.scPlayer;
+    })()
   },
   componentDidMount() {
     if (this.props.initPlaying) {

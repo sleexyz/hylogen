@@ -109,12 +109,16 @@ export default {
       source.disconnect(analyser);
     };
   },
-  initializeAudioSoundCloud: function(url, initPlaying) {
+  initializeAudioSoundCloud: async function(url, initPlaying) {
     mode = "sc";
     cleanup();
     keepPlaying = true;
 
-    let scPlayer = this.scPlayer = new SoundCloudAudio("4c869ec7222590da0f39838b2cd86740");
+    const {accessToken} = await(await fetch("https://sleexyz-sc_access_token.web.val.run/")).json();
+    console.log(accessToken);
+
+
+    let scPlayer = this.scPlayer = new SoundCloudAudio(accessToken);
     scPlayer.audio.crossOrigin = "anonymous";
 
     scPlayer.resolve(url, function(track) {
