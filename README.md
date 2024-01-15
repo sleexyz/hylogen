@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://thumbs.gfycat.com/SoftAdeptAlaskajingle-size_restricted.gif"></img>
+  <img src="./docs/demo.gif"></img>
 </p>
 
 ![](data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==)
