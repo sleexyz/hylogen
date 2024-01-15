@@ -4,11 +4,9 @@ var path = require("path");
 module.exports = function (entryPath, outputPath, publicPath, isProd) {
   var entry =  isProd
         ? [
-          "babel-polyfill",
           entryPath,
         ]
         : [
-          "babel-polyfill",
           "webpack-hot-middleware/client?reload=true",
           entryPath
         ];
@@ -36,9 +34,6 @@ module.exports = function (entryPath, outputPath, publicPath, isProd) {
           test: /\.jsx?$/,
           exclude: /(node_modules|bower_components)/,
           loader: 'babel-loader',
-          query: {
-            presets: ['env']
-          }
         }
       ]
     },

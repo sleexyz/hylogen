@@ -106,8 +106,8 @@ export default {
     }, (e) => {console.error(e);});
     cleanup = function() {
       keepPlaying = false;
-      source.disconnect(analyser);
-    };
+              source.disconnect(analyser);
+          };
   },
   initializeAudioSoundCloud: async function(url, initPlaying) {
     mode = "sc";

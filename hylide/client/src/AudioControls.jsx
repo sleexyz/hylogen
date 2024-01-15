@@ -23,25 +23,32 @@ const SC = React.createClass({
                   || "https://soundcloud.com/herzeloyde/deception"
                   || "https://soundcloud.com/aslamin/strannoe-chuvstvo";
     return {
+      loading: false,
       playing: this.props.initPlaying,
       val: 0,
       url: defaulturl
     };
   },
-  startPlaying() {
+  async startPlaying() {
+    if (!Audio.scPlayer) {
+        this.setState({ loading: true });
+        await Audio.initializeAudioSoundCloud(this.state.url, this.props.initPlaying);
+        Audio.scPlayer.play();
+        // Hack to get around some weirdness with the soundcloud player:
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        Audio.scPlayer.pause();
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        this.setState({ loading: false });
+    }
+    console.log("playing");
     this.startUpdating();
-    this.scPlayer.play();
+    Audio.scPlayer.play();
+    console.log(Audio.scPlayer);
   },
   stopPlaying() {
     /* console.log("clearing ", this.intervalId); */
     window.clearTimeout(this.intervalId);
-    this.scPlayer.pause();
-  },
-  componentWillMount() {
-    (async () => {
-      await Audio.initializeAudioSoundCloud(this.state.url, this.props.initPlaying);
-      this.scPlayer = Audio.scPlayer;
-    })()
+    Audio.scPlayer.pause();
   },
   componentDidMount() {
     if (this.props.initPlaying) {
@@ -61,7 +68,7 @@ const SC = React.createClass({
     this.setState((prev) => {return {playing: !prev.playing};});
   },
   update() {
-    let val = this.scPlayer.audio.currentTime/(this.scPlayer.duration / 100);
+    let val = Audio.scPlayer.audio.currentTime/(Audio.scPlayer.duration / 100);
     this.setState({val: val});
   },
   startUpdating() {
@@ -78,7 +85,7 @@ const SC = React.createClass({
   onSubmit(e) {
     e.preventDefault();
     localStorage.setItem("scurl", this.state.url);
-    this.scPlayer.resolve(this.state.url, function(track) {
+    Audio.scPlayer.resolve(this.state.url, function(track) {
       /* console.log(track); */
       this.setState({playing: false}, function() {
         /* console.log("callback"); */
@@ -88,12 +95,18 @@ const SC = React.createClass({
   },
   render: function() {
     let buttonVal = this.state.playing ? "[pause]" : "[play]";
+    if (this.state.loading) {
+      buttonVal = "[loading...]";
+    }
     return (
         <div className="scPlayer">
         <div className="row">
-            <button onClick={this.togglePlay}> {buttonVal}</button>
+            <button onClick={this.togglePlay}
+            style={{ cursor: 'pointer' }}
+            enabled={this.state.loading ? "false" : "true"}
+            > {buttonVal}</button>
             <Progress innerStyle={{}}
-                      soundCloudAudio={this.scPlayer}
+                      soundCloudAudio={Audio.scPlayer}
                       value={this.state.val}/>
           </div>
           <div className="row">
