@@ -3,15 +3,45 @@ var SoundCloudAudio = require("soundcloud-audio");
 let idCounter = 0;
 let callbacks = [];
 
-let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-let analyser = audioCtx.createAnalyser();
+
+// TODO: refactor
+// Lazy load audio context.
+const ctx = {
+  _audioCtx: null,
+  get audioCtx() {
+    if (!this._audioCtx) {
+      this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    return this._audioCtx;
+  },
+  _analyser: null,
+  get analyser() {
+    if (!this._analyser) {
+      this._analyser = this.audioCtx.createAnalyser();
+      this._analyser.fftSize = 512;
+    }
+    return this._analyser;
+  },
+  _bufferLength: null,
+  get bufferLength() {
+    if (!this._bufferLength) {
+      this._bufferLength = this.analyser.frequencyBinCount;
+    }
+    return this._bufferLength;
+  },
+  _dataArray: null,
+  get dataArray() {
+    if (!this._dataArray) {
+      this._dataArray = new Uint8Array(this.bufferLength);
+    }
+    return this._dataArray;
+  }
+};
+
 let source = null;
 
-analyser.fftSize = 512;
-let bufferLength = analyser.frequencyBinCount;
-let dataArray = new Uint8Array(bufferLength);
 let audioAgain = null;
-let bands = {low: 0.0, mid: 0.0, upper: 0.0, high: 0.0};
+let bands = { low: 0.0, mid: 0.0, upper: 0.0, high: 0.0 };
 
 
 let scPlayer = null;
@@ -19,7 +49,7 @@ let scPlayer = null;
 let keepPlaying = true;
 let mode = null;
 
-let cleanup = function() {};
+let cleanup = function () { };
 
 const video = document.createElement("video");
 window.video = video;
@@ -27,21 +57,21 @@ video.muted = true;
 video.playing = false;
 
 
-function onAcceptAudio () {
-  source.connect(analyser);
+function onAcceptAudio() {
+  source.connect(ctx.analyser);
 
   function toAudio() {
     if (keepPlaying) {
       audioAgain = requestAnimationFrame(toAudio);
     }
-    analyser.getByteFrequencyData(dataArray);
+    ctx.analyser.getByteFrequencyData(ctx.dataArray);
 
     // Taken from The_Force
     let k = 0, f = 0.0;
-    let a = 5, b = 11, c = 24, d = bufferLength, i = 0;
+    let a = 5, b = 11, c = 24, d = ctx.bufferLength, i = 0;
 
     for (; i < a; i++) {
-      f += dataArray[i];
+      f += ctx.dataArray[i];
     }
 
     f *= .2; // 1/(a-0)
@@ -50,7 +80,7 @@ function onAcceptAudio () {
 
     f = 0.0;
     for (; i < b; i++) {
-      f += dataArray[i];
+      f += ctx.dataArray[i];
     }
 
     f *= .166666667; // 1/(b-a)
@@ -59,7 +89,7 @@ function onAcceptAudio () {
 
     f = 0.0;
     for (; i < c; i++) {
-      f += dataArray[i];
+      f += ctx.dataArray[i];
     }
 
     f *= .076923077; // 1/(c-b)
@@ -68,7 +98,7 @@ function onAcceptAudio () {
 
     f = 0.0;
     for (; i < d; i++) {
-      f += dataArray[i];
+      f += ctx.dataArray[i];
     }
     f *= .00204918; // 1/(d-c)
     f *= .003921569; // 1/255
@@ -83,7 +113,7 @@ function onAcceptAudio () {
 
 
 export default {
-  initializeAudioUserMedia: function() {
+  initializeAudioUserMedia: function () {
     mode = "usermedia";
     cleanup();
     keepPlaying = true;
@@ -93,35 +123,36 @@ export default {
       || navigator.mozGetUserMedia
       || navigator.msGetUserMedia;
 
-    navigator.getUserMedia({audio: true, video: {width : 1280, height: 720}}, function(stream) {
+    navigator.getUserMedia({ audio: true, video: { width: 1280, height: 720 } }, function (stream) {
 
       video.src = window.URL.createObjectURL(stream);
-      video.onloadedmetadata = function(e) {
+      video.onloadedmetadata = function (e) {
         video.play();
         video.playing = true;
       };
 
-      source = audioCtx.createMediaStreamSource(stream);
+      source = ctx.audioCtx.createMediaStreamSource(stream);
       onAcceptAudio();
-    }, (e) => {console.error(e);});
-    cleanup = function() {
+    }, (e) => { console.error(e); });
+    cleanup = function () {
       keepPlaying = false;
-              source.disconnect(analyser);
-          };
+      if (source) {
+        source.disconnect(ctx.analyser);
+      }
+    };
   },
-  initializeAudioSoundCloud: async function(url, initPlaying) {
+  initializeAudioSoundCloud: async function (url, initPlaying) {
     mode = "sc";
     cleanup();
     keepPlaying = true;
 
-    const {accessToken} = await(await fetch("https://sleexyz-sc_access_token.web.val.run/")).json();
-    console.log(accessToken);
+    const { accessToken } = await (await fetch("https://sleexyz-sc_access_token.web.val.run/")).json();
 
 
     let scPlayer = this.scPlayer = new SoundCloudAudio(accessToken);
     scPlayer.audio.crossOrigin = "anonymous";
 
-    scPlayer.resolve(url, function(track) {
+    scPlayer.resolve(url, function (track) {
       if (mode !== "sc") {
         return;
       }
@@ -133,24 +164,26 @@ export default {
       }
     });
 
-    source = audioCtx.createMediaElementSource(scPlayer.audio);
-    source.connect(audioCtx.destination);
+    source = ctx.audioCtx.createMediaElementSource(scPlayer.audio);
+    source.connect(ctx.audioCtx.destination);
     onAcceptAudio();
 
-    cleanup = function() {
+    cleanup = function () {
       keepPlaying = false;
       scPlayer.stop();
-      source.disconnect(analyser);
+      if (source) {
+        source.disconnect(ctx.analyser);
+      }
     };
   },
-  addCallback: function(fn) {
+  addCallback: function (fn) {
     let i = idCounter;
     idCounter += 1;
 
     callbacks[i] = fn;
     return i;
   },
-  removeCallback: function(i) {
+  removeCallback: function (i) {
     callbacks[i] = null;
   },
   video: video
